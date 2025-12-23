@@ -9,6 +9,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
 
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data:; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; font-src https://fonts.gstatic.com; connect-src 'self' https:;">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
@@ -26,12 +28,13 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         .app-input {
             background-color: #1c1c1e;
             color: white;
-            border: 2px solid transparent;
+            border: 2px solid transparent; /* Prepared for error state */
             font-size: 17px;
             transition: all 0.2s;
         }
@@ -40,11 +43,17 @@
             outline: none;
             border-color: #3b82f6; 
         }
+        .app-input:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        /* Error State for Inputs */
         .app-input.input-error {
-            border-color: #ef4444 !important;
+            border-color: #ef4444 !important; /* Red-500 */
             background-color: rgba(239, 68, 68, 0.1);
         }
 
+        /* Segmented Control */
         .segmented-control {
             background-color: #1c1c1e;
             padding: 4px;
@@ -72,20 +81,75 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        .page { transition: opacity 0.3s ease; }
-        .page-hidden { display: none; opacity: 0; }
-        .page-active { display: block; opacity: 1; }
+        .page { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease; }
+        .page-hidden { display: none; opacity: 0; transform: scale(0.95); }
+        .page-active { display: block; opacity: 1; transform: scale(1); }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        #setup-hint {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 1rem;
-            padding: 1rem;
-            margin-top: 2rem;
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-content { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-hidden { visibility: hidden; }
+        .modal-hidden .modal-overlay { opacity: 0; pointer-events: none; }
+        .modal-hidden .modal-content { transform: translateY(100%); }
+        .modal-active { visibility: visible; }
+        .modal-active .modal-overlay { opacity: 1; pointer-events: auto; }
+        .modal-active .modal-content { transform: translateY(0); }
+
+        /* Button Error Animation State */
+        .btn-error-state {
+            background-color: #ef4444 !important; /* Red-500 */
+            color: white !important;
+            position: relative;
+            overflow: hidden;
+            pointer-events: none; /* Disable clicks during error */
         }
+        
+        /* The "Tracer" Border Animation */
+        .btn-error-state::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 1rem; /* Match button rounded-2xl approx */
+            border: 4px solid #991b1b; /* Darker red trace */
+            clip-path: polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%);
+            animation: trace-loop 3s linear forwards;
+        }
+
+        @keyframes trace-loop {
+            0% { clip-path: polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%); }
+            25% { clip-path: polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%); } /* Top Line */
+            50% { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 100% 100%); } /* Right Line */
+            75% { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); } /* Bottom Line */
+            100% { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); border-color: transparent; } /* Left Line / Done */
+        }
+
+        /* LIGHT MODE OVERRIDES */
+        body.light-mode { background-color: #f2f2f7; color: #000000; }
+        body.light-mode .glass-header { background: rgba(255, 255, 255, 0.9); border-bottom: 1px solid rgba(0, 0, 0, 0.15); }
+        body.light-mode .text-white { color: #000000 !important; }
+        body.light-mode .text-gray-300 { color: #1f2937 !important; }
+        body.light-mode .text-gray-400 { color: #4b5563 !important; }
+        body.light-mode .text-gray-500 { color: #6b7280 !important; }
+        body.light-mode .app-input { background-color: #ffffff; color: #000000; border: 1px solid #d1d5db; }
+        body.light-mode .app-input:focus { border-color: #3b82f6; background-color: #ffffff; }
+        body.light-mode .segmented-control { background-color: #e5e5e5; }
+        body.light-mode .segment-indicator { background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        body.light-mode .segment-btn { color: #6b7280; }
+        body.light-mode .segment-btn.active { color: #000000; }
+        body.light-mode .bg-\[\#1c1c1e\] { background-color: #ffffff !important; border: 1px solid #e5e5e5 !important; }
+        body.light-mode .border-white\/10 { border-color: rgba(0,0,0,0.1) !important; }
+        body.light-mode .bg-black\/30 { background-color: #f3f4f6 !important; border-color: #e5e5e5 !important; }
+        body.light-mode .text-green-400 { color: #15803d !important; font-weight: 700; }
+        body.light-mode .bg-blue-500\/10 { background-color: #dbeafe !important; }
+        body.light-mode .text-blue-400 { color: #1d4ed8 !important; }
+        body.light-mode .bg-\[\#2c2c2e\] { background-color: #f3f4f6 !important; border: 1px solid #e5e5e5; }
+        body.light-mode .bg-\[\#2c2c2e\]:hover { background-color: #e5e5e5 !important; }
+        body.light-mode .text-gray-200 { color: #111827 !important; }
+        body.light-mode .fixed.bottom-0 { background: rgba(255,255,255,0.95) !important; border-top-color: #e5e5e5 !important; }
+        body.light-mode .modal-content { background-color: #ffffff !important; color: #000000 !important; }
+        body.light-mode .app-input.input-error { border-color: #dc2626 !important; background-color: #fef2f2 !important; }
     </style>
 </head>
 <body class="h-screen w-full overflow-hidden flex flex-col">
@@ -94,23 +158,29 @@
         <div class="h-14 flex items-center justify-between px-4">
             <div class="flex flex-col">
                 <span class="text-[10px] text-blue-500 font-bold tracking-widest uppercase">GIS Exchange Bridge</span>
-                <h1 class="text-[17px] font-bold tracking-tight text-white">Indy Space Locator</h1>
+                <h1 class="text-[17px] font-bold tracking-tight text-white transition-colors">Indy Space Locator</h1>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="toggleTheme()" class="bg-[#1c1c1e] hover:bg-[#2c2c2e] border border-white/10 text-gray-300 p-1.5 rounded-lg transition-colors" aria-label="Toggle Contrast">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </button>
             </div>
         </div>
     </header>
 
     <main class="flex-1 pt-16 pb-24 overflow-y-auto no-scrollbar relative w-full max-w-md mx-auto">
-        <!-- SEARCH VIEW -->
         <div id="view-search" class="page page-active px-4 py-4 space-y-6">
             <div class="space-y-2 mt-4">
                 <div class="flex justify-between items-end">
-                    <h2 class="text-3xl font-bold text-white">Find Spaces</h2>
+                    <h2 class="text-3xl font-bold text-white transition-colors">Find Spaces</h2>
                     <span id="data-age" class="text-[10px] text-gray-500 font-mono mb-1">Checking exchange...</span>
                 </div>
-                <p class="text-gray-400 text-sm leading-relaxed">Secure gateway to Indy Transport GIS.</p>
+                <p class="text-gray-400 text-sm leading-relaxed transition-colors">Locate meters by ID or Street Name.</p>
             </div>
 
-            <div class="segmented-control">
+            <div class="segmented-control" id="search-mode-control">
                 <div class="segment-indicator" id="segment-indicator"></div>
                 <button class="segment-btn active" onclick="setMode('id')">Meter ID</button>
                 <button class="segment-btn" onclick="setMode('street')">Street Name</button>
@@ -118,168 +188,456 @@
 
             <div class="space-y-4">
                 <div id="input-group-id" class="group">
-                    <label class="block text-xs font-medium text-gray-500 uppercase ml-1 mb-2">Space Range</label>
+                    <label class="block text-xs font-medium text-gray-500 uppercase ml-1 mb-2 transition-colors">Space Range</label>
                     <div class="flex items-center space-x-3">
                         <input type="tel" id="inp_start" placeholder="000" maxlength="4" class="app-input w-full p-4 rounded-2xl text-center tracking-widest font-mono">
-                        <span class="text-gray-600 text-2xl font-light">-</span>
+                        <span class="text-gray-600 text-2xl font-light transition-colors">-</span>
                         <input type="tel" id="inp_end" placeholder="Optional" maxlength="4" class="app-input w-full p-4 rounded-2xl text-center tracking-widest font-mono" disabled>
                     </div>
                 </div>
 
                 <div id="input-group-street" class="group hidden">
-                    <label class="block text-xs font-medium text-gray-500 uppercase ml-1 mb-2">Street Name</label>
+                    <label class="block text-xs font-medium text-gray-500 uppercase ml-1 mb-2 transition-colors">Street Name</label>
                     <div class="relative">
                         <input type="text" id="inp_street" list="street_list" placeholder="e.g. Washington St" class="app-input w-full p-4 rounded-2xl">
                         <datalist id="street_list"></datalist>
+                        <div id="street-loader" class="absolute right-4 top-1/2 transform -translate-y-1/2 hidden">
+                            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                        </div>
                     </div>
+                    <p class="text-[10px] text-gray-500 mt-2 ml-1">Type to see available streets.</p>
                 </div>
             </div>
 
-            <button id="btn_init" onclick="runQuery()" class="w-full bg-[#3b82f6] active:bg-[#2563eb] text-white font-bold text-[17px] py-4 rounded-2xl mt-8 shadow-lg shadow-blue-900/20 transform transition active:scale-[0.98]">
+            <button id="btn_init" class="w-full bg-[#3b82f6] active:bg-[#2563eb] text-white font-bold text-[17px] py-4 rounded-2xl mt-8 shadow-lg shadow-blue-900/20 transform transition active:scale-[0.98]">
                 Search
             </button>
-
-            <div id="setup-hint" class="hidden">
-                <h3 class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-2">Bridge Status: Awaiting Connection</h3>
-                <p class="text-gray-400 text-xs leading-relaxed">If this remains offline, ensure your Render service is active, and your BACKEND_URL is correct.</p>
-            </div>
         </div>
 
-        <!-- RESULTS VIEW -->
         <div id="view-results" class="page page-hidden px-4 py-2">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-white">Results</h2>
-                <button onclick="switchView('search')" class="text-[#3b82f6] font-medium text-[17px]">Done</button>
+                <h2 class="text-2xl font-bold transition-colors text-white">Results</h2>
+                <div class="flex items-center space-x-2">
+                    <span id="txt_status" class="text-[10px] font-bold bg-green-500 text-green-950 px-2 py-0.5 rounded-full uppercase">Ready</span>
+                    <button onclick="switchView('search')" class="text-[#3b82f6] font-medium text-[17px] active:opacity-60 ml-2">Done</button>
+                </div>
             </div>
             <div id="loader" class="hidden flex flex-col items-center justify-center py-12 space-y-4">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3b82f6]"></div>
                 <p class="text-[#3b82f6] text-xs font-bold tracking-widest uppercase">Exchange in Progress...</p>
             </div>
+            <div id="error-container" class="hidden bg-red-500/10 border border-red-500/20 rounded-2xl p-4 mb-4 transition-colors">
+                <p id="error-msg" class="text-red-400 text-sm font-medium text-center"></p>
+            </div>
             <div id="list_out" class="space-y-4 pb-20"></div>
+            <button id="btn_back" class="hidden w-full bg-[#1c1c1e] text-gray-400 font-semibold py-3 rounded-xl border border-white/10 mt-6 transition-colors" onclick="switchView('search')">New Search</button>
         </div>
     </main>
 
-    <script>
-        const BACKEND_URL = "https://indy-locator-exchange.onrender.com";
+    <div class="fixed bottom-0 w-full bg-[rgba(20,20,20,0.95)] backdrop-blur-xl border-t border-gray-800 pb-safe-bottom z-40 transition-colors">
+        <div class="flex justify-around items-center h-16 max-w-md mx-auto">
+            <button onclick="switchView('search')" class="flex flex-col items-center justify-center w-full space-y-1 text-[#3b82f6]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <span class="text-[10px] font-medium">Search</span>
+            </button>
+            <button onclick="toggleModal(true)" class="flex flex-col items-center justify-center w-full space-y-1 text-gray-400 hover:text-gray-100 transition-colors group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span class="text-[10px] font-medium">System</span>
+            </button>
+        </div>
+    </div>
 
-        const state = { mode: 'id', streetsLoaded: false };
+    <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-3 rounded-full shadow-2xl transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none z-[100] flex items-center space-x-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+        <span class="text-sm font-semibold">Copied to Clipboard</span>
+    </div>
+
+    <div id="modal-info" class="fixed inset-0 z-[100] flex items-end sm:items-center justify-center modal-hidden">
+        <div class="modal-overlay absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="toggleModal(false)"></div>
+        <div class="modal-content relative bg-[#1c1c1e] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-white/10 p-6 sm:p-8 m-0 sm:m-4 shadow-2xl transition-colors">
+            <div class="w-12 h-1 bg-gray-600 rounded-full mx-auto mb-6 sm:hidden"></div>
+            <h2 class="text-2xl font-bold text-white mb-2 transition-colors">System Intel</h2>
+            <p class="text-gray-400 text-sm mb-6 leading-relaxed transition-colors">This utility bridges a direct connection to Indy's Open Data MapServer via a secure handshake server.</p>
+            <div class="bg-black/30 rounded-2xl p-5 mb-4 border border-white/5 transition-colors">
+                <div class="text-[10px] text-blue-500 font-bold tracking-widest uppercase mb-2">Data Source Status</div>
+                <div id="sys-meta-content" class="text-white text-xs font-mono"><span class="text-gray-500">Waiting for check...</span></div>
+            </div>
+            <div class="bg-black/30 rounded-2xl p-5 mb-6 border border-white/5 transition-colors">
+                <div class="text-[10px] text-blue-500 font-bold tracking-widest uppercase mb-1">Principal Developer</div>
+                <div class="text-white font-bold text-lg transition-colors">William Dugann</div>
+                <div class="text-gray-500 text-sm transition-colors">Full Stack Infrastructure</div>
+                <a href="https://www.linkedin.com/in/dugann/" target="_blank" class="text-blue-500 text-xs font-bold mt-3 block flex items-center hover:text-blue-400 transition-colors">LINKEDIN PROFILE <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></a>
+            </div>
+            <button onclick="toggleModal(false)" class="w-full bg-[#3b82f6] text-white font-bold py-4 rounded-xl active:scale-[0.98] transition-transform">Dismiss</button>
+        </div>
+    </div>
+
+<script>
+    (function() {
+        "use strict";
+        const BACKEND_URL = "https://indy-locator-exchange.onrender.com";
+        const STORAGE_KEY_STREETS = "indy_streets_data";
+        const STORAGE_KEY_META = "indy_meta_check";
+        
         const ui = {
             start: document.getElementById("inp_start"),
             end: document.getElementById("inp_end"),
             streetInput: document.getElementById("inp_street"),
+            streetList: document.getElementById("street_list"),
+            streetLoader: document.getElementById("street-loader"),
+            groupID: document.getElementById("input-group-id"),
+            groupStreet: document.getElementById("input-group-street"),
             indicator: document.getElementById("segment-indicator"),
             dataAge: document.getElementById("data-age"),
             viewSearch: document.getElementById("view-search"),
             viewResults: document.getElementById("view-results"),
             list: document.getElementById("list_out"),
             loader: document.getElementById("loader"),
+            errorBox: document.getElementById("error-container"),
+            errorMsg: document.getElementById("error-msg"),
+            status: document.getElementById("txt_status"),
             btnInit: document.getElementById("btn_init"),
-            setupHint: document.getElementById("setup-hint")
+            btnBack: document.getElementById("btn_back"),
+            modal: document.getElementById("modal-info")
         };
 
-        ui.start.oninput = (e) => {
-            ui.start.value = ui.start.value.replace(/\D/g, '');
-            ui.end.disabled = ui.start.value.length < 3;
-            if (ui.start.value.length < 3) ui.end.value = '';
+        const state = {
+            mode: 'id', // 'id' or 'street'
+            streetsLoaded: false
         };
-        ui.end.oninput = (e) => ui.end.value = ui.end.value.replace(/\D/g, '');
 
-        function setMode(mode) {
-            state.mode = mode;
-            ui.indicator.style.transform = mode === 'id' ? 'translateX(0)' : 'translateX(100%)';
-            document.getElementById("input-group-id").classList.toggle('hidden', mode !== 'id');
-            document.getElementById("input-group-street").classList.toggle('hidden', mode !== 'street');
-            
-            const btns = document.querySelectorAll('.segment-btn');
-            btns[0].classList.toggle('active', mode === 'id');
-            btns[1].classList.toggle('active', mode === 'street');
+        let activeController = null;
 
-            if (mode === 'street' && !state.streetsLoaded) fetchStreets();
+        // --- VALIDATION & INPUT HANDLING ---
+
+        // Restrict input to digits only
+        function enforceDigits(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            checkEndFieldState();
         }
 
-        async function fetchStreets() {
-            try {
-                const res = await fetch(`${BACKEND_URL}/api/streets`);
-                if (!res.ok) return;
-                const streets = await res.json();
-                const dl = document.getElementById("street_list");
-                dl.innerHTML = streets.map(s => `<option value="${s}">`).join('');
-                state.streetsLoaded = true;
-            } catch (e) { 
-                console.error("Fetch streets failed", e); 
+        // Logic: End field can only accept input if Start field is valid
+        function checkEndFieldState() {
+            const sv = ui.start.value;
+            // Valid start = At least 3 digits AND value >= 100
+            const isValidStart = sv.length >= 3 && parseInt(sv, 10) >= 100;
+            
+            ui.end.disabled = !isValidStart;
+            if (!isValidStart) {
+                ui.end.value = ''; // Clear if start becomes invalid
+                ui.end.classList.remove('input-error');
             }
         }
 
+        // Error Animation Controller
+        function triggerButtonError(msg, fieldsToHighlight) {
+            const originalText = ui.btnInit.innerText;
+            
+            // 1. Change Button Appearance
+            ui.btnInit.innerText = msg;
+            ui.btnInit.classList.add('btn-error-state');
+            
+            // 2. Highlight Fields
+            if(fieldsToHighlight) {
+                fieldsToHighlight.forEach(f => f.classList.add('input-error'));
+            }
+
+            // 3. Reset after 3 seconds
+            setTimeout(() => {
+                ui.btnInit.innerText = originalText;
+                ui.btnInit.classList.remove('btn-error-state');
+                
+                if(fieldsToHighlight) {
+                    fieldsToHighlight.forEach(f => {
+                        f.classList.remove('input-error');
+                        f.value = ''; // Clear invalid field
+                    });
+                }
+                
+                // Re-check state in case we cleared Start, forcing End to disable
+                checkEndFieldState();
+            }, 3000);
+        }
+
+        function validateInputs() {
+            // Only validate ID mode
+            if (state.mode !== 'id') return true; 
+
+            const sv = ui.start.value;
+            const ev = ui.end.value;
+
+            // Rule 1: First field required, >= 3 digits, >= 100
+            if (!sv || sv.length < 3 || parseInt(sv, 10) < 100) {
+                triggerButtonError("Invalid Space ID", [ui.start]);
+                return false;
+            }
+
+            // Rule 2: If second field populated
+            if (ev) {
+                const sNum = parseInt(sv, 10);
+                const eNum = parseInt(ev, 10);
+
+                if (ev.length < 3 || eNum < 101) {
+                    triggerButtonError("Invalid Space ID", [ui.end]);
+                    return false;
+                }
+
+                if (eNum <= sNum) {
+                    triggerButtonError("Cannot be lower than Space 1", [ui.end]);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Attach listeners
+        ui.start.addEventListener('input', enforceDigits);
+        ui.end.addEventListener('input', enforceDigits);
+
+        // --- Core Functions ---
+
+        async function init() {
+            await checkDataVersion();
+        }
+
+        async function checkDataVersion() {
+            try {
+                const cachedMeta = JSON.parse(localStorage.getItem(STORAGE_KEY_META));
+                // MODIFIED: Fetch from backend meta proxy
+                const res = await fetch(`${BACKEND_URL}/api/meta`);
+                const data = await res.json();
+                
+                let lastEdit = null;
+                if (data.data && data.data.length > 0 && data.data[0].attributes && data.data[0].attributes.modified) {
+                    lastEdit = data.data[0].attributes.modified;
+                }
+                
+                if (lastEdit) {
+                    const dateObj = new Date(lastEdit);
+                    const dateStr = dateObj.toLocaleDateString();
+                    ui.dataAge.innerText = `Data updated: ${dateStr}`;
+
+                    if (cachedMeta && cachedMeta.timestamp && cachedMeta.timestamp < lastEdit) {
+                        localStorage.removeItem(STORAGE_KEY_STREETS);
+                    }
+
+                    localStorage.setItem(STORAGE_KEY_META, JSON.stringify({
+                        timestamp: lastEdit,
+                        displayDate: dateStr,
+                        details: "Hub API V3"
+                    }));
+                } else {
+                    const cachedMeta = JSON.parse(localStorage.getItem(STORAGE_KEY_META));
+                    if (cachedMeta && cachedMeta.displayDate) {
+                        ui.dataAge.innerText = `Data updated: ${cachedMeta.displayDate}`;
+                    } else {
+                        ui.dataAge.innerText = "Data: Live Connection";
+                    }
+                }
+            } catch (e) {
+                const cachedMeta = JSON.parse(localStorage.getItem(STORAGE_KEY_META));
+                if (cachedMeta && cachedMeta.displayDate) {
+                    ui.dataAge.innerText = `Data updated: ${cachedMeta.displayDate}`;
+                } else {
+                    ui.dataAge.innerText = "Data: Offline Mode";
+                }
+            }
+        }
+
+        window.setMode = function(mode) {
+            state.mode = mode;
+            const btns = document.querySelectorAll('.segment-btn');
+            btns.forEach(b => b.classList.remove('active'));
+            
+            if (mode === 'id') {
+                btns[0].classList.add('active');
+                ui.indicator.style.transform = 'translateX(0)';
+                ui.groupID.classList.remove('hidden');
+                ui.groupStreet.classList.add('hidden');
+                ui.btnInit.innerText = "Search"; // Reset button text if switching back from error state
+                ui.btnInit.classList.remove('btn-error-state');
+            } else {
+                btns[1].classList.add('active');
+                ui.indicator.style.transform = 'translateX(100%)';
+                ui.groupID.classList.add('hidden');
+                ui.groupStreet.classList.remove('hidden');
+                loadStreets(); 
+            }
+        };
+
+        async function loadStreets() {
+            if (state.streetsLoaded) return;
+            const cachedStreets = localStorage.getItem(STORAGE_KEY_STREETS);
+            if (cachedStreets) {
+                populateStreetList(JSON.parse(cachedStreets));
+                state.streetsLoaded = true;
+                return;
+            }
+            ui.streetLoader.classList.remove('hidden');
+            try {
+                // MODIFIED: Fetch from backend streets proxy
+                const res = await fetch(`${BACKEND_URL}/api/streets`);
+                const streetArray = await res.json();
+                
+                localStorage.setItem(STORAGE_KEY_STREETS, JSON.stringify(streetArray));
+                populateStreetList(streetArray);
+                state.streetsLoaded = true;
+            } catch (e) {
+                console.error("Street fetch failed", e);
+            } finally {
+                ui.streetLoader.classList.add('hidden');
+            }
+        }
+
+        function populateStreetList(arr) {
+            ui.streetList.innerHTML = '';
+            arr.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                ui.streetList.appendChild(opt);
+            });
+        }
+
+        async function fetchSystemMeta() {
+            const metaEl = document.getElementById('sys-meta-content');
+            if(metaEl.dataset.loaded) return;
+            metaEl.innerHTML = '<span class="animate-pulse">Fetching Metadata...</span>';
+            try {
+                // MODIFIED: Fetch from backend meta proxy
+                const res = await fetch(`${BACKEND_URL}/api/meta`);
+                const data = await res.json();
+                let html = `<div class="grid grid-cols-2 gap-4 text-xs mt-2">`;
+                let name = "N/A", id = "N/A", updated = "N/A";
+                if (data.data && data.data.length > 0) {
+                    const attr = data.data[0].attributes;
+                    name = attr.name || "Metered Parking";
+                    id = data.data[0].id || "14";
+                    if (attr.modified) {
+                        updated = new Date(attr.modified).toLocaleString();
+                    }
+                }
+                html += `<div><span class="text-gray-500 block">Dataset Name</span><span class="text-white font-mono">${name}</span></div>`;
+                html += `<div><span class="text-gray-500 block">Hub ID</span><span class="text-white font-mono">${id}</span></div>`;
+                html += `<div class="col-span-2"><span class="text-gray-500 block">Last Data Update</span><span class="text-green-400 font-mono">${updated}</span></div>`;
+                html += `</div>`;
+                metaEl.innerHTML = html;
+                metaEl.dataset.loaded = "true";
+            } catch(e) {
+                metaEl.innerHTML = '<span class="text-red-500">Connection Error - Using Offline Config</span>';
+            }
+        }
+
+        window.toggleTheme = function() { document.body.classList.toggle('light-mode'); };
+        window.toggleModal = function(show) {
+            if (show) { ui.modal.classList.remove('modal-hidden'); ui.modal.classList.add('modal-active'); fetchSystemMeta(); }
+            else { ui.modal.classList.remove('modal-active'); ui.modal.classList.add('modal-hidden'); }
+        };
+
+        window.switchView = function(viewName) {
+            if (viewName === 'results') {
+                ui.viewSearch.classList.remove('page-active'); ui.viewSearch.classList.add('page-hidden');
+                ui.viewResults.classList.remove('page-hidden'); ui.viewResults.classList.add('page-active');
+            } else {
+                ui.viewSearch.classList.remove('page-hidden'); ui.viewSearch.classList.add('page-active');
+                ui.viewResults.classList.remove('page-active'); ui.viewResults.classList.add('page-hidden');
+                if(state.mode === 'id') { ui.start.value = ''; ui.end.value = ''; ui.end.disabled = true; }
+                else { ui.streetInput.value = ''; }
+                ui.list.innerHTML = ''; ui.btnBack.classList.add('hidden'); ui.errorBox.classList.add('hidden');
+            }
+        };
+
+        window.copyText = function(text) {
+            const txt = document.createElement('textarea'); txt.value = text; document.body.appendChild(txt); txt.select(); document.execCommand('copy'); document.body.removeChild(txt);
+            const toast = document.getElementById('toast'); toast.classList.remove('opacity-0', 'translate-y-[-20px]'); setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-[-20px]'); }, 2500);
+        };
+
         async function runQuery() {
-            const start = ui.start.value;
-            const end = ui.end.value;
-            const street = ui.streetInput.value;
+            ui.errorBox.classList.add('hidden');
+            
+            // Validate first
+            if (!validateInputs()) return;
 
-            if (state.mode === 'id' && start.length < 3) return;
-            if (state.mode === 'street' && !street) return;
+            // MODIFIED: Prepare params for backend instead of building SQL clause
+            const params = new URLSearchParams();
+            params.append('mode', state.mode);
+            
+            if (state.mode === 'id') {
+                params.append('start', ui.start.value.trim());
+                if (ui.end.value.trim()) {
+                    params.append('end', ui.end.value.trim());
+                }
+            } else {
+                const streetVal = ui.streetInput.value.trim();
+                if (!streetVal) { alert("Please select or type a street name"); return; }
+                params.append('street', streetVal);
+            }
 
-            switchView('results');
+            window.switchView('results');
             ui.loader.classList.remove('hidden');
             ui.list.innerHTML = "";
+            ui.status.innerText = "Querying";
+            
+            if (activeController) activeController.abort();
+            activeController = new AbortController();
 
             try {
-                const params = new URLSearchParams({ 
-                    mode: state.mode, 
-                    start: start || '', 
-                    end: end || '', 
-                    street: street || '' 
-                });
-                const res = await fetch(`${BACKEND_URL}/api/search?${params}`);
+                // MODIFIED: Fetch from backend search proxy
+                const res = await fetch(`${BACKEND_URL}/api/search?${params.toString()}`, { signal: activeController.signal });
                 const data = await res.json();
                 ui.loader.classList.add('hidden');
 
                 if (!data.features || data.features.length === 0) {
-                    ui.list.innerHTML = `<div class="text-center py-12 text-gray-500">No assets found.</div>`;
+                    // Logic for "Number cannot be found"
+                    if (state.mode === 'id') {
+                         triggerButtonError("Invalid Space ID", [ui.start, ui.end]);
+                         ui.status.innerText = "Ready"; // Reset status
+                         window.switchView('search'); // Go back to search to show error on button
+                         return;
+                    }
+                    
+                    // Keep existing behavior for Street mode (or fallback)
+                    ui.status.innerText = "Empty";
+                    ui.list.innerHTML = `<div class="flex flex-col items-center justify-center py-12 text-center"><div class="bg-gray-800 p-4 rounded-full mb-4"><svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><h3 class="text-lg font-bold text-white transition-colors">No Assets Found</h3><p class="text-gray-500 text-sm mt-1 transition-colors">Try different criteria.</p></div>`;
+                    ui.btnBack.classList.remove('hidden');
                     return;
                 }
 
+                const groups = {};
                 data.features.forEach(f => {
                     const addr = f.attributes.FULL_ADDRESS || "Unknown Location";
-                    const id = f.attributes.SPACE_NUMBER;
-                    const card = `
-                        <div class="bg-[#1c1c1e] rounded-2xl p-5 border border-gray-800">
-                            <h3 class="text-[17px] font-bold text-white">${addr}</h3>
-                            <div class="mt-4 bg-black/30 rounded-xl p-3 border border-white/5">
-                                <p class="text-green-400 font-mono text-sm">Space ID: ${id}</p>
-                            </div>
-                        </div>`;
+                    if (!groups[addr]) groups[addr] = { ids: [], geom: f.geometry };
+                    groups[addr].ids.push(f.attributes.SPACE_NUMBER);
+                });
+
+                Object.keys(groups).sort().forEach(addr => {
+                    const item = groups[addr];
+                    const ids = item.ids.sort((a,b) => a-b).join(', ');
+                    const encodedAddr = encodeURIComponent(addr + ', Indianapolis, IN');
+                    const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddr}`;
+                    let viewUrl = navUrl;
+                    if (item.geom && item.geom.y && item.geom.x) {
+                        viewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${item.geom.y},${item.geom.x}`;
+                    }
+
+                    const card = `<div class="bg-[#1c1c1e] rounded-2xl p-5 shadow-sm border border-gray-800 transition-colors"><div class="flex justify-between items-start mb-4"><div><h3 class="text-[17px] font-bold text-white leading-tight transition-colors">${addr}</h3><p class="text-xs text-gray-500 font-medium mt-1 uppercase tracking-wide transition-colors">Indianapolis, IN</p></div><div class="bg-blue-500/10 text-blue-400 text-xs font-bold px-2 py-1 rounded-md transition-colors">${item.ids.length} UNIT${item.ids.length > 1 ? 'S' : ''}</div></div><div class="bg-black/30 rounded-xl p-3 mb-4 border border-white/5 relative group cursor-pointer transition-colors" onclick="window.copyText('${ids}')"><p class="text-green-400 font-mono text-sm leading-relaxed break-words transition-colors">${ids}</p><div class="absolute top-2 right-2 opacity-50"><svg class="w-4 h-4 text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></div></div><div class="grid grid-cols-2 gap-3"><a href="${navUrl}" target="_blank" class="flex items-center justify-center space-x-2 bg-[#2c2c2e] hover:bg-[#3a3a3c] py-3 rounded-xl transition transition-colors"><span class="text-sm font-semibold text-gray-200 transition-colors">Maps</span></a><a href="${viewUrl}" target="_blank" class="flex items-center justify-center space-x-2 bg-[#2c2c2e] hover:bg-[#3a3a3c] py-3 rounded-xl transition transition-colors"><span class="text-sm font-semibold text-gray-200 transition-colors">Street</span></a></div></div>`;
                     ui.list.insertAdjacentHTML("beforeend", card);
                 });
+
+                ui.status.innerText = "Success";
+                ui.btnBack.classList.remove('hidden');
+
             } catch (e) {
-                ui.loader.classList.add('hidden');
-                ui.list.innerHTML = `<div class="text-red-500 text-center py-12">Connection error. Verify backend.</div>`;
+                if (e.name === 'AbortError') return;
+                ui.status.innerText = "Fail";
+                ui.errorBox.classList.remove('hidden');
+                ui.errorMsg.innerText = "GIS Link Severed. Check connection.";
             }
         }
 
-        function switchView(view) {
-            if (view === 'results') {
-                ui.viewSearch.classList.replace('page-active', 'page-hidden');
-                ui.viewResults.classList.replace('page-hidden', 'page-active');
-            } else {
-                ui.viewSearch.classList.replace('page-hidden', 'page-active');
-                ui.viewResults.classList.replace('page-active', 'page-hidden');
-            }
-        }
-
-        (async () => {
-            try {
-                const res = await fetch(`${BACKEND_URL}/api/meta`);
-                if (res.ok) {
-                    ui.dataAge.innerText = "Bridge: Secure";
-                    ui.setupHint.classList.add('hidden');
-                } else {
-                    throw new Error();
-                }
-            } catch(e) { 
-                ui.dataAge.innerText = "Bridge: Offline"; 
-                ui.setupHint.classList.remove('hidden');
-            }
-        })();
-    </script>
+        init();
+        ui.btnInit.onclick = runQuery;
+    })();
+</script>
 </body>
 </html>
