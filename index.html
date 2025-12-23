@@ -79,11 +79,18 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Button Error Animation */
         .btn-error-state {
             background-color: #ef4444 !important;
             color: white !important;
             pointer-events: none;
+        }
+
+        #setup-hint {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-top: 2rem;
         }
     </style>
 </head>
@@ -136,6 +143,11 @@
             <button id="btn_init" onclick="runQuery()" class="w-full bg-[#3b82f6] active:bg-[#2563eb] text-white font-bold text-[17px] py-4 rounded-2xl mt-8 shadow-lg shadow-blue-900/20 transform transition active:scale-[0.98]">
                 Search
             </button>
+
+            <div id="setup-hint" class="hidden">
+                <h3 class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-2">Bridge Status: Awaiting Connection</h3>
+                <p class="text-gray-400 text-xs leading-relaxed">If this remains offline, ensure your Render service is active at the URL defined in the source code, and that GitHub Pages is enabled in your repository settings.</p>
+            </div>
         </div>
 
         <div id="view-results" class="page page-hidden px-4 py-2">
@@ -152,7 +164,6 @@
     </main>
 
     <script>
-        // Updated with your live Render URL
         const BACKEND_URL = "https://indy-locator-exchange.onrender.com";
 
         const state = { mode: 'id', streetsLoaded: false };
@@ -166,7 +177,8 @@
             viewResults: document.getElementById("view-results"),
             list: document.getElementById("list_out"),
             loader: document.getElementById("loader"),
-            btnInit: document.getElementById("btn_init")
+            btnInit: document.getElementById("btn_init"),
+            setupHint: document.getElementById("setup-hint")
         };
 
         ui.start.oninput = (e) => {
@@ -193,7 +205,9 @@
                 const list = document.getElementById("street_list");
                 list.innerHTML = streets.map(s => `<option value="${s}">`).join('');
                 state.streetsLoaded = true;
-            } catch (e) { console.error("Exchange failed"); }
+            } catch (e) { 
+                console.error("Exchange failed to fetch streets", e); 
+            }
         }
 
         async function runQuery() {
@@ -201,14 +215,21 @@
             const end = ui.end.value;
             const street = ui.streetInput.value;
 
+            // Validation logic
             if (state.mode === 'id' && start.length < 3) return;
+            if (state.mode === 'street' && !street) return;
 
             switchView('results');
             ui.loader.classList.remove('hidden');
             ui.list.innerHTML = "";
 
             try {
-                const params = new URLSearchParams({ mode: state.mode, start, end, street });
+                const params = new URLSearchParams({ 
+                    mode: state.mode, 
+                    start: start || '', 
+                    end: end || '', 
+                    street: street || '' 
+                });
                 const res = await fetch(`${BACKEND_URL}/api/search?${params}`);
                 const data = await res.json();
                 ui.loader.classList.add('hidden');
@@ -243,12 +264,19 @@
             ui.viewResults.classList.toggle('page-hidden', view !== 'results');
         }
 
-        // Check backend on load
         (async () => {
             try {
                 const res = await fetch(`${BACKEND_URL}/api/meta`);
-                if (res.ok) ui.dataAge.innerText = "Bridge: Secure";
-            } catch(e) { ui.dataAge.innerText = "Bridge: Offline"; }
+                if (res.ok) {
+                    ui.dataAge.innerText = "Bridge: Secure";
+                    ui.setupHint.classList.add('hidden');
+                } else {
+                    throw new Error();
+                }
+            } catch(e) { 
+                ui.dataAge.innerText = "Bridge: Offline"; 
+                ui.setupHint.classList.remove('hidden');
+            }
         })();
     </script>
 </body>
