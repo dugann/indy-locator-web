@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Indy Space Locator</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .glass-header {
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .app-input {
+            background-color: #1c1c1e;
+            color: white;
+            border: 2px solid transparent;
+            font-size: 17px;
+            transition: all 0.2s;
+        }
+        .app-input:focus {
+            background-color: #2c2c2e;
+            outline: none;
+            border-color: #3b82f6; 
+        }
+        .app-input.input-error {
+            border-color: #ef4444 !important;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .segmented-control {
+            background-color: #1c1c1e;
+            padding: 4px;
+            border-radius: 12px;
+            display: flex;
+            position: relative;
+        }
+        .segment-btn {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #9ca3af;
+            z-index: 1;
+            transition: color 0.2s;
+        }
+        .segment-btn.active { color: white; }
+        .segment-indicator {
+            position: absolute;
+            top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px);
+            background-color: #3a3a3c;
+            border-radius: 8px;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .page { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease; }
+        .page-hidden { display: none; opacity: 0; transform: scale(0.95); }
+        .page-active { display: block; opacity: 1; transform: scale(1); }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Button Error Animation */
+        .btn-error-state {
+            background-color: #ef4444 !important;
+            color: white !important;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="h-screen w-full overflow-hidden flex flex-col">
+
+    <header class="glass-header fixed top-0 w-full z-50 pt-safe-top">
+        <div class="h-14 flex items-center justify-between px-4">
+            <div class="flex flex-col">
+                <span class="text-[10px] text-blue-500 font-bold tracking-widest uppercase">GIS Exchange Bridge</span>
+                <h1 class="text-[17px] font-bold tracking-tight text-white">Indy Space Locator</h1>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 pt-16 pb-24 overflow-y-auto no-scrollbar relative w-full max-w-md mx-auto">
+        <div id="view-search" class="page page-active px-4 py-4 space-y-6">
+            <div class="space-y-2 mt-4">
+                <div class="flex justify-between items-end">
+                    <h2 class="text-3xl font-bold text-white">Find Spaces</h2>
+                    <span id="data-age" class="text-[10px] text-gray-500 font-mono mb-1">Checking exchange...</span>
+                </div>
+                <p class="text-gray-400 text-sm leading-relaxed">Secure gateway to Indy Transport GIS.</p>
+            </div>
+
+            <div class="segmented-control">
+                <div class="segment-indicator" id="segment-indicator"></div>
+                <button class="segment-btn active" onclick="setMode('id')">Meter ID</button>
+                <button class="segment-btn" onclick="setMode('street')">Street Name</button>
+            </div>
+
+            <div class="space-y-4">
+                <div id="input-group-id" class="group">
+                    <label class="block text-xs font-medium text-gray-500 uppercase ml-1 mb-2">Space Range</label>
+                    <div class="flex items-center space-x-3">
+                        <input type="tel" id="inp_start" placeholder="000" maxlength="4" class="app-input w-full p-4 rounded-2xl text-center tracking-widest font-mono">
+                        <span class="text-gray-600 text-2xl font-light">-</span>
+                        <input type="tel" id="inp_end" placeholder="Optional" maxlength="4" class="app-input w-full p-4 rounded-2xl text-center tracking-widest font-mono" disabled>
+                    </div>
+                </div>
+
+                <div id="input-group-street" class="group hidden">
+                    <label class="block text-xs font-medium text-gray-500 uppercase ml-1 mb-2">Street Name</label>
+                    <div class="relative">
+                        <input type="text" id="inp_street" list="street_list" placeholder="e.g. Washington St" class="app-input w-full p-4 rounded-2xl">
+                        <datalist id="street_list"></datalist>
+                    </div>
+                </div>
+            </div>
+
+            <button id="btn_init" onclick="runQuery()" class="w-full bg-[#3b82f6] active:bg-[#2563eb] text-white font-bold text-[17px] py-4 rounded-2xl mt-8 shadow-lg shadow-blue-900/20 transform transition active:scale-[0.98]">
+                Search
+            </button>
+        </div>
+
+        <div id="view-results" class="page page-hidden px-4 py-2">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-white">Results</h2>
+                <button onclick="switchView('search')" class="text-[#3b82f6] font-medium text-[17px]">Done</button>
+            </div>
+            <div id="loader" class="hidden flex flex-col items-center justify-center py-12 space-y-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3b82f6]"></div>
+                <p class="text-[#3b82f6] text-xs font-bold tracking-widest uppercase">Exchange in Progress...</p>
+            </div>
+            <div id="list_out" class="space-y-4 pb-20"></div>
+        </div>
+    </main>
+
+    <script>
+        // Updated with your live Render URL
+        const BACKEND_URL = "https://indy-locator-exchange.onrender.com";
+
+        const state = { mode: 'id', streetsLoaded: false };
+        const ui = {
+            start: document.getElementById("inp_start"),
+            end: document.getElementById("inp_end"),
+            streetInput: document.getElementById("inp_street"),
+            indicator: document.getElementById("segment-indicator"),
+            dataAge: document.getElementById("data-age"),
+            viewSearch: document.getElementById("view-search"),
+            viewResults: document.getElementById("view-results"),
+            list: document.getElementById("list_out"),
+            loader: document.getElementById("loader"),
+            btnInit: document.getElementById("btn_init")
+        };
+
+        ui.start.oninput = (e) => {
+            ui.start.value = ui.start.value.replace(/\D/g, '');
+            ui.end.disabled = ui.start.value.length < 3;
+        };
+        ui.end.oninput = (e) => ui.end.value = ui.end.value.replace(/\D/g, '');
+
+        function setMode(mode) {
+            state.mode = mode;
+            ui.indicator.style.transform = mode === 'id' ? 'translateX(0)' : 'translateX(100%)';
+            document.getElementById("input-group-id").classList.toggle('hidden', mode !== 'id');
+            document.getElementById("input-group-street").classList.toggle('hidden', mode !== 'street');
+            document.querySelectorAll('.segment-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', (mode === 'id' && idx === 0) || (mode === 'street' && idx === 1));
+            });
+            if (mode === 'street' && !state.streetsLoaded) fetchStreets();
+        }
+
+        async function fetchStreets() {
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/streets`);
+                const streets = await res.json();
+                const list = document.getElementById("street_list");
+                list.innerHTML = streets.map(s => `<option value="${s}">`).join('');
+                state.streetsLoaded = true;
+            } catch (e) { console.error("Exchange failed"); }
+        }
+
+        async function runQuery() {
+            const start = ui.start.value;
+            const end = ui.end.value;
+            const street = ui.streetInput.value;
+
+            if (state.mode === 'id' && start.length < 3) return;
+
+            switchView('results');
+            ui.loader.classList.remove('hidden');
+            ui.list.innerHTML = "";
+
+            try {
+                const params = new URLSearchParams({ mode: state.mode, start, end, street });
+                const res = await fetch(`${BACKEND_URL}/api/search?${params}`);
+                const data = await res.json();
+                ui.loader.classList.add('hidden');
+
+                if (!data.features || data.features.length === 0) {
+                    ui.list.innerHTML = `<div class="text-center py-12 text-gray-500">No assets found via secure bridge.</div>`;
+                    return;
+                }
+
+                data.features.forEach(f => {
+                    const addr = f.attributes.FULL_ADDRESS || "Unknown Location";
+                    const id = f.attributes.SPACE_NUMBER;
+                    const card = `
+                        <div class="bg-[#1c1c1e] rounded-2xl p-5 border border-gray-800">
+                            <h3 class="text-[17px] font-bold text-white">${addr}</h3>
+                            <div class="mt-4 bg-black/30 rounded-xl p-3 border border-white/5">
+                                <p class="text-green-400 font-mono text-sm">Space ID: ${id}</p>
+                            </div>
+                        </div>`;
+                    ui.list.insertAdjacentHTML("beforeend", card);
+                });
+            } catch (e) {
+                ui.loader.classList.add('hidden');
+                ui.list.innerHTML = `<div class="text-red-500 text-center py-12">Bridge Timeout. Please verify backend status.</div>`;
+            }
+        }
+
+        function switchView(view) {
+            ui.viewSearch.classList.toggle('page-active', view === 'search');
+            ui.viewSearch.classList.toggle('page-hidden', view !== 'search');
+            ui.viewResults.classList.toggle('page-active', view === 'results');
+            ui.viewResults.classList.toggle('page-hidden', view !== 'results');
+        }
+
+        // Check backend on load
+        (async () => {
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/meta`);
+                if (res.ok) ui.dataAge.innerText = "Bridge: Secure";
+            } catch(e) { ui.dataAge.innerText = "Bridge: Offline"; }
+        })();
+    </script>
+</body>
+</html>
