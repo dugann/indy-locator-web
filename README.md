@@ -2,7 +2,7 @@
 
 **Indy Space Locator** is a specialized progressive web application (PWA) designed to streamline field operations for Indianapolis metered parking verification. It provides a streamlined and accessible mobile interface that can be easily accessed by field operators to identify the location of metered parking spaces in Indianapolis. The application utilizes an enterprise-grade architecture to ensure data integrity, maintainability, and system robustness.
 
-[**Launch Live Application**](https://www.google.com/search?q=https://your-username.github.io/indy-locator-web/)
+[**Launch Live Application**](https://dugann.github.io/indy-locator-web/)
 
 ## 🎯 The Challenge
 
