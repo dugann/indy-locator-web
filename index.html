@@ -72,18 +72,19 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        .page { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease; }
-        .page-hidden { display: none; opacity: 0; transform: scale(0.95); }
-        .page-active { display: block; opacity: 1; transform: scale(1); }
+        .page { transition: opacity 0.3s ease; }
+        .page-hidden { display: none; opacity: 0; }
+        .page-active { display: block; opacity: 1; }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Button Error Animation */
-        .btn-error-state {
-            background-color: #ef4444 !important;
-            color: white !important;
-            pointer-events: none;
+        #setup-hint {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-top: 2rem;
         }
     </style>
 </head>
@@ -99,6 +100,7 @@
     </header>
 
     <main class="flex-1 pt-16 pb-24 overflow-y-auto no-scrollbar relative w-full max-w-md mx-auto">
+        <!-- SEARCH VIEW -->
         <div id="view-search" class="page page-active px-4 py-4 space-y-6">
             <div class="space-y-2 mt-4">
                 <div class="flex justify-between items-end">
@@ -136,8 +138,14 @@
             <button id="btn_init" onclick="runQuery()" class="w-full bg-[#3b82f6] active:bg-[#2563eb] text-white font-bold text-[17px] py-4 rounded-2xl mt-8 shadow-lg shadow-blue-900/20 transform transition active:scale-[0.98]">
                 Search
             </button>
+
+            <div id="setup-hint" class="hidden">
+                <h3 class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-2">Bridge Status: Awaiting Connection</h3>
+                <p class="text-gray-400 text-xs leading-relaxed">If this remains offline, ensure your Render service is active, and your BACKEND_URL is correct.</p>
+            </div>
         </div>
 
+        <!-- RESULTS VIEW -->
         <div id="view-results" class="page page-hidden px-4 py-2">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-bold text-white">Results</h2>
@@ -152,7 +160,6 @@
     </main>
 
     <script>
-        // Updated with your live Render URL
         const BACKEND_URL = "https://indy-locator-exchange.onrender.com";
 
         const state = { mode: 'id', streetsLoaded: false };
@@ -166,12 +173,14 @@
             viewResults: document.getElementById("view-results"),
             list: document.getElementById("list_out"),
             loader: document.getElementById("loader"),
-            btnInit: document.getElementById("btn_init")
+            btnInit: document.getElementById("btn_init"),
+            setupHint: document.getElementById("setup-hint")
         };
 
         ui.start.oninput = (e) => {
             ui.start.value = ui.start.value.replace(/\D/g, '');
             ui.end.disabled = ui.start.value.length < 3;
+            if (ui.start.value.length < 3) ui.end.value = '';
         };
         ui.end.oninput = (e) => ui.end.value = ui.end.value.replace(/\D/g, '');
 
@@ -180,20 +189,25 @@
             ui.indicator.style.transform = mode === 'id' ? 'translateX(0)' : 'translateX(100%)';
             document.getElementById("input-group-id").classList.toggle('hidden', mode !== 'id');
             document.getElementById("input-group-street").classList.toggle('hidden', mode !== 'street');
-            document.querySelectorAll('.segment-btn').forEach((btn, idx) => {
-                btn.classList.toggle('active', (mode === 'id' && idx === 0) || (mode === 'street' && idx === 1));
-            });
+            
+            const btns = document.querySelectorAll('.segment-btn');
+            btns[0].classList.toggle('active', mode === 'id');
+            btns[1].classList.toggle('active', mode === 'street');
+
             if (mode === 'street' && !state.streetsLoaded) fetchStreets();
         }
 
         async function fetchStreets() {
             try {
                 const res = await fetch(`${BACKEND_URL}/api/streets`);
+                if (!res.ok) return;
                 const streets = await res.json();
-                const list = document.getElementById("street_list");
-                list.innerHTML = streets.map(s => `<option value="${s}">`).join('');
+                const dl = document.getElementById("street_list");
+                dl.innerHTML = streets.map(s => `<option value="${s}">`).join('');
                 state.streetsLoaded = true;
-            } catch (e) { console.error("Exchange failed"); }
+            } catch (e) { 
+                console.error("Fetch streets failed", e); 
+            }
         }
 
         async function runQuery() {
@@ -202,19 +216,25 @@
             const street = ui.streetInput.value;
 
             if (state.mode === 'id' && start.length < 3) return;
+            if (state.mode === 'street' && !street) return;
 
             switchView('results');
             ui.loader.classList.remove('hidden');
             ui.list.innerHTML = "";
 
             try {
-                const params = new URLSearchParams({ mode: state.mode, start, end, street });
+                const params = new URLSearchParams({ 
+                    mode: state.mode, 
+                    start: start || '', 
+                    end: end || '', 
+                    street: street || '' 
+                });
                 const res = await fetch(`${BACKEND_URL}/api/search?${params}`);
                 const data = await res.json();
                 ui.loader.classList.add('hidden');
 
                 if (!data.features || data.features.length === 0) {
-                    ui.list.innerHTML = `<div class="text-center py-12 text-gray-500">No assets found via secure bridge.</div>`;
+                    ui.list.innerHTML = `<div class="text-center py-12 text-gray-500">No assets found.</div>`;
                     return;
                 }
 
@@ -232,23 +252,33 @@
                 });
             } catch (e) {
                 ui.loader.classList.add('hidden');
-                ui.list.innerHTML = `<div class="text-red-500 text-center py-12">Bridge Timeout. Please verify backend status.</div>`;
+                ui.list.innerHTML = `<div class="text-red-500 text-center py-12">Connection error. Verify backend.</div>`;
             }
         }
 
         function switchView(view) {
-            ui.viewSearch.classList.toggle('page-active', view === 'search');
-            ui.viewSearch.classList.toggle('page-hidden', view !== 'search');
-            ui.viewResults.classList.toggle('page-active', view === 'results');
-            ui.viewResults.classList.toggle('page-hidden', view !== 'results');
+            if (view === 'results') {
+                ui.viewSearch.classList.replace('page-active', 'page-hidden');
+                ui.viewResults.classList.replace('page-hidden', 'page-active');
+            } else {
+                ui.viewSearch.classList.replace('page-hidden', 'page-active');
+                ui.viewResults.classList.replace('page-active', 'page-hidden');
+            }
         }
 
-        // Check backend on load
         (async () => {
             try {
                 const res = await fetch(`${BACKEND_URL}/api/meta`);
-                if (res.ok) ui.dataAge.innerText = "Bridge: Secure";
-            } catch(e) { ui.dataAge.innerText = "Bridge: Offline"; }
+                if (res.ok) {
+                    ui.dataAge.innerText = "Bridge: Secure";
+                    ui.setupHint.classList.add('hidden');
+                } else {
+                    throw new Error();
+                }
+            } catch(e) { 
+                ui.dataAge.innerText = "Bridge: Offline"; 
+                ui.setupHint.classList.remove('hidden');
+            }
         })();
     </script>
 </body>
