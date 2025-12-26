@@ -1,3 +1,12 @@
+<!--
+    SPDX-FileCopyrightText: © 2025 William Dugann <https://github.com/dugann>
+    SPDX-License-Identifier: LicenseRef-Proprietary
+
+    INDY SPACE LOCATOR & CITATION PORTAL
+    ------------------------------------
+    This application serves as a utility interface for Indianapolis parking enforcement
+    and asset verification, bridging connection to local GIS and payment portals.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +14,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Indy Space Locator</title>
     
+    <!-- PWA Manifest Link -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#003B71">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -14,7 +32,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 
-    <!-- Import Map: Enables "import" statements in the browser -->
+    <!-- Import Map -->
     <script type="importmap">
         {
             "imports": {
@@ -26,7 +44,6 @@
     </script>
 
     <style>
-        /* Base Critical CSS */
         :root {
             --indy-blue: #003B71;
             --indy-red: #D11241;
@@ -50,16 +67,24 @@
 <body>
     <div id="root"></div>
 
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW failure', err));
+            });
+        }
+    </script>
+
     <!-- The React Application -->
     <script type="text/babel" data-type="module">
 import React, { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy } from 'lucide-react';
 
-// --- CONFIGURATION ---
-// Replace this with your actual Render URL when deploying
 const BACKEND_URL = "https://indy-locator-exchange.onrender.com"; 
-
 const ETIMS_ENDPOINT = "https://prodpci.etimspayments.com/pbw/inputAction.doh";
 const STORAGE_KEY_STREETS = "indy_streets_data";
 const STORAGE_KEY_META = "indy_meta_check";
@@ -91,14 +116,12 @@ function luhnValidate(fullcode) {
 
 // --- DYNAMIC STYLES ---
 const customStyles = `
-    /* Pulse Animation */
     @keyframes pulse-ring {
         0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); }
         70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); }
         100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
     }
 
-    /* Shockwave Expansion */
     .circle-transition {
         position: absolute;
         top: 50%;
@@ -124,13 +147,11 @@ const customStyles = `
         transition: transform 0.5s cubic-bezier(0.5, 0, 0.75, 0);
     }
     
-    /* Fade In */
     .fade-enter { opacity: 0; transform: translateY(10px); }
     .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.4s ease-out, transform 0.4s ease-out; }
     
     .prevent-overscroll { overscroll-behavior: contain; }
 
-    /* Validation Shake */
     @keyframes shake {
         0%, 100% { transform: translateX(0); }
         25% { transform: translateX(-4px); }
@@ -140,9 +161,8 @@ const customStyles = `
 `;
 
 export default function App() {
-    // --- STATE ---
     const [isSecretMode, setIsSecretMode] = useState(false);
-    const [mode, setMode] = useState('id'); // 'id'|'street' (Normal) OR 'ticket'|'plate' (Secret)
+    const [mode, setMode] = useState('id'); 
     const [view, setView] = useState('search');
     const [loading, setLoading] = useState(false);
     const [isExpanding, setIsExpanding] = useState(false);
@@ -150,12 +170,10 @@ export default function App() {
     const [streets, setStreets] = useState([]);
     const [dataDate, setDataDate] = useState(null);
     
-    // Normal Inputs
     const [startId, setStartId] = useState('');
     const [endId, setEndId] = useState('');
     const [streetQuery, setStreetQuery] = useState('');
     
-    // Secret Inputs
     const [ticketNum, setTicketNum] = useState('');
     const [plateState, setPlateState] = useState('IN');
     const [plateNum, setPlateNum] = useState('');
@@ -172,7 +190,6 @@ export default function App() {
     useEffect(() => {
         const checkMeta = async () => {
             try {
-                // MODIFIED: Use Backend Proxy
                 const res = await fetch(`${BACKEND_URL}/api/meta`);
                 const data = await res.json();
                 
@@ -206,7 +223,6 @@ export default function App() {
                     return;
                 }
                 try {
-                    // MODIFIED: Use Backend Proxy
                     const res = await fetch(`${BACKEND_URL}/api/streets`);
                     const sorted = await res.json();
                     localStorage.setItem(STORAGE_KEY_STREETS, JSON.stringify(sorted));
@@ -233,7 +249,6 @@ export default function App() {
         setError(null);
         setShakeField(null);
 
-        // --- SECRET MODE SUBMISSION (Direct Form Post) ---
         if (isSecretMode) {
             if (mode === 'ticket') {
                 if (!ticketNum) { setError("Enter a ticket number"); setShakeField('ticket'); return; }
@@ -248,8 +263,6 @@ export default function App() {
             return;
         }
 
-        // --- NORMAL MODE SUBMISSION (Via Backend) ---
-        // Validation Logic
         if (mode === 'id') {
             if (!startId) { setError("Please enter a Start ID"); setShakeField('start'); return; }
             if (startId.length < 3) { setError("Meter ID too short (min 3 digits)"); setShakeField('start'); return; }
@@ -261,7 +274,6 @@ export default function App() {
         setLoading(true);
 
         try {
-            // MODIFIED: Send simple params to Backend Proxy
             const params = new URLSearchParams({ mode });
             if (mode === 'id') {
                 params.append('start', startId);
@@ -329,7 +341,6 @@ export default function App() {
         }
     };
 
-    // MODIFIED: Use Backend Proxy for Maps
     const getMapTileUrl = (x, y) => {
         return `${BACKEND_URL}/api/map?x=${x}&y=${y}`;
     };
@@ -348,7 +359,6 @@ export default function App() {
         <div className="h-screen w-screen relative overflow-hidden flex flex-col font-sans text-white">
             <style>{customStyles}</style>
 
-            {/* Hidden Form for eTIMS */}
             <form 
                 ref={formRef} 
                 action={ETIMS_ENDPOINT} 
@@ -392,7 +402,6 @@ export default function App() {
                 <div className="mt-8 px-6">
                     <div className="w-full max-w-sm mx-auto space-y-6 relative z-10">
                         
-                        {/* Mode Toggle */}
                         <div className="flex bg-white/10 p-1 rounded-2xl backdrop-blur-sm border border-white/20">
                             <button 
                                 onClick={() => { setMode(isSecretMode ? 'ticket' : 'id'); setError(null); }}
@@ -409,9 +418,7 @@ export default function App() {
                             </button>
                         </div>
 
-                        {/* Inputs */}
                         <div className="min-h-[120px] flex flex-col justify-center">
-                            {/* --- NORMAL MODE INPUTS --- */}
                             {!isSecretMode && mode === 'id' && (
                                 <div className="flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
                                     <input 
@@ -453,7 +460,6 @@ export default function App() {
                                 </div>
                             )}
 
-                            {/* --- SECRET MODE INPUTS --- */}
                             {isSecretMode && mode === 'ticket' && (
                                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
                                     <input 
@@ -500,12 +506,10 @@ export default function App() {
                     </div>
                 </div>
 
-                {/* THE BUTTON */}
-                <div className="flex-1 flex items-center justify-center relative">
+                <div className="flex-1 flex items-center justify-center relative pb-32">
                     <div className="absolute w-64 h-64 border border-white/5 rounded-full pointer-events-none" />
                     <div className="absolute w-48 h-48 border border-white/10 rounded-full pointer-events-none" />
                     
-                    {/* Expanding Transition (Only for normal mode) */}
                     <div 
                         className={`circle-transition ${isExpanding ? 'expanding' : ''} ${!isExpanding && view !== 'search' && !isSecretMode ? 'closing' : ''}`}
                     />
@@ -531,9 +535,27 @@ export default function App() {
                 </div>
             </main>
 
-            {/* --- CREDITS FOOTER (Main Screen) --- */}
             <div className={`fixed bottom-6 left-0 right-0 text-center z-10 transition-opacity duration-300 ${view === 'results' ? 'opacity-0' : 'opacity-80'}`}>
                 <div className="flex flex-col items-center gap-4 text-xs" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)' }}>
+                    
+                    {/* NEW SWITCH BUTTON */}
+                    <button 
+                        onClick={toggleSecretMode}
+                        className="mb-2 bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full backdrop-blur-md text-sm font-bold transition-all active:scale-95 flex items-center gap-2 border border-white/20 shadow-lg group"
+                    >
+                        {isSecretMode ? (
+                            <>
+                                <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+                                Switch to Space Locator
+                            </>
+                        ) : (
+                            <>
+                                Switch to Citation Portal 
+                                <ChevronLeft size={16} className="rotate-180 group-hover:translate-x-1 transition-transform" />
+                            </>
+                        )}
+                    </button>
+
                     <div className="flex items-center gap-3">
                         <span className="font-medium">Built by <span style={{ color: '#fff' }}>William Dugann</span></span>
                         <span>|</span>
@@ -547,10 +569,8 @@ export default function App() {
                 </div>
             </div>
 
-            {/* --- RESULTS DRAWER --- */}
             <div className={`fixed inset-x-0 bottom-0 z-30 bg-slate-200 text-[#003B71] rounded-t-[2.5rem] shadow-2xl transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col ${view === 'results' ? 'translate-y-0 h-[85vh]' : 'translate-y-full h-[85vh]'}`}>
                 
-                {/* Header with Blue Background */}
                 <div className="px-6 py-4 flex items-center justify-between bg-[#003B71] rounded-t-[2.5rem] sticky top-0 z-40 shadow-md">
                     <button 
                         onClick={handleNewSearch}
@@ -567,9 +587,7 @@ export default function App() {
                     </div>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 overflow-y-auto hide-scroll p-4 bg-slate-200 prevent-overscroll">
-                    {/* Disclaimer Notice */}
                     {dataDate && (
                         <div className="mb-4 p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex items-start gap-3 shadow-sm">
                             <Info className="text-blue-600 shrink-0 mt-0.5" size={18} />
@@ -579,7 +597,6 @@ export default function App() {
                         </div>
                     )}
 
-                    {/* Staggered Fade In */}
                     <div className={view === 'results' ? 'fade-enter-active' : 'fade-enter'}>
                         {results.map((item, idx) => (
                             <div 
@@ -587,7 +604,6 @@ export default function App() {
                                 className="bg-white rounded-2xl p-4 shadow-sm border border-gray-300 mb-4 hover:shadow-lg transition-shadow"
                             >
                                 <div className="flex gap-4">
-                                    {/* Left Side: Info & Actions */}
                                     <div className="flex-1 min-w-0 flex flex-col justify-between">
                                         <div>
                                             <div className="flex justify-between items-start mb-2">
@@ -611,7 +627,6 @@ export default function App() {
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-3 mt-auto">
-                                            {/* High Visibility Buttons */}
                                             <a 
                                                 href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.address + ', Indianapolis, IN')}`} 
                                                 target="_blank" 
@@ -631,7 +646,6 @@ export default function App() {
                                         </div>
                                     </div>
 
-                                    {/* Right Side: Larger Map Tile */}
                                     <div className="w-36 flex-shrink-0 flex flex-col gap-2">
                                          <a 
                                             href={`https://www.google.com/maps/search/?api=1&query=${item.geom?.y},${item.geom?.x}`}
@@ -650,7 +664,6 @@ export default function App() {
                                                     <MapPin size={24} />
                                                 </div>
                                             )}
-                                            {/* Pin Overlay */}
                                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                                 <MapPin className="text-[#D11241] fill-[#D11241] drop-shadow-lg" size={32} />
                                             </div>
@@ -670,7 +683,6 @@ export default function App() {
                 </div>
             </div>
 
-            {/* --- INFO MODAL --- */}
             {showInfoModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowInfoModal(false)} />
