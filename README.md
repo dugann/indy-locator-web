@@ -1,7 +1,7 @@
 <div align="left">
 
 # 🅿️ Indy Space Locator & Citation Portal
-### *Unified Portal for locating meters and parking tickets in Indianapolis*
+### *Simplified tool for locating metered spaces and parking tickets in Indianapolis*
 
 [![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge&logo=activity)](https://dugann.github.io/indy-locator-web/)
 [![Platform](https://img.shields.io/badge/Platform-PWA%20%7C%20iOS%20%7C%20Android-blue?style=for-the-badge&logo=pwa)](https://dugann.github.io/indy-locator-web/)
