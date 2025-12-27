@@ -56,7 +56,8 @@
             color: white;
             margin: 0;
             font-family: 'Inter', sans-serif;
-            overflow: hidden;
+            /* REMOVED overflow: hidden to allow pull-to-refresh on mobile browsers */
+            overscroll-behavior-y: auto; 
         }
         
         .hide-scroll::-webkit-scrollbar { display: none; }
@@ -82,7 +83,7 @@
     <script type="text/babel" data-type="module">
 import React, { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy } from 'lucide-react';
+import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download } from 'lucide-react';
 
 const BACKEND_URL = "https://indy-locator-exchange.onrender.com"; 
 const ETIMS_ENDPOINT = "https://prodpci.etimspayments.com/pbw/inputAction.doh";
@@ -150,7 +151,7 @@ const customStyles = `
     .fade-enter { opacity: 0; transform: translateY(10px); }
     .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.4s ease-out, transform 0.4s ease-out; }
     
-    .prevent-overscroll { overscroll-behavior: contain; }
+    /* REMOVED .prevent-overscroll to allow pull-to-refresh */
 
     @keyframes shake {
         0%, 100% { transform: translateX(0); }
@@ -184,9 +185,26 @@ export default function App() {
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [copiedId, setCopiedId] = useState(null);
 
+    // PWA Install State
+    const [installPrompt, setInstallPrompt] = useState(null);
+
     const formRef = useRef(null);
 
     // --- EFFECTS ---
+    useEffect(() => {
+        // Listen for the 'beforeinstallprompt' event
+        const handleInstallPrompt = (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            setInstallPrompt(e);
+        };
+
+        window.addEventListener('beforeinstallprompt', handleInstallPrompt);
+
+        return () => window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
+    }, []);
+
     useEffect(() => {
         const checkMeta = async () => {
             try {
@@ -236,6 +254,17 @@ export default function App() {
     }, [mode, isSecretMode]);
 
     // --- LOGIC ---
+
+    const handleInstallClick = async () => {
+        if (!installPrompt) return;
+        // Show the install prompt
+        installPrompt.prompt();
+        // Wait for the user to respond to the prompt
+        const { outcome } = await installPrompt.userChoice;
+        if (outcome === 'accepted') {
+            setInstallPrompt(null);
+        }
+    };
 
     const toggleSecretMode = () => {
         setIsSecretMode(!isSecretMode);
@@ -356,7 +385,7 @@ export default function App() {
     };
 
     return (
-        <div className="h-screen w-screen relative overflow-hidden flex flex-col font-sans text-white">
+        <div className="h-screen w-screen relative flex flex-col font-sans text-white">
             <style>{customStyles}</style>
 
             <form 
@@ -391,9 +420,22 @@ export default function App() {
                         {isSecretMode ? 'Indy Citation Portal' : 'Indy Space Locator'}
                     </h1>
                 </div>
-                <button onClick={() => setShowInfoModal(true)} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
-                    <Info size={20} className="text-white/80" />
-                </button>
+                
+                <div className="flex gap-2">
+                    {/* INSTALL BUTTON: Only shows if browser says app is installable */}
+                    {installPrompt && (
+                        <button 
+                            onClick={handleInstallClick} 
+                            className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors animate-in zoom-in"
+                            title="Install App"
+                        >
+                            <Download size={20} className="text-white/80" />
+                        </button>
+                    )}
+                    <button onClick={() => setShowInfoModal(true)} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+                        <Info size={20} className="text-white/80" />
+                    </button>
+                </div>
             </header>
 
             {/* --- MAIN CONTENT (SEARCH) --- */}
@@ -587,7 +629,8 @@ export default function App() {
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto hide-scroll p-4 bg-slate-200 prevent-overscroll">
+                {/* REMOVED 'prevent-overscroll' class from below */}
+                <div className="flex-1 overflow-y-auto hide-scroll p-4 bg-slate-200">
                     {dataDate && (
                         <div className="mb-4 p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex items-start gap-3 shadow-sm">
                             <Info className="text-blue-600 shrink-0 mt-0.5" size={18} />
