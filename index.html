@@ -1,105 +1,811 @@
-<div align="center">
+<!--
+    SPDX-FileCopyrightText: © 2025 William Dugann <https://github.com/dugann>
+    SPDX-License-Identifier: LicenseRef-Proprietary
 
-# 🅿️ Indy Space Locator & Citation Portal
-### *Unified Mobility Portal for Parking Infrastructure and Enforcement Operations in Indianapolis*
+    INDY SPACE LOCATOR & CITATION PORTAL
+    ------------------------------------
+    This application serves as a utility interface for Indianapolis parking enforcement
+    and asset verification, bridging connection to local GIS and payment portals.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Indy Space Locator</title>
+    
+    <!-- PWA Manifest Link -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#003B71">
+    <link rel="apple-touch-icon" href="icon-192.png">
 
-[![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge&logo=activity)](https://dugann.github.io/indy-locator-web/)
-[![Platform](https://img.shields.io/badge/Platform-PWA%20%7C%20iOS%20%7C%20Android-blue?style=for-the-badge&logo=pwa)](https://dugann.github.io/indy-locator-web/)
-[![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge&logo=law)](https://dugann.github.io/indy-locator-web/)
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-[🚀 **Launch Live Application**](https://dugann.github.io/indy-locator-web/)
+    <!-- Babel for in-browser JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-</div>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 
----
+    <!-- Import Map -->
+    <script type="importmap">
+        {
+            "imports": {
+                "react": "https://esm.sh/react@18.2.0",
+                "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+                "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+            }
+        }
+    </script>
 
-## 📱 Overview
+    <style>
+        :root {
+            --indy-blue: #003B71;
+            --indy-red: #D11241;
+            --indy-white: #FFFFFF;
+            --indy-sky: #E1E8F0;
+        }
+        
+        body {
+            background-color: var(--indy-blue);
+            color: white;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            /* REMOVED overflow: hidden to allow pull-to-refresh on mobile browsers */
+            overscroll-behavior-y: auto; 
+        }
+        
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
 
-**Indy Space Locator & Citation Portal** is an integrated Progressive Web Application (PWA) designed to unify critical parking operations and public-facing utilities within a single, modern interface.
+<body>
+    <div id="root"></div>
 
-The system streamlines two primary functions:
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW failure', err));
+            });
+        }
+    </script>
 
-1. **Space Locator:** A GIS-driven module that identifies and maps metered parking assets by ID or street name.  
-2. **Citation Portal:** A secure environment for citation validation and redirection to the City’s official payment infrastructure.
+    <!-- The React Application -->
+    <script type="text/babel" data-type="module">
+import React, { useState, useEffect, useRef } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download } from 'lucide-react';
 
-Optimized for on-site reliability, the application offers offline caching, high-contrast visual design, and an interface explicitly tested for outdoor and field use.  
+const BACKEND_URL = "https://indy-locator-exchange.onrender.com"; 
+const ETIMS_ENDPOINT = "https://prodpci.etimspayments.com/pbw/inputAction.doh";
+const STORAGE_KEY_STREETS = "indy_streets_data";
+const STORAGE_KEY_META = "indy_meta_check";
 
-> ⚠️ *Independent project. Not affiliated with or endorsed by the City of Indianapolis.*
+const US_STATES = [
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", 
+    "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", 
+    "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", 
+    "VT", "VA", "WA", "WV", "WI", "WY"
+];
 
----
+// --- UTILS ---
+function luhn_checksum(code) {
+    var len = code.length
+    var parity = len % 2
+    var sum = 0
+    for (var i = len-1; i >= 0; i--) {
+        var d = parseInt(code.charAt(i))
+        if (i % 2 === parity) { d *= 2 }
+        if (d > 9) { d -= 9 }
+        sum += d
+    }
+    return sum % 10
+}
 
-## 🔄 Operation Modes
+function luhnValidate(fullcode) {
+    return luhn_checksum(fullcode) === 0
+}
 
-The platform features a dual-mode interface toggle, allowing users to switch between tools without navigating away from the main workspace.
+// --- DYNAMIC STYLES ---
+const customStyles = `
+    @keyframes pulse-ring {
+        0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); }
+        70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); }
+        100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+    }
 
-| Mode | Purpose |
-| :--- | :--- |
-| **📍 Space Locator** | *Default functionality for location mapping.*<br>• Query single or range-based IDs (e.g., 101–105).<br>• Search validated street names.<br>• One-tap Google Maps and Street View integration for asset verification. |
-| **🎫 Citation Portal** | *Dedicated module for ticket lookup and payment linking.*<br>• Validates citation numbers using the **Luhn algorithm**.<br>• Supports license plate lookups by plate and state.<br>• Pass-through routing to trusted payment processors with secured parameters. |
+    .circle-transition {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 128px;
+        height: 128px;
+        background-color: #E1E8F0;
+        border-radius: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+        pointer-events: none;
+        z-index: 25;
+    }
 
----
+    .circle-transition.expanding {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(25);
+        transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.1s ease-in;
+    }
+    
+    .circle-transition.closing {
+        transform: translate(-50%, -50%) scale(0);
+        transition: transform 0.5s cubic-bezier(0.5, 0, 0.75, 0);
+    }
+    
+    .fade-enter { opacity: 0; transform: translateY(10px); }
+    .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.4s ease-out, transform 0.4s ease-out; }
+    
+    /* REMOVED .prevent-overscroll to allow pull-to-refresh */
 
-## 📲 Installation
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        75% { transform: translateX(4px); }
+    }
+    .shake-input { animation: shake 0.3s ease-in-out; border-color: #D11241 !important; }
+`;
 
-The system operates as a full-featured PWA across desktop and mobile environments.
+export default function App() {
+    const [isCitationMode, setIsCitationMode] = useState(false);
+    const [mode, setMode] = useState('id'); 
+    const [view, setView] = useState('search');
+    const [loading, setLoading] = useState(false);
+    const [isExpanding, setIsExpanding] = useState(false);
+    
+    const [streets, setStreets] = useState([]);
+    const [dataDate, setDataDate] = useState(null);
+    
+    const [startId, setStartId] = useState('');
+    const [endId, setEndId] = useState('');
+    const [streetQuery, setStreetQuery] = useState('');
+    
+    const [ticketNum, setTicketNum] = useState('');
+    const [plateState, setPlateState] = useState('IN');
+    const [plateNum, setPlateNum] = useState('');
 
-- **Desktop:** Click the install icon in the URL bar or use the in-app control.  
-- **iOS:** Select `Share` → `Add to Home Screen`.  
-- **Android:** Use the browser menu → `Install App` or in-app prompt.
+    const [results, setResults] = useState([]);
+    const [error, setError] = useState(null);
+    const [shakeField, setShakeField] = useState(null);
+    const [showInfoModal, setShowInfoModal] = useState(false);
+    const [copiedId, setCopiedId] = useState(null);
 
----
+    // PWA Install State
+    const [installPrompt, setInstallPrompt] = useState(null);
+    const [isStandalone, setIsStandalone] = useState(false);
 
-## 👥 Primary Users
+    const formRef = useRef(null);
 
-The portal was developed to serve both institutional and public stakeholders.
+    // --- EFFECTS ---
+    useEffect(() => {
+        // 1. Listen for the 'beforeinstallprompt' event (Standard Install Trigger)
+        const handleInstallPrompt = (e) => {
+            e.preventDefault();
+            setInstallPrompt(e);
+        };
 
-- **Field Enforcement & Police:** Quick verification of parking assets and citations.  
-- **Contractors & ROW Inspectors:** Identify affected parking assets within permitted work zones.  
-- **Parking Operators:** Assist customers with meter identification or ticket clarification.  
-- **Municipal Staff:** Real-time, lightweight access to GIS datasets.  
-- **Public Users:** Simplified interface for locating parking and resolving citations.
+        // 2. Listen for the 'appinstalled' event (External Install Trigger)
+        // This fires if they install via the Omnibox or other browser UI
+        const handleAppInstalled = () => {
+            setInstallPrompt(null);
+            console.log('PWA was installed');
+        };
 
----
+        // 3. Detect if already running in Standalone (App) Mode
+        const checkStandalone = () => {
+             const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches 
+                || window.navigator.standalone 
+                || document.referrer.includes('android-app://');
+             setIsStandalone(isStandaloneMode);
+        };
 
-## ⚙️ Technical Architecture
+        window.addEventListener('beforeinstallprompt', handleInstallPrompt);
+        window.addEventListener('appinstalled', handleAppInstalled);
+        
+        // Initial check
+        checkStandalone();
+        
+        // Listen for display mode changes
+        const mediaQuery = window.matchMedia('(display-mode: standalone)');
+        try {
+             mediaQuery.addEventListener('change', checkStandalone);
+        } catch (e) {
+             // Fallback for older browsers
+             mediaQuery.addListener(checkStandalone);
+        }
 
-The system employs a modern, maintainable stack focused on performance and platform independence.
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
+            window.removeEventListener('appinstalled', handleAppInstalled);
+            try {
+                 mediaQuery.removeEventListener('change', checkStandalone);
+            } catch (e) {
+                 mediaQuery.removeListener(checkStandalone);
+            }
+        };
+    }, []);
 
-### **Client Application**
-![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)
-![Tailwind](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
-![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?style=flat-square&logo=pwa&logoColor=white)
+    useEffect(() => {
+        const checkMeta = async () => {
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/meta`);
+                const data = await res.json();
+                
+                if (data.data?.[0]?.attributes?.modified) {
+                    const dateStr = new Date(data.data[0].attributes.modified).toLocaleDateString();
+                    setDataDate(dateStr);
+                    
+                    const cachedMeta = JSON.parse(localStorage.getItem(STORAGE_KEY_META));
+                    if (cachedMeta?.timestamp < data.data[0].attributes.modified) {
+                        localStorage.removeItem(STORAGE_KEY_STREETS);
+                    }
+                    
+                    localStorage.setItem(STORAGE_KEY_META, JSON.stringify({
+                        timestamp: data.data[0].attributes.modified,
+                        displayDate: dateStr
+                    }));
+                }
+            } catch (e) {
+                console.error("Meta handshake failed. Using offline mode.", e);
+            }
+        };
+        checkMeta();
+    }, []);
 
-- **Framework:** React 18 (served via CDN/Babel for zero-build deployment).  
-- **Styling:** Tailwind CSS for consistent, scalable UI design.  
-- **Icons:** Lucide React for unified vector iconography.  
-- **Offline Mode:** Caching and installation support for uninterrupted use.
+    useEffect(() => {
+        if (!isCitationMode && mode === 'street' && streets.length === 0) {
+            const loadStreets = async () => {
+                const cached = localStorage.getItem(STORAGE_KEY_STREETS);
+                if (cached) {
+                    setStreets(JSON.parse(cached));
+                    return;
+                }
+                try {
+                    const res = await fetch(`${BACKEND_URL}/api/streets`);
+                    const sorted = await res.json();
+                    localStorage.setItem(STORAGE_KEY_STREETS, JSON.stringify(sorted));
+                    setStreets(sorted);
+                } catch (e) {
+                    console.error("Street handshake failed");
+                }
+            };
+            loadStreets();
+        }
+    }, [mode, isCitationMode]);
 
-### **Middleware (Backend-for-Frontend)**
-![Node](https://img.shields.io/badge/Node.js-Middleware-339933?style=flat-square&logo=node.js&logoColor=white)
+    // --- LOGIC ---
 
-A Node.js middleware layer provides the application’s BFF (Backend-for-Frontend) abstraction.
+    const handleInstallClick = async () => {
+        if (!installPrompt) return;
+        // Show the install prompt
+        installPrompt.prompt();
+        // Wait for the user to respond to the prompt
+        const { outcome } = await installPrompt.userChoice;
+        if (outcome === 'accepted') {
+            setInstallPrompt(null);
+        }
+    };
 
-- **Data Management:** Interfaces with the Indianapolis Open Data API.  
-- **Security:** Isolates API keys and endpoints from the client tier.  
-- **Transformation:** Converts raw Esri GIS data into optimized JSON for mobile delivery.
+    const toggleCitationMode = () => {
+        setIsCitationMode(!isCitationMode);
+        setMode(isCitationMode ? 'id' : 'ticket');
+        setError(null);
+        setResults([]);
+        setView('search');
+    };
 
----
+    const handleSearch = async () => {
+        setError(null);
+        setShakeField(null);
 
-## 🔒 Data and Privacy
+        if (isCitationMode) {
+            if (mode === 'ticket') {
+                if (!ticketNum) { setError("Enter a ticket number"); setShakeField('ticket'); return; }
+                if (ticketNum.length !== 9) { setError("Ticket number must be 9 digits"); setShakeField('ticket'); return; }
+                if (!ticketNum.startsWith('0') && !ticketNum.startsWith('71')) { setError("Ticket must start with 0 or 71"); setShakeField('ticket'); return; }
+                if (!luhnValidate(ticketNum)) { setError("Invalid ticket number"); setShakeField('ticket'); return; }
+            } else {
+                if (!plateNum) { setError("Enter a license plate"); setShakeField('plate'); return; }
+            }
+            formRef.current.submit();
+            setTicketNum(''); setPlateNum(''); setPlateState('IN');
+            return;
+        }
 
-- **Parking Asset Data:** Derived in real time from the Indianapolis Open Data Portal.  
-- **Citation Information:** No storage, caching, or logging of user queries or identifiers.  
-- **Service Availability:** Dependent on source data uptime and reliability.  
-- **Privacy Standards:** No tracking or retention of personal data.
+        if (mode === 'id') {
+            if (!startId) { setError("Please enter a Start ID"); setShakeField('start'); return; }
+            if (startId.length < 3) { setError("Meter ID too short (min 3 digits)"); setShakeField('start'); return; }
+            if (endId && parseInt(endId) <= parseInt(startId)) { setError("End ID must be greater than Start ID"); setShakeField('end'); return; }
+        } else {
+            if (!streetQuery || streetQuery.trim().length < 2) { setError("Please select a valid street name"); setShakeField('street'); return; }
+        }
 
----
+        setLoading(true);
 
-## 📝 Project Information
+        try {
+            const params = new URLSearchParams({ mode });
+            if (mode === 'id') {
+                params.append('start', startId);
+                if (endId) params.append('end', endId);
+            } else {
+                params.append('street', streetQuery);
+            }
+            
+            const res = await fetch(`${BACKEND_URL}/api/search?${params}`);
+            const data = await res.json();
+            
+            if (!data.features || data.features.length === 0) {
+                setResults([]);
+                setLoading(false);
+                setError("No parking assets found.");
+            } else {
+                const groups = {};
+                data.features.forEach(f => {
+                    const rawAddr = f.attributes.FULL_ADDRESS;
+                    const addr = rawAddr ? rawAddr.trim() : "Unknown Location";
+                    if (!groups[addr]) groups[addr] = { ids: [], geom: f.geometry };
+                    groups[addr].ids.push(f.attributes.SPACE_NUMBER);
+                });
+                
+                const resultList = Object.keys(groups).sort().map(addr => ({
+                    address: addr,
+                    ids: groups[addr].ids.sort((a,b) => a-b),
+                    geom: groups[addr].geom
+                }));
+                
+                setResults(resultList);
+                setIsExpanding(true);
+                setTimeout(() => {
+                    setView('results');
+                    setLoading(false);
+                }, 400); 
+            }
+        } catch (e) {
+            setError("Connection failed. Try again.");
+            setLoading(false);
+        }
+    };
 
-**Principal Developer:** William Dugann  
-**Copyright:** © 2025 William Dugann  
-**License:** Proprietary  
-**SPDX Identifier:** `LicenseRef-Proprietary`
+    const handleNewSearch = () => {
+        setIsExpanding(false); 
+        setTimeout(() => {
+            setView('search');
+            setStartId(''); setEndId(''); setStreetQuery('');
+            setResults([]); setError(null);
+        }, 300);
+    };
 
-[Report Issues](https://github.com/dugann/indy-locator-web/issues)
+    const copyToClipboard = (text) => {
+        try {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            setCopiedId(text);
+            setTimeout(() => setCopiedId(null), 2000);
+        } catch (err) {
+            console.error('Copy failed', err);
+        }
+    };
+
+    const getMapTileUrl = (x, y) => {
+        return `${BACKEND_URL}/api/map?x=${x}&y=${y}`;
+    };
+
+    const handleNumericInput = (setter) => (e) => {
+        const val = e.target.value;
+        if (val === '' || (/^[1-9]\d*$/.test(val))) setter(val);
+    };
+
+    const handleTicketInput = (e) => {
+        const val = e.target.value.replace(/\D/g,'');
+        setTicketNum(val);
+    };
+
+    return (
+        <div className="h-screen w-screen relative flex flex-col font-sans text-white">
+            <style>{customStyles}</style>
+
+            <form 
+                ref={formRef} 
+                action={ETIMS_ENDPOINT} 
+                method="POST" 
+                target="_blank"
+                className="hidden"
+            >
+                <input type="hidden" name="clientcode" value="5I" />
+                <input type="hidden" name="requestType" value="submit" />
+                <input type="hidden" name="requestCount" value="1" />
+                <input type="hidden" name="clientAccount" value="6" />
+                <input type="hidden" name="paymentType" value={mode === 'ticket' ? 'T' : 'P'} />
+                <input type="hidden" name="documentNum" value={mode === 'ticket' ? ticketNum : `${plateState}${plateNum}`} />
+                <input type="submit" value="Submit" />
+            </form>
+
+            {/* --- BACKGROUND --- */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#003B71_0%,#001f3f_100%)] z-0" />
+            <div className="absolute inset-0 opacity-10 pointer-events-none z-0" 
+                 style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
+            </div>
+
+            {/* --- HEADER --- */}
+            <header className={`relative z-10 pt-safe-top px-6 py-4 flex justify-between items-center transition-opacity duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                <div>
+                    <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        <button onClick={toggleCitationMode} className="focus:outline-none active:scale-95 transition-transform">
+                            <Star className={`${isCitationMode ? 'text-[#D11241] fill-[#D11241]' : 'text-[#D11241]'} transition-colors`} size={32} strokeWidth={isCitationMode ? 0 : 2} />
+                        </button>
+                        {isCitationMode ? 'Indy Citation Portal' : 'Indy Space Locator'}
+                    </h1>
+                </div>
+                
+                <div className="flex gap-2">
+                    {/* INSTALL BUTTON: Only shows if installable AND not currently running as standalone app */}
+                    {installPrompt && !isStandalone && (
+                        <button 
+                            onClick={handleInstallClick} 
+                            className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors animate-in zoom-in"
+                            title="Install App"
+                        >
+                            <Download size={20} className="text-white/80" />
+                        </button>
+                    )}
+                    <button onClick={() => setShowInfoModal(true)} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+                        <Info size={20} className="text-white/80" />
+                    </button>
+                </div>
+            </header>
+
+            {/* --- MAIN CONTENT (SEARCH) --- */}
+            <main className={`flex-1 relative z-10 flex flex-col transition-all duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
+                
+                <div className="mt-8 px-6">
+                    <div className="w-full max-w-sm mx-auto space-y-6 relative z-10">
+                        
+                        <div className="flex bg-white/10 p-1 rounded-2xl backdrop-blur-sm border border-white/20">
+                            <button 
+                                onClick={() => { setMode(isCitationMode ? 'ticket' : 'id'); setError(null); }}
+                                className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'id' || mode === 'ticket' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                            >
+                                {isCitationMode ? 'Ticket #' : 'Meter ID'}
+                            </button>
+                            <div className="w-[1px] bg-white/10 my-2"></div>
+                            <button 
+                                onClick={() => { setMode(isCitationMode ? 'plate' : 'street'); setError(null); }}
+                                className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'street' || mode === 'plate' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                            >
+                                {isCitationMode ? 'License Plate' : 'Street Name'}
+                            </button>
+                        </div>
+
+                        <div className="min-h-[120px] flex flex-col justify-center">
+                            {!isCitationMode && mode === 'id' && (
+                                <div className="flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                    <input 
+                                        type="tel" 
+                                        placeholder="Start" 
+                                        className={`w-1/2 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-4 px-6 text-center text-2xl font-mono outline-none transition-all ${shakeField === 'start' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
+                                        value={startId}
+                                        onChange={handleNumericInput(setStartId)}
+                                        maxLength={6}
+                                    />
+                                    <span className="text-white/40 font-light text-2xl">-</span>
+                                    <input 
+                                        type="tel" 
+                                        placeholder="End" 
+                                        className={`w-1/2 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-4 px-6 text-center text-2xl font-mono outline-none transition-all disabled:opacity-30 ${shakeField === 'end' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
+                                        value={endId}
+                                        onChange={handleNumericInput(setEndId)}
+                                        disabled={startId.length < 3}
+                                        maxLength={6}
+                                    />
+                                </div>
+                            )}
+
+                            {!isCitationMode && mode === 'street' && (
+                                <div className="relative animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                    <input 
+                                        list="streets"
+                                        placeholder="Search Street Name..." 
+                                        className={`w-full bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-4 px-6 text-lg font-medium outline-none transition-all ${shakeField === 'street' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
+                                        value={streetQuery}
+                                        onChange={(e) => setStreetQuery(e.target.value)}
+                                    />
+                                    <datalist id="streets">
+                                        {streets.map(s => <option key={s} value={s} />)}
+                                    </datalist>
+                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none">
+                                        <Search size={20} />
+                                    </div>
+                                </div>
+                            )}
+
+                            {isCitationMode && mode === 'ticket' && (
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                    <input 
+                                        type="tel"
+                                        placeholder="Ticket Number" 
+                                        className={`w-full bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-4 px-6 text-center text-2xl font-mono outline-none transition-all ${shakeField === 'ticket' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
+                                        value={ticketNum}
+                                        onChange={handleTicketInput}
+                                        maxLength={9} 
+                                    />
+                                </div>
+                            )}
+
+                            {isCitationMode && mode === 'plate' && (
+                                <div className="flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                    <div className="relative w-1/3">
+                                        <select 
+                                            value={plateState}
+                                            onChange={(e) => setPlateState(e.target.value)}
+                                            className="w-full bg-white/20 border-2 border-white/10 focus:border-white/50 text-white rounded-3xl py-4 px-4 text-center text-lg font-bold appearance-none outline-none transition-all"
+                                        >
+                                            {US_STATES.map(s => <option key={s} value={s} className="text-black">{s}</option>)}
+                                        </select>
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/60">▼</div>
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="PLATE #" 
+                                        className={`w-2/3 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-4 px-6 text-center text-xl font-mono uppercase outline-none transition-all ${shakeField === 'plate' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
+                                        value={plateNum}
+                                        onChange={(e) => setPlateNum(e.target.value.toUpperCase())}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        {error && (
+                            <div className="bg-[#D11241]/20 border border-[#D11241] rounded-2xl p-3 text-center animate-in zoom-in duration-200">
+                                <p className="text-white text-sm font-semibold flex items-center justify-center gap-2">
+                                    <AlertTriangle size={16} /> {error}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex-1 flex items-center justify-center relative pb-32">
+                    <div className="absolute w-64 h-64 border border-white/5 rounded-full pointer-events-none" />
+                    <div className="absolute w-48 h-48 border border-white/10 rounded-full pointer-events-none" />
+                    
+                    <div 
+                        className={`circle-transition ${isExpanding ? 'expanding' : ''} ${!isExpanding && view !== 'search' && !isCitationMode ? 'closing' : ''}`}
+                    />
+
+                    <button 
+                        onClick={handleSearch}
+                        className="group relative w-32 h-32 rounded-full bg-white shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.3)] transition-all duration-300 active:scale-95 flex items-center justify-center z-30"
+                    >
+                        <div className="absolute inset-1 rounded-full border-4 border-double border-[#003B71]/10 group-hover:border-[#003B71]/30 transition-colors" />
+                        <div className="flex flex-col items-center text-[#003B71]">
+                            {loading && !isExpanding ? (
+                                <RotateCw className="animate-spin" size={32} />
+                            ) : (
+                                <>
+                                    {isCitationMode ? <Search size={32} strokeWidth={2.5} /> : <Search size={32} strokeWidth={2.5} />}
+                                    <span className="text-xs font-black uppercase tracking-widest mt-1">
+                                        {isCitationMode ? 'Lookup' : 'Find'}
+                                    </span>
+                                </>
+                            )}
+                        </div>
+                    </button>
+                </div>
+            </main>
+
+            <div className={`fixed bottom-6 left-0 right-0 text-center z-10 transition-opacity duration-300 ${view === 'results' ? 'opacity-0' : 'opacity-80'}`}>
+                <div className="flex flex-col items-center gap-4 text-xs" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)' }}>
+                    
+                    {/* NEW SWITCH BUTTON */}
+                    <button 
+                        onClick={toggleCitationMode}
+                        className="mb-2 bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full backdrop-blur-md text-sm font-bold transition-all active:scale-95 flex items-center gap-2 border border-white/20 shadow-lg group"
+                    >
+                        {isCitationMode ? (
+                            <>
+                                <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+                                Switch to Space Locator
+                            </>
+                        ) : (
+                            <>
+                                Switch to Citation Portal 
+                                <ChevronLeft size={16} className="rotate-180 group-hover:translate-x-1 transition-transform" />
+                            </>
+                        )}
+                    </button>
+
+                    <div className="flex items-center gap-3">
+                        <span className="font-medium">Built by <span style={{ color: '#fff' }}>William Dugann</span></span>
+                        <span>|</span>
+                        <a href="https://github.com/dugann" className="hover:text-white transition-colors p-1" target="_blank" rel="noreferrer">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+                        </a>
+                        <a href="https://www.linkedin.com/in/dugann/" className="transition-colors p-1 hover:text-white" style={{ color: 'white' }} target="_blank" rel="noreferrer">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div className={`fixed inset-x-0 bottom-0 z-30 bg-slate-200 text-[#003B71] rounded-t-[2.5rem] shadow-2xl transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col ${view === 'results' ? 'translate-y-0 h-[85vh]' : 'translate-y-full h-[85vh]'}`}>
+                
+                <div className="px-6 py-4 flex items-center justify-between bg-[#003B71] rounded-t-[2.5rem] sticky top-0 z-40 shadow-md">
+                    <button 
+                        onClick={handleNewSearch}
+                        className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl transition-colors text-sm font-bold active:scale-95"
+                    >
+                        <RotateCw size={18} />
+                        New Search
+                    </button>
+                    <div className="text-right">
+                        <span className="block font-bold text-white text-xl leading-none">
+                            {results.length}
+                        </span>
+                        <span className="text-[10px] text-white/60 font-bold uppercase tracking-wider">Results</span>
+                    </div>
+                </div>
+
+                {/* REMOVED 'prevent-overscroll' class from below */}
+                <div className="flex-1 overflow-y-auto hide-scroll p-4 bg-slate-200">
+                    {dataDate && (
+                        <div className="mb-4 p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex items-start gap-3 shadow-sm">
+                            <Info className="text-blue-600 shrink-0 mt-0.5" size={18} />
+                            <p className="text-xs text-blue-800 leading-relaxed font-medium">
+                                These results are dependent on the accuracy of City maintained records which were last updated on <span className="font-bold">{dataDate}</span>.
+                            </p>
+                        </div>
+                    )}
+
+                    <div className={view === 'results' ? 'fade-enter-active' : 'fade-enter'}>
+                        {results.map((item, idx) => (
+                            <div 
+                                key={idx} 
+                                className="bg-white rounded-2xl p-4 shadow-sm border border-gray-300 mb-4 hover:shadow-lg transition-shadow"
+                            >
+                                <div className="flex gap-4">
+                                    <div className="flex-1 min-w-0 flex flex-col justify-between">
+                                        <div>
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <h3 className="font-bold text-[#003B71] text-lg leading-tight text-black truncate pr-2">{item.address}</h3>
+                                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mt-0.5">Indianapolis, IN</p>
+                                                </div>
+                                            </div>
+
+                                            <button 
+                                                onClick={() => copyToClipboard(item.ids.join(', '))}
+                                                className="w-full text-left bg-[#003B71]/5 rounded-xl p-2.5 mb-3 border border-[#003B71]/10 group hover:border-[#003B71]/30 hover:bg-[#003B71]/10 transition-colors relative"
+                                            >
+                                                <p className="text-[#003B71] font-mono text-sm leading-relaxed break-words pr-6 line-clamp-2 font-medium">
+                                                    {item.ids.join(', ')}
+                                                </p>
+                                                <div className="absolute top-2 right-2 text-[#003B71]/40 group-hover:text-[#003B71] transition-colors">
+                                                    {copiedId === item.ids.join(', ') ? <CheckCircle size={16} className="text-green-600"/> : <Copy size={16} />}
+                                                </div>
+                                            </button>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3 mt-auto">
+                                            <a 
+                                                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.address + ', Indianapolis, IN')}`} 
+                                                target="_blank" 
+                                                rel="noreferrer"
+                                                className="flex items-center justify-center gap-1.5 bg-white text-[#003B71] border-2 border-[#003B71] py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-all hover:bg-[#003B71] hover:text-white"
+                                            >
+                                                <Navigation size={14} /> Navigate
+                                            </a>
+                                            <a 
+                                                href={item.geom?.y ? `https://www.google.com/maps?q=&layer=c&cbll=${item.geom.y},${item.geom.x}` : '#'} 
+                                                target="_blank" 
+                                                rel="noreferrer"
+                                                className={`flex items-center justify-center gap-1.5 bg-white text-[#003B71] border-2 border-[#003B71] py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-all hover:bg-[#003B71] hover:text-white ${!item.geom?.y && 'opacity-50 pointer-events-none'}`}
+                                            >
+                                                <MapPin size={14} /> Street View
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div className="w-36 flex-shrink-0 flex flex-col gap-2">
+                                         <a 
+                                            href={`https://www.google.com/maps/search/?api=1&query=${item.geom?.y},${item.geom?.x}`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="w-36 h-36 bg-gray-100 rounded-2xl overflow-hidden border-2 border-white shadow-md relative group block"
+                                        >
+                                            {item.geom?.y ? (
+                                                <img 
+                                                    src={getMapTileUrl(item.geom.x, item.geom.y)}
+                                                    alt="Map"
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                    <MapPin size={24} />
+                                                </div>
+                                            )}
+                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                <MapPin className="text-[#D11241] fill-[#D11241] drop-shadow-lg" size={32} />
+                                            </div>
+                                            
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                                                <ExternalLink size={20} className="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" />
+                                            </div>
+                                        </a>
+                                        <div className="bg-[#003B71] text-white text-[10px] font-bold py-1.5 rounded-lg text-center tracking-wide uppercase shadow-sm">
+                                            {item.ids.length} {item.ids.length === 1 ? 'Unit' : 'Units'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {showInfoModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowInfoModal(false)} />
+                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm relative z-10 animate-in zoom-in-95 duration-200 text-black">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-[#003B71]">System Intel</h2>
+                            <button onClick={() => setShowInfoModal(false)} className="p-1 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"><X size={20} className="text-gray-500" /></button>
+                        </div>
+                        <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                            This utility bridges a direct connection to Indy's Open Data MapServer (Transportation Layer 14) for field asset verification.
+                        </p>
+                        
+                        <div className="flex items-center gap-3 bg-blue-50 p-3 rounded-xl mb-4 border border-blue-100">
+                            <div className="bg-[#003B71] p-2 rounded-full text-white">
+                                <User size={16} />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Designed By</p>
+                                <p className="text-[#003B71] font-bold text-sm">William Dugann</p>
+                            </div>
+                            <div className="flex gap-2">
+                                <a href="https://github.com/dugann" target="_blank" rel="noreferrer" className="text-[#003B71]/70 hover:text-[#003B71] transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+                                </a>
+                                <a href="https://www.linkedin.com/in/dugann/" target="_blank" rel="noreferrer" className="text-[#003B71]/70 hover:text-[#003B71] transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-2xl p-4 mb-4">
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Data Source</p>
+                            <p className="text-[#003B71] font-mono text-xs">IndyGIS :: metered-parking</p>
+                        </div>
+                        <button onClick={() => setShowInfoModal(false)} className="w-full py-3 bg-[#003B71] text-white font-bold rounded-xl active:scale-95 transition-transform">Dismiss</button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<App />);
+    </script>
+</body>
+</html>
