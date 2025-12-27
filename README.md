@@ -1,4 +1,4 @@
-<div align="center">
+<div align="left">
 
 # 🅿️ Indy Space Locator & Citation Portal
 ### *Unified Mobility Portal for Parking Infrastructure and Enforcement Operations in Indianapolis*
