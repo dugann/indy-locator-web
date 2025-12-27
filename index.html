@@ -187,22 +187,57 @@ export default function App() {
 
     // PWA Install State
     const [installPrompt, setInstallPrompt] = useState(null);
+    const [isStandalone, setIsStandalone] = useState(false);
 
     const formRef = useRef(null);
 
     // --- EFFECTS ---
     useEffect(() => {
-        // Listen for the 'beforeinstallprompt' event
+        // 1. Listen for the 'beforeinstallprompt' event (Standard Install Trigger)
         const handleInstallPrompt = (e) => {
-            // Prevent the mini-infobar from appearing on mobile
             e.preventDefault();
-            // Stash the event so it can be triggered later.
             setInstallPrompt(e);
         };
 
-        window.addEventListener('beforeinstallprompt', handleInstallPrompt);
+        // 2. Listen for the 'appinstalled' event (External Install Trigger)
+        // This fires if they install via the Omnibox or other browser UI
+        const handleAppInstalled = () => {
+            setInstallPrompt(null);
+            console.log('PWA was installed');
+        };
 
-        return () => window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
+        // 3. Detect if already running in Standalone (App) Mode
+        const checkStandalone = () => {
+             const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches 
+                || window.navigator.standalone 
+                || document.referrer.includes('android-app://');
+             setIsStandalone(isStandaloneMode);
+        };
+
+        window.addEventListener('beforeinstallprompt', handleInstallPrompt);
+        window.addEventListener('appinstalled', handleAppInstalled);
+        
+        // Initial check
+        checkStandalone();
+        
+        // Listen for display mode changes
+        const mediaQuery = window.matchMedia('(display-mode: standalone)');
+        try {
+             mediaQuery.addEventListener('change', checkStandalone);
+        } catch (e) {
+             // Fallback for older browsers
+             mediaQuery.addListener(checkStandalone);
+        }
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
+            window.removeEventListener('appinstalled', handleAppInstalled);
+            try {
+                 mediaQuery.removeEventListener('change', checkStandalone);
+            } catch (e) {
+                 mediaQuery.removeListener(checkStandalone);
+            }
+        };
     }, []);
 
     useEffect(() => {
@@ -422,8 +457,8 @@ export default function App() {
                 </div>
                 
                 <div className="flex gap-2">
-                    {/* INSTALL BUTTON: Only shows if browser says app is installable */}
-                    {installPrompt && (
+                    {/* INSTALL BUTTON: Only shows if installable AND not currently running as standalone app */}
+                    {installPrompt && !isStandalone && (
                         <button 
                             onClick={handleInstallClick} 
                             className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors animate-in zoom-in"
