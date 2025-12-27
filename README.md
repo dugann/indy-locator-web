@@ -1,88 +1,105 @@
-# Indy Space Locator
-*A mobile-first tool for locating Indianapolis metered parking*
+<div align="center">
 
-[**Launch Live Application**](https://dugann.github.io/indy-locator-web/)
+# 🅿️ Indy Space Locator & Citation Portal
+### *Unified Mobility Portal for Parking Infrastructure and Enforcement Operations in Indianapolis*
 
----
+[![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge&logo=activity)](https://dugann.github.io/indy-locator-web/)
+[![Platform](https://img.shields.io/badge/Platform-PWA%20%7C%20iOS%20%7C%20Android-blue?style=for-the-badge&logo=pwa)](https://dugann.github.io/indy-locator-web/)
+[![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge&logo=law)](https://dugann.github.io/indy-locator-web/)
 
-## Overview
+[🚀 **Launch Live Application**](https://dugann.github.io/indy-locator-web/)
 
-**Indy Space Locator** is a progressive web application that helps users quickly identify the location of metered parking spaces across Indianapolis. It is built for real-world field use, offering a fast, reliable, and readable mobile interface that performs well outdoors and does not rely on heavy desktop GIS software.
-
-The application exists to remove friction in everyday interactions with public space. Police officers verifying meter locations, contractors preparing row permit applications, parking attendants assisting visitors, and city staff supporting enforcement or permitting workflows all face the same challenge: finding accurate meter location data quickly, often with minimal information. Indy Space Locator turns a meter number or street name into a clear, actionable answer in seconds.
-
----
-
-## Who It’s For
-
-Indy Space Locator was designed with frontline and field-facing roles in mind:
-
-- Police officers and enforcement staff verifying meter locations
-- Contractors identifying meters affected by permit requests
-- Parking attendants and garage managers assisting the public
-- City employees and support services working with public right-of-way data
-- Visitors who only remember a meter number and need help finding their vehicle
-
-The guiding principles are speed, clarity, and reliability under real working conditions.
+</div>
 
 ---
 
-## The Problem
+## 📱 Overview
 
-Indianapolis meter data is available, but accessing it in the field is not easy. Existing tools are often desktop-oriented, slow on mobile devices, or require stable connectivity and complex interfaces.
+**Indy Space Locator & Citation Portal** is an integrated Progressive Web Application (PWA) designed to unify critical parking operations and public-facing utilities within a single, modern interface.
 
-Field teams needed a lightweight, dependable way to verify GIS metered parking data on mobile devices. The solution had to scale cleanly, handle unreliable networks, and avoid exposing brittle backend systems directly to the browser.
+The system streamlines two primary functions:
 
----
+1. **Space Locator:** A GIS-driven module that identifies and maps metered parking assets by ID or street name.  
+2. **Citation Portal:** A secure environment for citation validation and redirection to the City’s official payment infrastructure.
 
-## Technical Design
+Optimized for on-site reliability, the application offers offline caching, high-contrast visual design, and an interface explicitly tested for outdoor and field use.  
 
-Although the Indianapolis Open Data API is publicly accessible, this project deliberately uses a production-style architecture to demonstrate best practices.
-
-### Client
-
-The frontend is a high-performance vanilla JavaScript application hosted on GitHub Pages. The interface is touch-optimized, high-contrast, and designed for readability in bright outdoor environments.
-
-### Server
-
-A private Node.js middleware service acts as a **Backend for Frontend**. This layer manages API orchestration, filters and transforms GIS data, and prevents direct coupling between the client and the upstream ESRI and ArcGIS services.
-
-This design offers several advantages:
-
-- The frontend remains insulated from upstream API changes
-- Data returned to the client is minimal and purpose-built
-- The architecture mirrors how sensitive or proprietary APIs would be protected in a production environment
-- Maintenance and future enhancements are significantly simplified
+> ⚠️ *Independent project. Not affiliated with or endorsed by the City of Indianapolis.*
 
 ---
 
-## Core Capabilities
+## 🔄 Operation Modes
 
-### Flexible Search
+The platform features a dual-mode interface toggle, allowing users to switch between tools without navigating away from the main workspace.
 
-Users can search for a single meter or a dash-separated range of meter IDs to retrieve all associated addresses. Results are automatically grouped by street when multiple addresses are involved. Street-based searches are supported through a dynamic list of valid street names sourced from active datasets.
-
-### Intelligent Grouping
-
-Raw GIS data often returns individual points. Indy Space Locator aggregates those points by physical address, producing a clean, human-readable view that aligns with how meters are managed in the field.
-
-### Navigation and Visual Verification
-
-Each result includes one-tap navigation links to Google Maps for turn-by-turn directions. Google Street View is also available for remote visual confirmation of meter placement and surroundings.
-
-### Progressive Web App Features
-
-The application can be installed directly to a mobile home screen on both iOS and Android devices. It handles connectivity issues gracefully, keeping the interface responsive even when network conditions degrade.
+| Mode | Purpose |
+| :--- | :--- |
+| **📍 Space Locator** | *Default functionality for location mapping.*<br>• Query single or range-based IDs (e.g., 101–105).<br>• Search validated street names.<br>• One-tap Google Maps and Street View integration for asset verification. |
+| **🎫 Citation Portal** | *Dedicated module for ticket lookup and payment linking.*<br>• Validates citation numbers using the **Luhn algorithm**.<br>• Supports license plate lookups by plate and state.<br>• Pass-through routing to trusted payment processors with secured parameters. |
 
 ---
 
-## Data Use and Privacy
+## 📲 Installation
 
-Indy Space Locator uses real-time data from the Indianapolis Open Data Portal, Transportation Layer 14. All data is processed on demand. No user location data or persistent search history is stored.
+The system operates as a full-featured PWA across desktop and mobile environments.
+
+- **Desktop:** Click the install icon in the URL bar or use the in-app control.  
+- **iOS:** Select `Share` → `Add to Home Screen`.  
+- **Android:** Use the browser menu → `Install App` or in-app prompt.
 
 ---
 
-## Project Details
+## 👥 Primary Users
+
+The portal was developed to serve both institutional and public stakeholders.
+
+- **Field Enforcement & Police:** Quick verification of parking assets and citations.  
+- **Contractors & ROW Inspectors:** Identify affected parking assets within permitted work zones.  
+- **Parking Operators:** Assist customers with meter identification or ticket clarification.  
+- **Municipal Staff:** Real-time, lightweight access to GIS datasets.  
+- **Public Users:** Simplified interface for locating parking and resolving citations.
+
+---
+
+## ⚙️ Technical Architecture
+
+The system employs a modern, maintainable stack focused on performance and platform independence.
+
+### **Client Application**
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)
+![Tailwind](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?style=flat-square&logo=pwa&logoColor=white)
+
+- **Framework:** React 18 (served via CDN/Babel for zero-build deployment).  
+- **Styling:** Tailwind CSS for consistent, scalable UI design.  
+- **Icons:** Lucide React for unified vector iconography.  
+- **Offline Mode:** Caching and installation support for uninterrupted use.
+
+### **Middleware (Backend-for-Frontend)**
+![Node](https://img.shields.io/badge/Node.js-Middleware-339933?style=flat-square&logo=node.js&logoColor=white)
+
+A Node.js middleware layer provides the application’s BFF (Backend-for-Frontend) abstraction.
+
+- **Data Management:** Interfaces with the Indianapolis Open Data API.  
+- **Security:** Isolates API keys and endpoints from the client tier.  
+- **Transformation:** Converts raw Esri GIS data into optimized JSON for mobile delivery.
+
+---
+
+## 🔒 Data and Privacy
+
+- **Parking Asset Data:** Derived in real time from the Indianapolis Open Data Portal.  
+- **Citation Information:** No storage, caching, or logging of user queries or identifiers.  
+- **Service Availability:** Dependent on source data uptime and reliability.  
+- **Privacy Standards:** No tracking or retention of personal data.
+
+---
+
+## 📝 Project Information
 
 **Principal Developer:** William Dugann  
-**License:** MIT
+**Copyright:** © 2025 William Dugann  
+**License:** Proprietary  
+**SPDX Identifier:** `LicenseRef-Proprietary`
+
+[Report Issues](https://github.com/dugann/indy-locator-web/issues)
