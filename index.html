@@ -83,7 +83,7 @@
     <script type="text/babel" data-type="module">
 import React, { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download } from 'lucide-react';
+import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download, Map as MapIcon } from 'lucide-react';
 
 const BACKEND_URL = "https://indy-locator-exchange.onrender.com"; 
 const ETIMS_ENDPOINT = "https://prodpci.etimspayments.com/pbw/inputAction.doh";
@@ -161,6 +161,123 @@ const customStyles = `
     .shake-input { animation: shake 0.3s ease-in-out; border-color: #D11241 !important; }
 `;
 
+// --- COMPONENTS ---
+
+// Separate Result Item Component for better state/layout handling
+const ResultItem = ({ item, getMapTileUrl }) => {
+    const [copied, setCopied] = useState(false);
+    const [imgError, setImgError] = useState(false);
+
+    const handleCopy = () => {
+        try {
+            const text = item.ids.join(', ');
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Copy failed', err);
+        }
+    };
+
+    return (
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-300 mb-4 hover:shadow-lg transition-shadow">
+            <div className="flex flex-col-reverse sm:flex-row gap-4">
+                
+                {/* Content Section */}
+                <div className="flex-1 min-w-0 flex flex-col justify-between">
+                    <div>
+                        <div className="flex justify-between items-start mb-2">
+                            <div>
+                                <h3 className="font-bold text-[#003B71] text-lg leading-tight text-black truncate pr-2">{item.address}</h3>
+                                <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mt-0.5">Indianapolis, IN</p>
+                            </div>
+                        </div>
+
+                        {/* ID Scroller */}
+                        <div className="bg-[#003B71]/5 rounded-xl p-2 mb-3 border border-[#003B71]/10 relative group">
+                            <div className="flex items-center justify-between mb-1 px-1">
+                                <span className="text-[10px] uppercase font-bold text-[#003B71]/60">Meter IDs</span>
+                                <button onClick={handleCopy} className="text-[#003B71]/40 hover:text-[#003B71] transition-colors">
+                                    {copied ? <CheckCircle size={14} className="text-green-600"/> : <Copy size={14} />}
+                                </button>
+                            </div>
+                            <div className="flex overflow-x-auto gap-2 pb-1 hide-scroll">
+                                {item.ids.map(id => (
+                                    <span key={id} className="inline-flex items-center justify-center bg-white border border-[#003B71]/20 rounded-md px-2 py-1 text-sm font-mono font-bold text-[#003B71] whitespace-nowrap shadow-sm min-w-[3rem]">
+                                        {id}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 mt-auto">
+                        <a 
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.address + ', Indianapolis, IN')}`} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="flex items-center justify-center gap-1.5 bg-white text-[#003B71] border-2 border-[#003B71] py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-all hover:bg-[#003B71] hover:text-white"
+                        >
+                            <Navigation size={14} /> Navigate
+                        </a>
+                        <a 
+                            href={item.geom?.y ? `https://www.google.com/maps?q=&layer=c&cbll=${item.geom.y},${item.geom.x}` : '#'} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className={`flex items-center justify-center gap-1.5 bg-white text-[#003B71] border-2 border-[#003B71] py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-all hover:bg-[#003B71] hover:text-white ${!item.geom?.y && 'opacity-50 pointer-events-none'}`}
+                        >
+                            <MapPin size={14} /> Street View
+                        </a>
+                    </div>
+                </div>
+
+                {/* Map/Image Section */}
+                <div className="w-full sm:w-36 flex-shrink-0 flex flex-col gap-2">
+                     <a 
+                        href={`https://www.google.com/maps/search/?api=1&query=${item.geom?.y},${item.geom?.x}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full h-32 sm:h-36 bg-gray-100 rounded-2xl overflow-hidden border-2 border-white shadow-md relative group block"
+                    >
+                        {item.geom?.y && !imgError ? (
+                            <img 
+                                src={getMapTileUrl(item.geom.x, item.geom.y)}
+                                alt="Map"
+                                onError={() => setImgError(true)}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                            />
+                        ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50 p-4 text-center">
+                                <MapIcon size={24} className="mb-1 opacity-50" />
+                                <span className="text-[10px] font-medium opacity-50">Map Unavailable</span>
+                            </div>
+                        )}
+                        
+                        {/* Overlay Icon (only shows if map loads to indicate clickability) */}
+                        {!imgError && item.geom?.y && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <MapPin className="text-[#D11241] fill-[#D11241] drop-shadow-lg" size={32} />
+                            </div>
+                        )}
+                        
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                            <ExternalLink size={20} className="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" />
+                        </div>
+                    </a>
+                    <div className="bg-[#003B71] text-white text-[10px] font-bold py-1.5 rounded-lg text-center tracking-wide uppercase shadow-sm">
+                        {item.ids.length} {item.ids.length === 1 ? 'Unit' : 'Units'}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export default function App() {
     const [isCitationMode, setIsCitationMode] = useState(false);
     const [mode, setMode] = useState('id'); 
@@ -183,7 +300,6 @@ export default function App() {
     const [error, setError] = useState(null);
     const [shakeField, setShakeField] = useState(null);
     const [showInfoModal, setShowInfoModal] = useState(false);
-    const [copiedId, setCopiedId] = useState(null);
 
     // PWA Install State
     const [installPrompt, setInstallPrompt] = useState(null);
@@ -193,20 +309,16 @@ export default function App() {
 
     // --- EFFECTS ---
     useEffect(() => {
-        // 1. Listen for the 'beforeinstallprompt' event (Standard Install Trigger)
         const handleInstallPrompt = (e) => {
             e.preventDefault();
             setInstallPrompt(e);
         };
 
-        // 2. Listen for the 'appinstalled' event (External Install Trigger)
-        // This fires if they install via the Omnibox or other browser UI
         const handleAppInstalled = () => {
             setInstallPrompt(null);
             console.log('PWA was installed');
         };
 
-        // 3. Detect if already running in Standalone (App) Mode
         const checkStandalone = () => {
              const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches 
                 || window.navigator.standalone 
@@ -217,15 +329,12 @@ export default function App() {
         window.addEventListener('beforeinstallprompt', handleInstallPrompt);
         window.addEventListener('appinstalled', handleAppInstalled);
         
-        // Initial check
         checkStandalone();
         
-        // Listen for display mode changes
         const mediaQuery = window.matchMedia('(display-mode: standalone)');
         try {
              mediaQuery.addEventListener('change', checkStandalone);
         } catch (e) {
-             // Fallback for older browsers
              mediaQuery.addListener(checkStandalone);
         }
 
@@ -292,9 +401,7 @@ export default function App() {
 
     const handleInstallClick = async () => {
         if (!installPrompt) return;
-        // Show the install prompt
         installPrompt.prompt();
-        // Wait for the user to respond to the prompt
         const { outcome } = await installPrompt.userChoice;
         if (outcome === 'accepted') {
             setInstallPrompt(null);
@@ -388,21 +495,6 @@ export default function App() {
             setStartId(''); setEndId(''); setStreetQuery('');
             setResults([]); setError(null);
         }, 300);
-    };
-
-    const copyToClipboard = (text) => {
-        try {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            setCopiedId(text);
-            setTimeout(() => setCopiedId(null), 2000);
-        } catch (err) {
-            console.error('Copy failed', err);
-        }
     };
 
     const getMapTileUrl = (x, y) => {
@@ -678,85 +770,7 @@ export default function App() {
 
                     <div className={view === 'results' ? 'fade-enter-active' : 'fade-enter'}>
                         {results.map((item, idx) => (
-                            <div 
-                                key={idx} 
-                                className="bg-white rounded-2xl p-4 shadow-sm border border-gray-300 mb-4 hover:shadow-lg transition-shadow"
-                            >
-                                <div className="flex gap-4">
-                                    <div className="flex-1 min-w-0 flex flex-col justify-between">
-                                        <div>
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div>
-                                                    <h3 className="font-bold text-[#003B71] text-lg leading-tight text-black truncate pr-2">{item.address}</h3>
-                                                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mt-0.5">Indianapolis, IN</p>
-                                                </div>
-                                            </div>
-
-                                            <button 
-                                                onClick={() => copyToClipboard(item.ids.join(', '))}
-                                                className="w-full text-left bg-[#003B71]/5 rounded-xl p-2.5 mb-3 border border-[#003B71]/10 group hover:border-[#003B71]/30 hover:bg-[#003B71]/10 transition-colors relative"
-                                            >
-                                                <p className="text-[#003B71] font-mono text-sm leading-relaxed break-words pr-6 line-clamp-2 font-medium">
-                                                    {item.ids.join(', ')}
-                                                </p>
-                                                <div className="absolute top-2 right-2 text-[#003B71]/40 group-hover:text-[#003B71] transition-colors">
-                                                    {copiedId === item.ids.join(', ') ? <CheckCircle size={16} className="text-green-600"/> : <Copy size={16} />}
-                                                </div>
-                                            </button>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-3 mt-auto">
-                                            <a 
-                                                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.address + ', Indianapolis, IN')}`} 
-                                                target="_blank" 
-                                                rel="noreferrer"
-                                                className="flex items-center justify-center gap-1.5 bg-white text-[#003B71] border-2 border-[#003B71] py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-all hover:bg-[#003B71] hover:text-white"
-                                            >
-                                                <Navigation size={14} /> Navigate
-                                            </a>
-                                            <a 
-                                                href={item.geom?.y ? `https://www.google.com/maps?q=&layer=c&cbll=${item.geom.y},${item.geom.x}` : '#'} 
-                                                target="_blank" 
-                                                rel="noreferrer"
-                                                className={`flex items-center justify-center gap-1.5 bg-white text-[#003B71] border-2 border-[#003B71] py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-all hover:bg-[#003B71] hover:text-white ${!item.geom?.y && 'opacity-50 pointer-events-none'}`}
-                                            >
-                                                <MapPin size={14} /> Street View
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                    <div className="w-36 flex-shrink-0 flex flex-col gap-2">
-                                         <a 
-                                            href={`https://www.google.com/maps/search/?api=1&query=${item.geom?.y},${item.geom?.x}`}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="w-36 h-36 bg-gray-100 rounded-2xl overflow-hidden border-2 border-white shadow-md relative group block"
-                                        >
-                                            {item.geom?.y ? (
-                                                <img 
-                                                    src={getMapTileUrl(item.geom.x, item.geom.y)}
-                                                    alt="Map"
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                                    <MapPin size={24} />
-                                                </div>
-                                            )}
-                                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                <MapPin className="text-[#D11241] fill-[#D11241] drop-shadow-lg" size={32} />
-                                            </div>
-                                            
-                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                                                <ExternalLink size={20} className="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" />
-                                            </div>
-                                        </a>
-                                        <div className="bg-[#003B71] text-white text-[10px] font-bold py-1.5 rounded-lg text-center tracking-wide uppercase shadow-sm">
-                                            {item.ids.length} {item.ids.length === 1 ? 'Unit' : 'Units'}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <ResultItem key={idx} item={item} getMapTileUrl={getMapTileUrl} />
                         ))}
                     </div>
                 </div>
