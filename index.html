@@ -448,9 +448,9 @@ export default function App() {
             {/* --- HEADER --- */}
             <header className={`relative z-10 pt-safe-top px-6 py-4 flex justify-between items-center transition-opacity duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                 <div>
-                    <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                    <h1 className="text-lg sm:text-xl font-bold tracking-tight text-white flex items-center gap-2">
                         <button onClick={toggleCitationMode} className="focus:outline-none active:scale-95 transition-transform">
-                            <Star className={`${isCitationMode ? 'text-[#D11241] fill-[#D11241]' : 'text-[#D11241]'} transition-colors`} size={32} strokeWidth={isCitationMode ? 0 : 2} />
+                            <Star className={`${isCitationMode ? 'text-[#D11241] fill-[#D11241]' : 'text-[#D11241]'} transition-colors`} size={28} strokeWidth={isCitationMode ? 0 : 2} />
                         </button>
                         {isCitationMode ? 'Indy Citation Portal' : 'Indy Space Locator'}
                     </h1>
@@ -476,32 +476,32 @@ export default function App() {
             {/* --- MAIN CONTENT (SEARCH) --- */}
             <main className={`flex-1 relative z-10 flex flex-col transition-all duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
                 
-                <div className="mt-8 px-6">
-                    <div className="w-full max-w-sm mx-auto space-y-6 relative z-10">
+                <div className="mt-4 sm:mt-8 px-6">
+                    <div className="w-full max-w-sm mx-auto space-y-4 sm:space-y-6 relative z-10">
                         
                         <div className="flex bg-white/10 p-1 rounded-2xl backdrop-blur-sm border border-white/20">
                             <button 
                                 onClick={() => { setMode(isCitationMode ? 'ticket' : 'id'); setError(null); }}
-                                className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'id' || mode === 'ticket' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                                className={`flex-1 py-3 px-2 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'id' || mode === 'ticket' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
                             >
                                 {isCitationMode ? 'Ticket #' : 'Meter ID'}
                             </button>
                             <div className="w-[1px] bg-white/10 my-2"></div>
                             <button 
                                 onClick={() => { setMode(isCitationMode ? 'plate' : 'street'); setError(null); }}
-                                className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'street' || mode === 'plate' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                                className={`flex-1 py-3 px-2 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'street' || mode === 'plate' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
                             >
                                 {isCitationMode ? 'License Plate' : 'Street Name'}
                             </button>
                         </div>
 
-                        <div className="min-h-[120px] flex flex-col justify-center">
+                        <div className="min-h-[100px] sm:min-h-[120px] flex flex-col justify-center">
                             {!isCitationMode && mode === 'id' && (
                                 <div className="flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
                                     <input 
                                         type="tel" 
                                         placeholder="Start" 
-                                        className={`w-1/2 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-4 px-6 text-center text-2xl font-mono outline-none transition-all ${shakeField === 'start' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
+                                        className={`w-1/2 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 sm:py-4 px-4 sm:px-6 text-center text-xl sm:text-2xl font-mono outline-none transition-all ${shakeField === 'start' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
                                         value={startId}
                                         onChange={handleNumericInput(setStartId)}
                                         maxLength={6}
@@ -510,7 +510,7 @@ export default function App() {
                                     <input 
                                         type="tel" 
                                         placeholder="End" 
-                                        className={`w-1/2 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-4 px-6 text-center text-2xl font-mono outline-none transition-all disabled:opacity-30 ${shakeField === 'end' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
+                                        className={`w-1/2 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 sm:py-4 px-4 sm:px-6 text-center text-xl sm:text-2xl font-mono outline-none transition-all disabled:opacity-30 ${shakeField === 'end' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
                                         value={endId}
                                         onChange={handleNumericInput(setEndId)}
                                         disabled={startId.length < 3}
@@ -524,7 +524,7 @@ export default function App() {
                                     <input 
                                         list="streets"
                                         placeholder="Search Street Name..." 
-                                        className={`w-full bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-4 px-6 text-lg font-medium outline-none transition-all ${shakeField === 'street' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
+                                        className={`w-full bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 sm:py-4 px-4 sm:px-6 text-lg font-medium outline-none transition-all ${shakeField === 'street' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
                                         value={streetQuery}
                                         onChange={(e) => setStreetQuery(e.target.value)}
                                     />
@@ -542,7 +542,7 @@ export default function App() {
                                     <input 
                                         type="tel"
                                         placeholder="Ticket Number" 
-                                        className={`w-full bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-4 px-6 text-center text-2xl font-mono outline-none transition-all ${shakeField === 'ticket' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
+                                        className={`w-full bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 sm:py-4 px-4 sm:px-6 text-center text-xl sm:text-2xl font-mono outline-none transition-all ${shakeField === 'ticket' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
                                         value={ticketNum}
                                         onChange={handleTicketInput}
                                         maxLength={9} 
@@ -556,16 +556,16 @@ export default function App() {
                                         <select 
                                             value={plateState}
                                             onChange={(e) => setPlateState(e.target.value)}
-                                            className="w-full bg-white/20 border-2 border-white/10 focus:border-white/50 text-white rounded-3xl py-4 px-4 text-center text-lg font-bold appearance-none outline-none transition-all"
+                                            className="w-full bg-white/20 border-2 border-white/10 focus:border-white/50 text-white rounded-3xl py-3 sm:py-4 px-2 sm:px-4 text-center text-base sm:text-lg font-bold appearance-none outline-none transition-all"
                                         >
                                             {US_STATES.map(s => <option key={s} value={s} className="text-black">{s}</option>)}
                                         </select>
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/60">▼</div>
+                                        <div className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/60">▼</div>
                                     </div>
                                     <input 
                                         type="text" 
                                         placeholder="PLATE #" 
-                                        className={`w-2/3 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-4 px-6 text-center text-xl font-mono uppercase outline-none transition-all ${shakeField === 'plate' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
+                                        className={`w-2/3 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 sm:py-4 px-4 sm:px-6 text-center text-xl sm:text-xl font-mono uppercase outline-none transition-all ${shakeField === 'plate' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
                                         value={plateNum}
                                         onChange={(e) => setPlateNum(e.target.value.toUpperCase())}
                                     />
@@ -584,8 +584,8 @@ export default function App() {
                 </div>
 
                 <div className="flex-1 flex items-center justify-center relative pb-32">
-                    <div className="absolute w-64 h-64 border border-white/5 rounded-full pointer-events-none" />
-                    <div className="absolute w-48 h-48 border border-white/10 rounded-full pointer-events-none" />
+                    <div className="absolute w-48 h-48 sm:w-64 sm:h-64 border border-white/5 rounded-full pointer-events-none" />
+                    <div className="absolute w-36 h-36 sm:w-48 sm:h-48 border border-white/10 rounded-full pointer-events-none" />
                     
                     <div 
                         className={`circle-transition ${isExpanding ? 'expanding' : ''} ${!isExpanding && view !== 'search' && !isCitationMode ? 'closing' : ''}`}
@@ -593,16 +593,17 @@ export default function App() {
 
                     <button 
                         onClick={handleSearch}
-                        className="group relative w-32 h-32 rounded-full bg-white shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.3)] transition-all duration-300 active:scale-95 flex items-center justify-center z-30"
+                        className="group relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.3)] transition-all duration-300 active:scale-95 flex items-center justify-center z-30"
                     >
                         <div className="absolute inset-1 rounded-full border-4 border-double border-[#003B71]/10 group-hover:border-[#003B71]/30 transition-colors" />
                         <div className="flex flex-col items-center text-[#003B71]">
                             {loading && !isExpanding ? (
-                                <RotateCw className="animate-spin" size={32} />
+                                <RotateCw className="animate-spin" size={24} />
                             ) : (
                                 <>
-                                    {isCitationMode ? <Search size={32} strokeWidth={2.5} /> : <Search size={32} strokeWidth={2.5} />}
-                                    <span className="text-xs font-black uppercase tracking-widest mt-1">
+                                    {isCitationMode ? <Search size={24} strokeWidth={2.5} className="sm:hidden" /> : <Search size={24} strokeWidth={2.5} className="sm:hidden" />}
+                                    {isCitationMode ? <Search size={32} strokeWidth={2.5} className="hidden sm:block" /> : <Search size={32} strokeWidth={2.5} className="hidden sm:block" />}
+                                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest mt-1">
                                         {isCitationMode ? 'Lookup' : 'Find'}
                                     </span>
                                 </>
@@ -618,7 +619,7 @@ export default function App() {
                     {/* NEW SWITCH BUTTON */}
                     <button 
                         onClick={toggleCitationMode}
-                        className="mb-2 bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full backdrop-blur-md text-sm font-bold transition-all active:scale-95 flex items-center gap-2 border border-white/20 shadow-lg group"
+                        className="mb-2 bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full backdrop-blur-md text-xs sm:text-sm font-bold transition-all active:scale-95 flex items-center gap-2 border border-white/20 shadow-lg group"
                     >
                         {isCitationMode ? (
                             <>
