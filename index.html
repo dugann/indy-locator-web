@@ -83,7 +83,7 @@
     <script type="text/babel" data-type="module">
 import React, { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download, Map as MapIcon } from 'lucide-react';
+import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download, Map as MapIcon, CloudOff } from 'lucide-react';
 
 const BACKEND_URL = "https://indy-locator-exchange.onrender.com"; 
 const ETIMS_ENDPOINT = "https://prodpci.etimspayments.com/pbw/inputAction.doh";
@@ -161,12 +161,72 @@ const customStyles = `
     .shake-input { animation: shake 0.3s ease-in-out; border-color: #D11241 !important; }
 `;
 
+// --- ICONS ---
+// Custom SVGs to mimic Google styling
+const GoogleDirectionsIcon = ({ size = 20, className = "" }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/>
+    </svg>
+);
+
+const GooglePegmanIcon = ({ size = 20, className = "" }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C9.5 2 7.5 4 7.5 6.5C7.5 8.7 9.1 10.5 11.15 10.9V22H12.85V16H14.5V22H16.2V10.9C18.25 10.5 19.85 8.7 19.85 6.5C19.85 4 17.85 2 15.35 2H12ZM12 4H15.35C16.75 4 17.85 5.1 17.85 6.5C17.85 7.9 16.75 9 15.35 9C14.85 9 14.4 8.85 14 8.6V7H12V8.6C11.6 8.85 11.15 9 10.65 9C9.25 9 8.15 7.9 8.15 6.5C8.15 5.1 9.25 4 10.65 4H12Z"/>
+    </svg>
+);
+
 // --- COMPONENTS ---
 
 // Separate Result Item Component for better state/layout handling
-const ResultItem = ({ item, getMapTileUrl }) => {
+const ResultItem = ({ item }) => {
     const [copied, setCopied] = useState(false);
-    const [imgError, setImgError] = useState(false);
+
+    // 1. Calculate Centroid (for single-point navigation buttons)
+    // 2. Identify Start/End/Waypoints (for Map Card range visualization)
+    let centroid = null;
+    let mainActionUrl = '#';
+    let navigateUrl = '#';
+    let streetViewUrl = '#';
+
+    if (item.geoms && item.geoms.length > 0) {
+        // Centroid Math (Average position)
+        const total = item.geoms.length;
+        const avgX = item.geoms.reduce((sum, g) => sum + g.x, 0) / total;
+        const avgY = item.geoms.reduce((sum, g) => sum + g.y, 0) / total;
+        centroid = { x: avgX, y: avgY };
+
+        // Sort by ID to find physical range extent
+        const sortedGeoms = [...item.geoms].sort((a, b) => parseInt(a.id) - parseInt(b.id));
+        
+        // --- LOGIC FOR MAP CARD (The "Red Line" Visualization) ---
+        if (sortedGeoms.length > 1) {
+            const first = sortedGeoms[0];
+            const last = sortedGeoms[sortedGeoms.length - 1];
+            
+            // Extract intermediate meters for waypoints (Google limits this, so we slice if needed)
+            // We skip the first and last because they are Origin and Dest
+            // We take up to 20 intermediates to prevent URL overflow, evenly distributed if necessary
+            const intermediates = sortedGeoms.slice(1, -1);
+            const waypoints = intermediates
+                .slice(0, 20) // Cap to avoid URL limits
+                .map(g => `${g.y},${g.x}`)
+                .join('|');
+
+            // Construct Direction URL: Origin -> Waypoints -> Destination
+            // This forces a line to be drawn connecting the specific meters
+            mainActionUrl = `https://www.google.com/maps/dir/?api=1&origin=${first.y},${first.x}&destination=${last.y},${last.x}&waypoints=${waypoints}&travelmode=walking`;
+        } else {
+            // Single Meter: Standard Pin Drop
+            mainActionUrl = `https://www.google.com/maps/search/?api=1&query=${centroid.y},${centroid.x}`;
+        }
+
+        // --- LOGIC FOR BUTTONS (Unchanged) ---
+        // "Navigate" button uses Centroid
+        navigateUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.address + ', Indianapolis, IN')}`;
+        
+        // Street View opens at Centroid
+        streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${centroid.y},${centroid.x}`;
+    }
 
     const handleCopy = () => {
         try {
@@ -216,57 +276,44 @@ const ResultItem = ({ item, getMapTileUrl }) => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 mt-auto">
+                    <div className="flex flex-wrap gap-3 mt-auto">
                         <a 
-                            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.address + ', Indianapolis, IN')}`} 
+                            href={navigateUrl}
                             target="_blank" 
                             rel="noreferrer"
-                            className="flex items-center justify-center gap-1.5 bg-white text-[#003B71] border-2 border-[#003B71] py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-all hover:bg-[#003B71] hover:text-white"
+                            className="flex items-center justify-center gap-1.5 bg-white text-[#003B71] border border-[#003B71]/30 py-1.5 px-3 rounded-lg text-[10px] sm:text-xs font-bold active:scale-95 transition-all hover:bg-[#003B71] hover:text-white"
                         >
-                            <Navigation size={14} /> Navigate
+                            <GoogleDirectionsIcon size={16} /> Navigate
                         </a>
                         <a 
-                            href={item.geom?.y ? `https://www.google.com/maps?q=&layer=c&cbll=${item.geom.y},${item.geom.x}` : '#'} 
+                            href={streetViewUrl}
                             target="_blank" 
                             rel="noreferrer"
-                            className={`flex items-center justify-center gap-1.5 bg-white text-[#003B71] border-2 border-[#003B71] py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-all hover:bg-[#003B71] hover:text-white ${!item.geom?.y && 'opacity-50 pointer-events-none'}`}
+                            className={`flex items-center justify-center gap-1.5 bg-white text-[#003B71] border border-[#003B71]/30 py-1.5 px-3 rounded-lg text-[10px] sm:text-xs font-bold active:scale-95 transition-all hover:bg-[#003B71] hover:text-white ${!centroid && 'opacity-50 pointer-events-none'}`}
                         >
-                            <MapPin size={14} /> Street View
+                            <GooglePegmanIcon size={16} /> Street View
                         </a>
                     </div>
                 </div>
 
-                {/* Map/Image Section */}
+                {/* Map/Image Section - STATIC ICON VERSION */}
                 <div className="w-full sm:w-36 flex-shrink-0 flex flex-col gap-2">
                      <a 
-                        href={`https://www.google.com/maps/search/?api=1&query=${item.geom?.y},${item.geom?.x}`}
+                        href={mainActionUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="w-full h-32 sm:h-36 bg-gray-100 rounded-2xl overflow-hidden border-2 border-white shadow-md relative group block"
+                        className="w-full h-24 sm:h-36 bg-gray-100 rounded-2xl overflow-hidden border-2 border-white shadow-md relative group block bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-100 to-gray-200"
                     >
-                        {item.geom?.y && !imgError ? (
-                            <img 
-                                src={getMapTileUrl(item.geom.x, item.geom.y)}
-                                alt="Map"
-                                onError={() => setImgError(true)}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                            />
-                        ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50 p-4 text-center">
-                                <MapIcon size={24} className="mb-1 opacity-50" />
-                                <span className="text-[10px] font-medium opacity-50">Map Unavailable</span>
-                            </div>
-                        )}
+                        <div className="w-full h-full flex flex-col items-center justify-center text-[#003B71]/30 group-hover:text-[#003B71]/50 transition-colors">
+                            <MapIcon size={36} strokeWidth={1.5} />
+                        </div>
                         
-                        {/* Overlay Icon (only shows if map loads to indicate clickability) */}
-                        {!imgError && item.geom?.y && (
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <MapPin className="text-[#D11241] fill-[#D11241] drop-shadow-lg" size={32} />
-                            </div>
-                        )}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <MapPin className="text-[#D11241] fill-[#D11241] drop-shadow-lg transform -translate-y-1" size={32} />
+                        </div>
                         
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                            <ExternalLink size={20} className="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md" />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                            <ExternalLink size={20} className="text-[#003B71] opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md bg-white/80 p-1 rounded-full" />
                         </div>
                     </a>
                     <div className="bg-[#003B71] text-white text-[10px] font-bold py-1.5 rounded-lg text-center tracking-wide uppercase shadow-sm">
@@ -465,14 +512,25 @@ export default function App() {
                 data.features.forEach(f => {
                     const rawAddr = f.attributes.FULL_ADDRESS;
                     const addr = rawAddr ? rawAddr.trim() : "Unknown Location";
-                    if (!groups[addr]) groups[addr] = { ids: [], geom: f.geometry };
+                    
+                    // Capture ALL geometries for this address group
+                    if (!groups[addr]) groups[addr] = { ids: [], geoms: [] };
                     groups[addr].ids.push(f.attributes.SPACE_NUMBER);
+                    
+                    // Store geometry if valid
+                    if (f.geometry && f.geometry.x && f.geometry.y) {
+                        groups[addr].geoms.push({ 
+                            id: f.attributes.SPACE_NUMBER, 
+                            x: f.geometry.x, 
+                            y: f.geometry.y 
+                        });
+                    }
                 });
                 
                 const resultList = Object.keys(groups).sort().map(addr => ({
                     address: addr,
                     ids: groups[addr].ids.sort((a,b) => a-b),
-                    geom: groups[addr].geom
+                    geoms: groups[addr].geoms // Pass the full array of points
                 }));
                 
                 setResults(resultList);
@@ -495,10 +553,6 @@ export default function App() {
             setStartId(''); setEndId(''); setStreetQuery('');
             setResults([]); setError(null);
         }, 300);
-    };
-
-    const getMapTileUrl = (x, y) => {
-        return `${BACKEND_URL}/api/map?x=${x}&y=${y}`;
     };
 
     const handleNumericInput = (setter) => (e) => {
@@ -683,6 +737,21 @@ export default function App() {
                         className={`circle-transition ${isExpanding ? 'expanding' : ''} ${!isExpanding && view !== 'search' && !isCitationMode ? 'closing' : ''}`}
                     />
 
+                    {/* COLD START WARNING */}
+                    {loading && !isExpanding && (
+                        <div className="absolute -top-24 sm:-top-20 left-0 right-0 flex justify-center z-40 px-6">
+                            <div className="bg-[#003B71]/80 backdrop-blur-md border border-white/10 p-3 rounded-2xl max-w-xs text-center animate-pulse">
+                                <div className="flex justify-center mb-1">
+                                    <CloudOff className="text-white/60" size={20} />
+                                </div>
+                                <p className="text-white/80 text-xs font-medium leading-relaxed">
+                                    Connecting to free-tier backend...<br/>
+                                    <span className="text-white/50">This may take up to 50s on first use.</span>
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     <button 
                         onClick={handleSearch}
                         className="group relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.3)] transition-all duration-300 active:scale-95 flex items-center justify-center z-30"
@@ -770,7 +839,7 @@ export default function App() {
 
                     <div className={view === 'results' ? 'fade-enter-active' : 'fade-enter'}>
                         {results.map((item, idx) => (
-                            <ResultItem key={idx} item={item} getMapTileUrl={getMapTileUrl} />
+                            <ResultItem key={idx} item={item} />
                         ))}
                     </div>
                 </div>
