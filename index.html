@@ -4,14 +4,15 @@
 
     OPEN CURB
     ------------------------------------
-    This application creates a simplified way for users to look up information about Indianapolis parking meters and parking tickets.
+    This application serves as a utility interface for Indianapolis parking enforcement
+    and asset verification, bridging connection to local GIS and payment portals.
 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Indy Space Locator</title>
+    <title>Open Curb</title>
     
     <!-- PWA Manifest Link -->
     <link rel="manifest" href="manifest.json">
@@ -86,8 +87,8 @@ import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, Alert
 
 const BACKEND_URL = "https://indy-locator-exchange.onrender.com"; 
 const ETIMS_ENDPOINT = "https://prodpci.etimspayments.com/pbw/inputAction.doh";
-const STORAGE_KEY_STREETS = "indy_streets_data";
-const STORAGE_KEY_META = "indy_meta_check";
+const STORAGE_KEY_STREETS = "opencurb_streets_data";
+const STORAGE_KEY_META = "opencurb_meta_check";
 
 const US_STATES = [
     "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", 
@@ -591,13 +592,13 @@ export default function App() {
             </div>
 
             {/* --- HEADER --- */}
-            <header className={`relative z-10 pt-safe-top px-6 py-4 grid grid-cols-[1fr_auto_1fr] sm:flex sm:justify-between items-center transition-opacity duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <header className={`relative z-10 pt-safe-top px-6 py-6 grid grid-cols-[1fr_auto_1fr] sm:flex sm:justify-between items-center transition-opacity duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                 <div className="col-start-2">
                     <button onClick={toggleCitationMode} className="focus:outline-none active:scale-95 transition-transform block">
                         <img 
                             src="./logo.png" 
-                            alt="Indy Space Locator" 
-                            className="h-10 w-auto object-contain" 
+                            alt="Open Curb" 
+                            className="h-14 sm:h-16 w-auto object-contain drop-shadow-md" 
                         />
                     </button>
                 </div>
@@ -624,7 +625,7 @@ export default function App() {
             {/* --- MAIN CONTENT (SEARCH) --- */}
             <main className={`flex-1 relative z-10 flex flex-col transition-all duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
                 
-                <div className="mt-4 sm:mt-8 px-6">
+                <div className="mt-10 sm:mt-12 px-6">
                     <div className="w-full max-w-sm mx-auto space-y-4 sm:space-y-6 relative z-10">
                         
                         <div className="flex bg-white/10 p-1 rounded-2xl backdrop-blur-sm border border-white/20">
