@@ -1,6 +1,6 @@
 <div align="left">
 
-# 🅿️ Indy Space Locator & Citation Portal
+# 🅿️ Open Curb
 ### *Simplified tool for locating metered spaces and parking tickets in Indianapolis*
 
 [![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge&logo=activity)](https://dugann.github.io/indy-locator-web/)
@@ -15,7 +15,7 @@
 
 ## 📱 Overview
 
-**Indy Space Locator & Citation Portal** is an integrated Progressive Web Application (PWA) designed to unify critical parking operations and public-facing utilities within a single, modern interface.
+**Open Curb** is an integrated Progressive Web Application (PWA) designed to unify critical parking operations and public-facing utilities within a single, modern interface.
 
 The system streamlines two primary functions:
 
