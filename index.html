@@ -56,7 +56,6 @@
             color: white;
             margin: 0;
             font-family: 'Inter', sans-serif;
-            /* REMOVED overflow: hidden to allow pull-to-refresh on mobile browsers */
             overscroll-behavior-y: auto; 
         }
         
@@ -83,7 +82,7 @@
     <script type="text/babel" data-type="module">
 import React, { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download, Map as MapIcon, CloudOff } from 'lucide-react';
+import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download, Map as MapIcon, CloudOff, Share2 } from 'lucide-react';
 
 const BACKEND_URL = "https://indy-locator-exchange.onrender.com"; 
 const ETIMS_ENDPOINT = "https://prodpci.etimspayments.com/pbw/inputAction.doh";
@@ -151,8 +150,6 @@ const customStyles = `
     .fade-enter { opacity: 0; transform: translateY(10px); }
     .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.4s ease-out, transform 0.4s ease-out; }
     
-    /* REMOVED .prevent-overscroll to allow pull-to-refresh */
-
     @keyframes shake {
         0%, 100% { transform: translateX(0); }
         25% { transform: translateX(-4px); }
@@ -162,7 +159,6 @@ const customStyles = `
 `;
 
 // --- ICONS ---
-// Custom SVGs to mimic Google styling
 const GoogleDirectionsIcon = ({ size = 20, className = "" }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
         <path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/>
@@ -177,54 +173,37 @@ const GooglePegmanIcon = ({ size = 20, className = "" }) => (
 
 // --- COMPONENTS ---
 
-// Separate Result Item Component for better state/layout handling
 const ResultItem = ({ item }) => {
     const [copied, setCopied] = useState(false);
 
-    // 1. Calculate Centroid (for single-point navigation buttons)
-    // 2. Identify Start/End/Waypoints (for Map Card range visualization)
     let centroid = null;
     let mainActionUrl = '#';
     let navigateUrl = '#';
     let streetViewUrl = '#';
 
     if (item.geoms && item.geoms.length > 0) {
-        // Centroid Math (Average position)
         const total = item.geoms.length;
         const avgX = item.geoms.reduce((sum, g) => sum + g.x, 0) / total;
         const avgY = item.geoms.reduce((sum, g) => sum + g.y, 0) / total;
         centroid = { x: avgX, y: avgY };
 
-        // Sort by ID to find physical range extent
         const sortedGeoms = [...item.geoms].sort((a, b) => parseInt(a.id) - parseInt(b.id));
         
-        // --- LOGIC FOR MAP CARD (The "Red Line" Visualization) ---
         if (sortedGeoms.length > 1) {
             const first = sortedGeoms[0];
             const last = sortedGeoms[sortedGeoms.length - 1];
-            
-            // Extract intermediate meters for waypoints (Google limits this, so we slice if needed)
-            // We skip the first and last because they are Origin and Dest
-            // We take up to 20 intermediates to prevent URL overflow, evenly distributed if necessary
             const intermediates = sortedGeoms.slice(1, -1);
             const waypoints = intermediates
-                .slice(0, 20) // Cap to avoid URL limits
+                .slice(0, 20) 
                 .map(g => `${g.y},${g.x}`)
                 .join('|');
 
-            // Construct Direction URL: Origin -> Waypoints -> Destination
-            // This forces a line to be drawn connecting the specific meters
             mainActionUrl = `https://www.google.com/maps/dir/?api=1&origin=${first.y},${first.x}&destination=${last.y},${last.x}&waypoints=${waypoints}&travelmode=walking`;
         } else {
-            // Single Meter: Standard Pin Drop
             mainActionUrl = `https://www.google.com/maps/search/?api=1&query=${centroid.y},${centroid.x}`;
         }
 
-        // --- LOGIC FOR BUTTONS (Unchanged) ---
-        // "Navigate" button uses Centroid
         navigateUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.address + ', Indianapolis, IN')}`;
-        
-        // Street View opens at Centroid
         streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${centroid.y},${centroid.x}`;
     }
 
@@ -244,11 +223,31 @@ const ResultItem = ({ item }) => {
         }
     };
 
+    // Share Functionality for individual result
+    const handleShare = async () => {
+        if (!navigator.share) return;
+        
+        const ids = item.ids.join('-');
+        // Create a deep link to this specific search
+        const shareUrl = `${window.location.origin}${window.location.pathname}?q=${ids}`;
+        const title = `Parking at ${item.address}`;
+        const text = `Check out parking meters ${item.ids.join(', ')} at ${item.address}`;
+
+        try {
+            await navigator.share({
+                title: title,
+                text: text,
+                url: shareUrl
+            });
+        } catch (err) {
+            console.log('Share dismissed');
+        }
+    };
+
     return (
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-300 mb-4 hover:shadow-lg transition-shadow">
             <div className="flex flex-col-reverse sm:flex-row gap-4">
                 
-                {/* Content Section */}
                 <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
                         <div className="flex justify-between items-start mb-2">
@@ -258,13 +257,20 @@ const ResultItem = ({ item }) => {
                             </div>
                         </div>
 
-                        {/* ID Scroller */}
-                        <div className="bg-[#003B71]/5 rounded-xl p-2 mb-3 border border-[#003B71]/10 relative group">
-                            <div className="flex items-center justify-between mb-1 px-1">
-                                <span className="text-[10px] uppercase font-bold text-[#003B71]/60">Meter IDs</span>
-                                <button onClick={handleCopy} className="text-[#003B71]/40 hover:text-[#003B71] transition-colors">
-                                    {copied ? <CheckCircle size={14} className="text-green-600"/> : <Copy size={14} />}
-                                </button>
+                        {/* ID Scroller Container - Updated for width and visibility */}
+                        <div className="bg-[#003B71]/5 rounded-xl p-2 mb-3 border border-[#003B71]/10 relative group w-fit max-w-full">
+                            <div className="flex items-center justify-between mb-1 px-1 gap-4">
+                                <span className="text-[10px] uppercase font-bold text-[#003B71]/70">Meter IDs</span>
+                                <div className="flex gap-3">
+                                    {navigator.share && (
+                                        <button onClick={handleShare} className="text-[#003B71] opacity-75 hover:opacity-100 transition-opacity" title="Share">
+                                            <Share2 size={16} />
+                                        </button>
+                                    )}
+                                    <button onClick={handleCopy} className="text-[#003B71] opacity-75 hover:opacity-100 transition-opacity" title="Copy">
+                                        {copied ? <CheckCircle size={16} className="text-green-600 opacity-100"/> : <Copy size={16} />}
+                                    </button>
+                                </div>
                             </div>
                             <div className="flex overflow-x-auto gap-2 pb-1 hide-scroll">
                                 {item.ids.map(id => (
@@ -296,7 +302,6 @@ const ResultItem = ({ item }) => {
                     </div>
                 </div>
 
-                {/* Map/Image Section - STATIC ICON VERSION */}
                 <div className="w-full sm:w-36 flex-shrink-0 flex flex-col gap-2">
                      <a 
                         href={mainActionUrl}
@@ -354,6 +359,64 @@ export default function App() {
 
     const formRef = useRef(null);
 
+    // Reusable search function that can be called by UI or URL handler
+    const executeSearch = async (searchMode, sId, eId, sQuery) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const params = new URLSearchParams({ mode: searchMode });
+            if (searchMode === 'id') {
+                params.append('start', sId);
+                if (eId) params.append('end', eId);
+            } else {
+                params.append('street', sQuery);
+            }
+            
+            const res = await fetch(`${BACKEND_URL}/api/search?${params}`);
+            const data = await res.json();
+            
+            if (!data.features || data.features.length === 0) {
+                setResults([]);
+                setLoading(false);
+                setError("No parking assets found.");
+            } else {
+                const groups = {};
+                data.features.forEach(f => {
+                    const rawAddr = f.attributes.FULL_ADDRESS;
+                    const addr = rawAddr ? rawAddr.trim() : "Unknown Location";
+                    
+                    if (!groups[addr]) groups[addr] = { ids: [], geoms: [] };
+                    groups[addr].ids.push(f.attributes.SPACE_NUMBER);
+                    
+                    if (f.geometry && f.geometry.x && f.geometry.y) {
+                        groups[addr].geoms.push({ 
+                            id: f.attributes.SPACE_NUMBER, 
+                            x: f.geometry.x, 
+                            y: f.geometry.y 
+                        });
+                    }
+                });
+                
+                const resultList = Object.keys(groups).sort().map(addr => ({
+                    address: addr,
+                    ids: groups[addr].ids.sort((a,b) => a-b),
+                    geoms: groups[addr].geoms
+                }));
+                
+                setResults(resultList);
+                setIsExpanding(true);
+                setTimeout(() => {
+                    setView('results');
+                    setLoading(false);
+                }, 400); 
+            }
+        } catch (e) {
+            setError("Connection failed. Try again.");
+            setLoading(false);
+        }
+    };
+
     // --- EFFECTS ---
     useEffect(() => {
         const handleInstallPrompt = (e) => {
@@ -373,10 +436,39 @@ export default function App() {
              setIsStandalone(isStandaloneMode);
         };
 
+        // --- HANDLE SHARE TARGET / DEEP LINK ---
+        const handleShareTarget = () => {
+            const params = new URLSearchParams(window.location.search);
+            // 'share_text' comes from PWA share target, 'q' comes from our internal deep links
+            const query = params.get('share_text') || params.get('q') || params.get('text');
+            
+            if (query) {
+                // Extract numbers (potential meter ID)
+                // Looks for the first sequence of 3-6 digits
+                const match = query.match(/\b\d{3,6}\b/);
+                if (match) {
+                    const foundId = match[0];
+                    console.log("Shared/Linked ID found:", foundId);
+                    
+                    // Update UI state
+                    setMode('id');
+                    setStartId(foundId);
+                    setIsCitationMode(false); // Ensure we are in space locator mode
+                    
+                    // Trigger Search
+                    executeSearch('id', foundId, '', '');
+                    
+                    // Clean URL without refresh
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+        };
+
         window.addEventListener('beforeinstallprompt', handleInstallPrompt);
         window.addEventListener('appinstalled', handleAppInstalled);
         
         checkStandalone();
+        handleShareTarget(); // Check for shares on load
         
         const mediaQuery = window.matchMedia('(display-mode: standalone)');
         try {
@@ -489,61 +581,8 @@ export default function App() {
             if (!streetQuery || streetQuery.trim().length < 2) { setError("Please select a valid street name"); setShakeField('street'); return; }
         }
 
-        setLoading(true);
-
-        try {
-            const params = new URLSearchParams({ mode });
-            if (mode === 'id') {
-                params.append('start', startId);
-                if (endId) params.append('end', endId);
-            } else {
-                params.append('street', streetQuery);
-            }
-            
-            const res = await fetch(`${BACKEND_URL}/api/search?${params}`);
-            const data = await res.json();
-            
-            if (!data.features || data.features.length === 0) {
-                setResults([]);
-                setLoading(false);
-                setError("No parking assets found.");
-            } else {
-                const groups = {};
-                data.features.forEach(f => {
-                    const rawAddr = f.attributes.FULL_ADDRESS;
-                    const addr = rawAddr ? rawAddr.trim() : "Unknown Location";
-                    
-                    // Capture ALL geometries for this address group
-                    if (!groups[addr]) groups[addr] = { ids: [], geoms: [] };
-                    groups[addr].ids.push(f.attributes.SPACE_NUMBER);
-                    
-                    // Store geometry if valid
-                    if (f.geometry && f.geometry.x && f.geometry.y) {
-                        groups[addr].geoms.push({ 
-                            id: f.attributes.SPACE_NUMBER, 
-                            x: f.geometry.x, 
-                            y: f.geometry.y 
-                        });
-                    }
-                });
-                
-                const resultList = Object.keys(groups).sort().map(addr => ({
-                    address: addr,
-                    ids: groups[addr].ids.sort((a,b) => a-b),
-                    geoms: groups[addr].geoms // Pass the full array of points
-                }));
-                
-                setResults(resultList);
-                setIsExpanding(true);
-                setTimeout(() => {
-                    setView('results');
-                    setLoading(false);
-                }, 400); 
-            }
-        } catch (e) {
-            setError("Connection failed. Try again.");
-            setLoading(false);
-        }
+        // Call the reusable search function
+        executeSearch(mode, startId, endId, streetQuery);
     };
 
     const handleNewSearch = () => {
