@@ -1,4 +1,4 @@
-const CACHE_NAME = 'indy-locator-v1';
+const CACHE_NAME = 'opencurb-v1';
 const ASSETS = [
   './',
   './index.html',
@@ -22,4 +22,5 @@ self.addEventListener('fetch', (event) => {
         return response || fetch(event.request);
       })
   );
+
 });
