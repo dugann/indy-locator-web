@@ -2,10 +2,9 @@
     SPDX-FileCopyrightText: © 2025 William Dugann <https://github.com/dugann>
     SPDX-License-Identifier: LicenseRef-Proprietary
 
-    INDY SPACE LOCATOR & CITATION PORTAL
+    OPEN CURB
     ------------------------------------
-    This application serves as a utility interface for Indianapolis parking enforcement
-    and asset verification, bridging connection to local GIS and payment portals.
+    This application creates a simplified way for users to look up information about Indianapolis parking meters and parking tickets.
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -83,7 +82,7 @@
     <script type="text/babel" data-type="module">
 import React, { useState, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Search, MapPin, Navigation, Info, X, ChevronLeft, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download, Map as MapIcon, CloudOff } from 'lucide-react';
+import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download, Map as MapIcon, CloudOff } from 'lucide-react';
 
 const BACKEND_URL = "https://indy-locator-exchange.onrender.com"; 
 const ETIMS_ENDPOINT = "https://prodpci.etimspayments.com/pbw/inputAction.doh";
@@ -592,8 +591,8 @@ export default function App() {
             </div>
 
             {/* --- HEADER --- */}
-            <header className={`relative z-10 pt-safe-top px-6 py-4 flex justify-between items-center transition-opacity duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                <div>
+            <header className={`relative z-10 pt-safe-top px-6 py-4 grid grid-cols-[1fr_auto_1fr] sm:flex sm:justify-between items-center transition-opacity duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                <div className="col-start-2">
                     <button onClick={toggleCitationMode} className="focus:outline-none active:scale-95 transition-transform block">
                         <img 
                             src="./logo.png" 
@@ -603,7 +602,7 @@ export default function App() {
                     </button>
                 </div>
                 
-                <div className="flex gap-2">
+                <div className="flex gap-2 col-start-3 justify-self-end">
                     {/* INSTALL BUTTON: Only shows if installable AND not currently running as standalone app */}
                     {installPrompt && !isStandalone && (
                         <button 
@@ -614,9 +613,11 @@ export default function App() {
                             <Download size={20} className="text-white/80" />
                         </button>
                     )}
-                    <button onClick={() => setShowInfoModal(true)} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
+                    {/* INFO BUTTON: Temporarily hidden */}
+                    {/* <button onClick={() => setShowInfoModal(true)} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
                         <Info size={20} className="text-white/80" />
-                    </button>
+                    </button> 
+                    */}
                 </div>
             </header>
 
