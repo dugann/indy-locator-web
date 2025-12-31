@@ -28,6 +28,9 @@
 
     <!-- Babel for in-browser JSX transformation -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- HTML5-QRCode Library for Barcode Scanning -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -38,7 +41,7 @@
             "imports": {
                 "react": "https://esm.sh/react@18.2.0",
                 "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-                "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+                "lucide-react": "https://esm.sh/lucide-react@0.344.0"
             }
         }
     </script>
@@ -61,6 +64,22 @@
         
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .safe-top { padding-top: env(safe-area-inset-top); }
+            .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        }
+        
+        /* Barcode Scanner Overlay Styles */
+        #reader {
+            width: 100%;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        #reader video {
+            object-fit: cover;
+            border-radius: 1rem;
+        }
     </style>
 </head>
 
@@ -80,14 +99,40 @@
 
     <!-- The React Application -->
     <script type="text/babel" data-type="module">
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Search, MapPin, Navigation, Info, X, ChevronLeft, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download, Map as MapIcon, CloudOff, Share2 } from 'lucide-react';
+import { 
+    Search, MapPin, Navigation, Info, X, ChevronLeft, ChevronRight, Star, 
+    RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download, 
+    Map as MapIcon, CloudOff, Share2, Link as LinkIcon, History, Trash2, 
+    Camera, Moon, Sun, Settings, ArrowLeft, BookmarkPlus, Bookmark,
+    Wifi, WifiOff, Zap, Clock, Loader2, ScanBarcode
+} from 'lucide-react';
 
-const BACKEND_URL = "https://indy-locator-exchange.onrender.com"; 
-const ETIMS_ENDPOINT = "https://prodpci.etimspayments.com/pbw/inputAction.doh";
-const STORAGE_KEY_STREETS = "opencurb_streets_data";
-const STORAGE_KEY_META = "opencurb_meta_check";
+// ============================================================================
+// CONSTANTS & CONFIG
+// ============================================================================
+
+const CONFIG = {
+    BACKEND_URL: "https://indy-locator-exchange.onrender.com",
+    ETIMS_ENDPOINT: "https://prodpci.etimspayments.com/pbw/inputAction.doh",
+    // Token removed. Pointing to secure backend proxy.
+    SNAPSHOT_PROXY_URL: "https://indy-locator-exchange.onrender.com/api/proxy/lpr", 
+    STORAGE_KEYS: {
+        STREETS: "opencurb_streets_data",
+        META: "opencurb_meta_check",
+        FAVORITES: "opencurb_favorites",
+        RECENT: "opencurb_recent_searches",
+        THEME: "opencurb_theme",
+        SETTINGS: "opencurb_settings"
+    },
+    CACHE_DURATION: 24 * 60 * 60 * 1000, // 24 hours
+    MAX_RECENT: 10,
+    MAX_FAVORITES: 20,
+    REQUEST_TIMEOUT: 30000,
+    RETRY_ATTEMPTS: 3,
+    RETRY_DELAY: 1000
+};
 
 const US_STATES = [
     "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", 
@@ -96,30 +141,118 @@ const US_STATES = [
     "VT", "VA", "WA", "WV", "WI", "WY"
 ];
 
-// --- UTILS ---
+// ============================================================================
+// UTILITIES & HOOKS (Standard)
+// ============================================================================
+
 function luhn_checksum(code) {
-    var len = code.length
-    var parity = len % 2
-    var sum = 0
+    var len = code.length;
+    var parity = len % 2;
+    var sum = 0;
     for (var i = len-1; i >= 0; i--) {
-        var d = parseInt(code.charAt(i))
-        if (i % 2 === parity) { d *= 2 }
-        if (d > 9) { d -= 9 }
-        sum += d
+        var d = parseInt(code.charAt(i));
+        if (i % 2 === parity) { d *= 2; }
+        if (d > 9) { d -= 9; }
+        sum += d;
     }
-    return sum % 10
+    return sum % 10;
 }
 
 function luhnValidate(fullcode) {
-    return luhn_checksum(fullcode) === 0
+    return luhn_checksum(fullcode) === 0;
 }
 
-// --- DYNAMIC STYLES ---
+function vibrate(pattern = 10) {
+    if ('vibrate' in navigator) {
+        navigator.vibrate(pattern);
+    }
+}
+
+async function fetchWithTimeout(url, options = {}, timeout = CONFIG.REQUEST_TIMEOUT) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        throw error;
+    }
+}
+
+async function fetchWithRetry(url, options = {}, retries = CONFIG.RETRY_ATTEMPTS) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await fetchWithTimeout(url, options);
+        } catch (error) {
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY * (i + 1)));
+        }
+    }
+}
+
+// Storage helpers
+const storage = {
+    get: (key, defaultValue = null) => {
+        try {
+            const item = localStorage.getItem(key);
+            return item ? JSON.parse(item) : defaultValue;
+        } catch {
+            return defaultValue;
+        }
+    },
+    set: (key, value) => {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+            return true;
+        } catch {
+            return false;
+        }
+    },
+    remove: (key) => {
+        try {
+            localStorage.removeItem(key);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+};
+
+// ============================================================================
+// DYNAMIC STYLES
+// ============================================================================
+
 const customStyles = `
     @keyframes pulse-ring {
         0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); }
         70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); }
         100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+    }
+
+    @keyframes slideInUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes slideInDown {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -468px 0; }
+        100% { background-position: 468px 0; }
     }
 
     .circle-transition {
@@ -155,10 +288,55 @@ const customStyles = `
         25% { transform: translateX(-4px); }
         75% { transform: translateX(4px); }
     }
-    .shake-input { animation: shake 0.3s ease-in-out; border-color: #D11241 !important; }
+    
+    .shake-input { 
+        animation: shake 0.3s ease-in-out; 
+        border-color: #D11241 !important; 
+    }
+
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
+
+    .slide-in-up {
+        animation: slideInUp 0.3s ease-out;
+    }
+
+    .slide-in-down {
+        animation: slideInDown 0.3s ease-out;
+    }
+
+    .fade-in {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Pull to refresh styles */
+    .ptr-element {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        pointer-events: none;
+        z-index: 100;
+    }
+
+    /* Dark mode */
+    .dark {
+        --indy-blue: #001f3f;
+        --indy-sky: #1a2332;
+    }
+
+    .dark body {
+        background-color: var(--indy-blue);
+    }
 `;
 
-// --- ICONS ---
+// ============================================================================
+// ICONS
+// ============================================================================
+
 const GoogleDirectionsIcon = ({ size = 20, className = "" }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
         <path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/>
@@ -171,9 +349,135 @@ const GooglePegmanIcon = ({ size = 20, className = "" }) => (
     </svg>
 );
 
-// --- COMPONENTS ---
+// ============================================================================
+// HOOKS
+// ============================================================================
 
-const ResultItem = ({ item }) => {
+function useOnlineStatus() {
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+    
+    useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+        
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
+    
+    return isOnline;
+}
+
+function useFavorites() {
+    const [favorites, setFavorites] = useState(() => 
+        storage.get(CONFIG.STORAGE_KEYS.FAVORITES, [])
+    );
+    
+    const addFavorite = useCallback((item) => {
+        setFavorites(prev => {
+            const updated = [item, ...prev.filter(f => f.id !== item.id)].slice(0, CONFIG.MAX_FAVORITES);
+            storage.set(CONFIG.STORAGE_KEYS.FAVORITES, updated);
+            return updated;
+        });
+    }, []);
+    
+    const removeFavorite = useCallback((id) => {
+        setFavorites(prev => {
+            const updated = prev.filter(f => f.id !== id);
+            storage.set(CONFIG.STORAGE_KEYS.FAVORITES, updated);
+            return updated;
+        });
+    }, []);
+    
+    const isFavorite = useCallback((id) => {
+        return favorites.some(f => f.id === id);
+    }, [favorites]);
+    
+    return { favorites, addFavorite, removeFavorite, isFavorite };
+}
+
+function useRecentSearches() {
+    const [recent, setRecent] = useState(() => 
+        storage.get(CONFIG.STORAGE_KEYS.RECENT, [])
+    );
+    
+    const addRecent = useCallback((search) => {
+        setRecent(prev => {
+            const updated = [
+                { ...search, timestamp: Date.now() },
+                ...prev.filter(s => s.query !== search.query)
+            ].slice(0, CONFIG.MAX_RECENT);
+            storage.set(CONFIG.STORAGE_KEYS.RECENT, updated);
+            return updated;
+        });
+    }, []);
+    
+    const clearRecent = useCallback(() => {
+        setRecent([]);
+        storage.remove(CONFIG.STORAGE_KEYS.RECENT);
+    }, []);
+    
+    return { recent, addRecent, clearRecent };
+}
+
+// ============================================================================
+// COMPONENTS
+// ============================================================================
+
+const LoadingSkeleton = () => (
+    <div className="space-y-4 p-4">
+        {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-300 slide-in-up" style={{ animationDelay: `${i * 0.1}s` }}>
+                <div className="flex gap-4">
+                    <div className="flex-1 space-y-3">
+                        <div className="skeleton h-6 w-3/4 rounded"></div>
+                        <div className="skeleton h-4 w-1/2 rounded"></div>
+                        <div className="skeleton h-16 w-full rounded-xl"></div>
+                        <div className="flex gap-2">
+                            <div className="skeleton h-10 w-24 rounded-lg"></div>
+                            <div className="skeleton h-10 w-24 rounded-lg"></div>
+                        </div>
+                    </div>
+                    <div className="skeleton w-36 h-36 rounded-2xl"></div>
+                </div>
+            </div>
+        ))}
+    </div>
+);
+
+const EmptyState = ({ message, icon: Icon, action }) => (
+    <div className="flex flex-col items-center justify-center py-16 px-6 text-center fade-in">
+        <div className="bg-white/5 rounded-full p-6 mb-4">
+            <Icon size={48} className="text-white/40" />
+        </div>
+        <p className="text-white/60 text-sm mb-4">{message}</p>
+        {action && action}
+    </div>
+);
+
+const Toast = ({ message, type = 'info', onClose }) => {
+    useEffect(() => {
+        const timer = setTimeout(onClose, 3000);
+        return () => clearTimeout(timer);
+    }, [onClose]);
+    
+    const bgColor = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500';
+    
+    return (
+        <div className={`fixed top-20 left-1/2 -translate-x-1/2 ${bgColor} text-white px-6 py-3 rounded-full shadow-lg z-50 slide-in-down flex items-center gap-2`}>
+            {type === 'success' && <CheckCircle size={18} />}
+            {type === 'error' && <AlertTriangle size={18} />}
+            {type === 'info' && <Info size={18} />}
+            <span className="font-medium">{message}</span>
+        </div>
+    );
+};
+
+const ResultItem = ({ item, onFavorite, isFavorite }) => {
     const [copied, setCopied] = useState(false);
 
     let centroid = null;
@@ -217,58 +521,70 @@ const ResultItem = ({ item }) => {
             document.execCommand('copy');
             document.body.removeChild(textArea);
             setCopied(true);
+            vibrate([10, 50, 10]);
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
             console.error('Copy failed', err);
         }
     };
 
-    // Share Functionality for individual result
     const handleShare = async () => {
         if (!navigator.share) return;
-        
         const ids = item.ids.join('-');
-        // Create a deep link to this specific search
         const shareUrl = `${window.location.origin}${window.location.pathname}?q=${ids}`;
         const title = `Parking at ${item.address}`;
         const text = `Check out parking meters ${item.ids.join(', ')} at ${item.address}`;
 
         try {
-            await navigator.share({
-                title: title,
-                text: text,
-                url: shareUrl
-            });
-        } catch (err) {
-            console.log('Share dismissed');
-        }
+            await navigator.share({ title, text, url: shareUrl });
+        } catch (err) { console.log('Share dismissed'); }
+    };
+
+    const handleFavoriteClick = () => {
+        vibrate(10);
+        onFavorite({ 
+            id: item.ids.join('-'), 
+            address: item.address, 
+            ids: item.ids,
+            geoms: item.geoms 
+        });
     };
 
     return (
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-300 mb-4 hover:shadow-lg transition-shadow">
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-300 mb-4 hover:shadow-lg transition-all slide-in-up">
             <div className="flex flex-col-reverse sm:flex-row gap-4">
                 
                 <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
                         <div className="flex justify-between items-start mb-2">
-                            <div>
+                            <div className="flex-1">
                                 <h3 className="font-bold text-[#003B71] text-lg leading-tight text-black truncate pr-2">{item.address}</h3>
                                 <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mt-0.5">Indianapolis, IN</p>
                             </div>
+                            <button 
+                                onClick={handleFavoriteClick}
+                                className="ml-2 p-2 rounded-full hover:bg-gray-100 transition-colors active:scale-95"
+                                aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                            >
+                                {isFavorite ? 
+                                    <Bookmark size={20} className="text-yellow-500 fill-yellow-500" /> : 
+                                    <BookmarkPlus size={20} className="text-gray-400" />
+                                }
+                            </button>
                         </div>
 
-                        {/* ID Scroller Container - Updated for width and visibility */}
                         <div className="bg-[#003B71]/5 rounded-xl p-2 mb-3 border border-[#003B71]/10 relative group w-fit max-w-full">
                             <div className="flex items-center justify-between mb-1 px-1 gap-4">
                                 <span className="text-[10px] uppercase font-bold text-[#003B71]/70">Meter IDs</span>
-                                <div className="flex gap-3">
+                                <div className="flex gap-2">
                                     {navigator.share && (
-                                        <button onClick={handleShare} className="text-[#003B71] opacity-75 hover:opacity-100 transition-opacity" title="Share">
-                                            <Share2 size={16} />
+                                        <button onClick={handleShare} className="flex items-center gap-1 bg-white border border-[#003B71]/20 px-2 py-0.5 rounded text-[10px] font-bold text-[#003B71] hover:bg-[#003B71]/5 transition-colors active:scale-95">
+                                            <Share2 size={12} /> Share
                                         </button>
                                     )}
-                                    <button onClick={handleCopy} className="text-[#003B71] opacity-75 hover:opacity-100 transition-opacity" title="Copy">
-                                        {copied ? <CheckCircle size={16} className="text-green-600 opacity-100"/> : <Copy size={16} />}
+                                    <button onClick={handleCopy} className="flex items-center gap-1 bg-white border border-[#003B71]/20 px-2 py-0.5 rounded text-[10px] font-bold text-[#003B71] hover:bg-[#003B71]/5 transition-colors active:scale-95">
+                                        {copied ? <CheckCircle size={12} className="text-green-600"/> : <Copy size={12} />}
+                                        {copied ? 'Copied' : 'Copy'}
                                     </button>
                                 </div>
                             </div>
@@ -330,12 +646,67 @@ const ResultItem = ({ item }) => {
     );
 };
 
+const RecentSearchItem = ({ search, onSelect, onRemove }) => (
+    <button 
+        onClick={() => onSelect(search)}
+        className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors group"
+    >
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Clock size={16} className="text-white/40 flex-shrink-0" />
+            <div className="text-left flex-1 min-w-0">
+                <p className="text-white font-medium text-sm truncate">{search.query}</p>
+                <p className="text-white/40 text-xs">{search.mode === 'id' ? 'Meter ID' : 'Street Name'}</p>
+            </div>
+        </div>
+        <button 
+            onClick={(e) => {
+                e.stopPropagation();
+                onRemove(search);
+            }}
+            className="p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10 rounded"
+        >
+            <X size={16} className="text-white/60" />
+        </button>
+    </button>
+);
+
+const FavoriteItem = ({ favorite, onSelect, onRemove }) => (
+    <button 
+        onClick={() => onSelect(favorite)}
+        className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors group"
+    >
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Star size={16} className="text-yellow-500 fill-yellow-500 flex-shrink-0" />
+            <div className="text-left flex-1 min-w-0">
+                <p className="text-white font-medium text-sm truncate">{favorite.address}</p>
+                <p className="text-white/40 text-xs">{favorite.ids.length} {favorite.ids.length === 1 ? 'meter' : 'meters'}</p>
+            </div>
+        </div>
+        <button 
+            onClick={(e) => {
+                e.stopPropagation();
+                onRemove(favorite.id);
+            }}
+            className="p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10 rounded"
+        >
+            <X size={16} className="text-white/60" />
+        </button>
+    </button>
+);
+
+// ============================================================================
+// MAIN APP COMPONENT
+// ============================================================================
+
 export default function App() {
     const [isCitationMode, setIsCitationMode] = useState(false);
     const [mode, setMode] = useState('id'); 
     const [view, setView] = useState('search');
     const [loading, setLoading] = useState(false);
     const [isExpanding, setIsExpanding] = useState(false);
+    const [copyFeedback, setCopyFeedback] = useState(null);
+    const [isScanning, setIsScanning] = useState(false); 
+    const [showBarcodeScanner, setShowBarcodeScanner] = useState(false); // NEW Barcode State
     
     const [streets, setStreets] = useState([]);
     const [dataDate, setDataDate] = useState(null);
@@ -352,15 +723,34 @@ export default function App() {
     const [error, setError] = useState(null);
     const [shakeField, setShakeField] = useState(null);
     const [showInfoModal, setShowInfoModal] = useState(false);
+    const [showSettingsModal, setShowSettingsModal] = useState(false);
+    const [toast, setToast] = useState(null);
 
     // PWA Install State
     const [installPrompt, setInstallPrompt] = useState(null);
     const [isStandalone, setIsStandalone] = useState(false);
+    
+    // Custom hooks
+    const isOnline = useOnlineStatus();
+    const { favorites, addFavorite, removeFavorite, isFavorite } = useFavorites();
+    const { recent, addRecent, clearRecent } = useRecentSearches();
 
     const formRef = useRef(null);
+    const fileInputRef = useRef(null);
 
-    // Reusable search function that can be called by UI or URL handler
+    // Show toast
+    const showToast = useCallback((message, type = 'info') => {
+        setToast({ message, type });
+    }, []);
+
+    // Reusable search function with better error handling
     const executeSearch = async (searchMode, sId, eId, sQuery) => {
+        if (!isOnline) {
+            setError("No internet connection");
+            vibrate([10, 100, 10]);
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -373,22 +763,26 @@ export default function App() {
                 params.append('street', sQuery);
             }
             
-            const res = await fetch(`${BACKEND_URL}/api/search?${params}`);
+            const res = await fetchWithRetry(`${CONFIG.BACKEND_URL}/api/search?${params}`);
+            
+            if (!res.ok) {
+                throw new Error(`Server error: ${res.status}`);
+            }
+            
             const data = await res.json();
             
             if (!data.features || data.features.length === 0) {
                 setResults([]);
                 setLoading(false);
                 setError("No parking assets found.");
+                vibrate([10, 100, 10]);
             } else {
                 const groups = {};
                 data.features.forEach(f => {
                     const rawAddr = f.attributes.FULL_ADDRESS;
                     const addr = rawAddr ? rawAddr.trim() : "Unknown Location";
-                    
                     if (!groups[addr]) groups[addr] = { ids: [], geoms: [] };
                     groups[addr].ids.push(f.attributes.SPACE_NUMBER);
-                    
                     if (f.geometry && f.geometry.x && f.geometry.y) {
                         groups[addr].geoms.push({ 
                             id: f.attributes.SPACE_NUMBER, 
@@ -406,59 +800,192 @@ export default function App() {
                 
                 setResults(resultList);
                 setIsExpanding(true);
+                
+                // Add to recent searches
+                addRecent({
+                    query: searchMode === 'id' ? `${sId}${eId ? `-${eId}` : ''}` : sQuery,
+                    mode: searchMode
+                });
+                
+                vibrate(10);
                 setTimeout(() => {
                     setView('results');
                     setLoading(false);
                 }, 400); 
             }
         } catch (e) {
-            setError("Connection failed. Try again.");
+            console.error('Search error:', e);
+            if (e.name === 'AbortError') {
+                setError("Request timed out. Try again.");
+            } else {
+                setError("Connection failed. Check your internet.");
+            }
             setLoading(false);
+            vibrate([10, 100, 10, 100, 10]);
         }
     };
 
-    // --- EFFECTS ---
+    // Camera Handlers
+    const handleCameraClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleImageUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        setIsScanning(true);
+        setError(null);
+        vibrate(10);
+
+        const formData = new FormData();
+        formData.append('upload', file);
+        formData.append('regions', 'us'); // Optimize for US plates
+
+        try {
+            const response = await fetch(CONFIG.SNAPSHOT_PROXY_URL, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('API Error');
+
+            const data = await response.json();
+
+            if (data.results && data.results.length > 0) {
+                const bestMatch = data.results[0];
+                const plate = bestMatch.plate.toUpperCase();
+                
+                setPlateNum(plate);
+                
+                // Try to map region to state code if available
+                // Note: API returns region codes that might need mapping to US_STATES
+                // For now, we default to current selection or try basic matching if API provides it
+                if (bestMatch.region && bestMatch.region.code) {
+                     const regionCode = bestMatch.region.code.split('-').pop().toUpperCase();
+                     if (US_STATES.includes(regionCode)) {
+                         setPlateState(regionCode);
+                     }
+                }
+
+                showToast(`Plate detected: ${plate}`, 'success');
+                vibrate([10, 50, 10]);
+            } else {
+                setError("No license plate detected. Try again.");
+                vibrate([10, 100, 10]);
+            }
+        } catch (err) {
+            console.error("LPR Error:", err);
+            setError("Failed to scan plate. Please enter manually.");
+            vibrate([10, 100, 10]);
+        } finally {
+            setIsScanning(false);
+            // Reset input so same file can be selected again if needed
+            event.target.value = null;
+        }
+    };
+
+    const handleBarcodeDetected = (code) => {
+        setTicketNum(code);
+        showToast(`Ticket scanned: ${code}`, 'success');
+    };
+
+    // Citation share/copy logic
+    const getCitationShareData = () => {
+        let shareUrl = window.location.origin + window.location.pathname;
+        let text = "";
+        
+        if (mode === 'ticket' && ticketNum) {
+            shareUrl += `?ticket=${ticketNum}`;
+            text = `Pay citation #${ticketNum}: ${shareUrl}`;
+        } else if (mode === 'plate' && plateNum) {
+            shareUrl += `?plate=${plateNum}&state=${plateState}`;
+            text = `Pay citations for ${plateState} plate ${plateNum}: ${shareUrl}`;
+        }
+        return { shareUrl, text };
+    };
+
+    const handleCitationShare = async () => {
+        const { shareUrl, text } = getCitationShareData();
+        if (!text) return;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: "Open Curb Citation", text: text, url: shareUrl });
+                vibrate(10);
+            } catch (err) { console.log('Share dismissed'); }
+        } else {
+            handleCitationCopy();
+        }
+    };
+
+    const handleCitationCopy = async () => {
+        const { text } = getCitationShareData();
+        if (!text) return;
+        
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopyFeedback("Copied!");
+            vibrate([10, 50, 10]);
+            setTimeout(() => setCopyFeedback(null), 2000);
+        } catch (err) {
+            console.error("Copy failed");
+        }
+    };
+
+    // Effects
     useEffect(() => {
-        const handleInstallPrompt = (e) => {
-            e.preventDefault();
-            setInstallPrompt(e);
+        const handleInstallPrompt = (e) => { 
+            e.preventDefault(); 
+            setInstallPrompt(e); 
         };
-
-        const handleAppInstalled = () => {
-            setInstallPrompt(null);
-            console.log('PWA was installed');
+        
+        const handleAppInstalled = () => { 
+            setInstallPrompt(null); 
+            showToast('App installed successfully!', 'success');
         };
-
+        
         const checkStandalone = () => {
              const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches 
                 || window.navigator.standalone 
                 || document.referrer.includes('android-app://');
              setIsStandalone(isStandaloneMode);
         };
-
-        // --- HANDLE SHARE TARGET / DEEP LINK ---
+        
         const handleShareTarget = () => {
             const params = new URLSearchParams(window.location.search);
-            // 'share_text' comes from PWA share target, 'q' comes from our internal deep links
             const query = params.get('share_text') || params.get('q') || params.get('text');
+            const ticketParam = params.get('ticket');
+            const plateParam = params.get('plate');
+            const stateParam = params.get('state');
+
+            if (ticketParam) {
+                 setIsCitationMode(true); 
+                 setMode('ticket'); 
+                 setTicketNum(ticketParam);
+                 window.history.replaceState({}, document.title, window.location.pathname);
+                 return;
+            }
+            
+            if (plateParam) {
+                 setIsCitationMode(true); 
+                 setMode('plate'); 
+                 setPlateNum(plateParam);
+                 if (stateParam) setPlateState(stateParam);
+                 window.history.replaceState({}, document.title, window.location.pathname);
+                 return;
+            }
             
             if (query) {
-                // Extract numbers (potential meter ID)
-                // Looks for the first sequence of 3-6 digits
                 const match = query.match(/\b\d{3,6}\b/);
                 if (match) {
                     const foundId = match[0];
-                    console.log("Shared/Linked ID found:", foundId);
-                    
-                    // Update UI state
-                    setMode('id');
-                    setStartId(foundId);
-                    setIsCitationMode(false); // Ensure we are in space locator mode
-                    
-                    // Trigger Search
+                    setMode('id'); 
+                    setStartId(foundId); 
+                    setIsCitationMode(false);
                     executeSearch('id', foundId, '', '');
-                    
-                    // Clean URL without refresh
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             }
@@ -466,24 +993,23 @@ export default function App() {
 
         window.addEventListener('beforeinstallprompt', handleInstallPrompt);
         window.addEventListener('appinstalled', handleAppInstalled);
-        
         checkStandalone();
-        handleShareTarget(); // Check for shares on load
+        handleShareTarget();
         
         const mediaQuery = window.matchMedia('(display-mode: standalone)');
-        try {
-             mediaQuery.addEventListener('change', checkStandalone);
-        } catch (e) {
-             mediaQuery.addListener(checkStandalone);
+        try { 
+            mediaQuery.addEventListener('change', checkStandalone); 
+        } catch (e) { 
+            mediaQuery.addListener(checkStandalone); 
         }
 
         return () => {
             window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
             window.removeEventListener('appinstalled', handleAppInstalled);
-            try {
-                 mediaQuery.removeEventListener('change', checkStandalone);
-            } catch (e) {
-                 mediaQuery.removeListener(checkStandalone);
+            try { 
+                mediaQuery.removeEventListener('change', checkStandalone); 
+            } catch (e) { 
+                mediaQuery.removeListener(checkStandalone); 
             }
         };
     }, []);
@@ -491,25 +1017,25 @@ export default function App() {
     useEffect(() => {
         const checkMeta = async () => {
             try {
-                const res = await fetch(`${BACKEND_URL}/api/meta`);
+                const res = await fetchWithRetry(`${CONFIG.BACKEND_URL}/api/meta`);
                 const data = await res.json();
                 
                 if (data.data?.[0]?.attributes?.modified) {
                     const dateStr = new Date(data.data[0].attributes.modified).toLocaleDateString();
                     setDataDate(dateStr);
                     
-                    const cachedMeta = JSON.parse(localStorage.getItem(STORAGE_KEY_META));
+                    const cachedMeta = storage.get(CONFIG.STORAGE_KEYS.META);
                     if (cachedMeta?.timestamp < data.data[0].attributes.modified) {
-                        localStorage.removeItem(STORAGE_KEY_STREETS);
+                        storage.remove(CONFIG.STORAGE_KEYS.STREETS);
                     }
                     
-                    localStorage.setItem(STORAGE_KEY_META, JSON.stringify({
+                    storage.set(CONFIG.STORAGE_KEYS.META, {
                         timestamp: data.data[0].attributes.modified,
                         displayDate: dateStr
-                    }));
+                    });
                 }
             } catch (e) {
-                console.error("Meta handshake failed. Using offline mode.", e);
+                console.error("Meta handshake failed.", e);
             }
         };
         checkMeta();
@@ -518,26 +1044,27 @@ export default function App() {
     useEffect(() => {
         if (!isCitationMode && mode === 'street' && streets.length === 0) {
             const loadStreets = async () => {
-                const cached = localStorage.getItem(STORAGE_KEY_STREETS);
-                if (cached) {
-                    setStreets(JSON.parse(cached));
-                    return;
+                const cached = storage.get(CONFIG.STORAGE_KEYS.STREETS);
+                if (cached) { 
+                    setStreets(cached); 
+                    return; 
                 }
+                
                 try {
-                    const res = await fetch(`${BACKEND_URL}/api/streets`);
+                    const res = await fetchWithRetry(`${CONFIG.BACKEND_URL}/api/streets`);
                     const sorted = await res.json();
-                    localStorage.setItem(STORAGE_KEY_STREETS, JSON.stringify(sorted));
+                    storage.set(CONFIG.STORAGE_KEYS.STREETS, sorted);
                     setStreets(sorted);
                 } catch (e) {
-                    console.error("Street handshake failed");
+                    console.error("Street handshake failed", e);
+                    showToast('Failed to load street names', 'error');
                 }
             };
             loadStreets();
         }
     }, [mode, isCitationMode]);
 
-    // --- LOGIC ---
-
+    // Handlers
     const handleInstallClick = async () => {
         if (!installPrompt) return;
         installPrompt.prompt();
@@ -550,71 +1077,157 @@ export default function App() {
     const toggleCitationMode = () => {
         setIsCitationMode(!isCitationMode);
         setMode(isCitationMode ? 'id' : 'ticket');
-        setError(null);
-        setResults([]);
+        setError(null); 
+        setResults([]); 
         setView('search');
+        vibrate(10);
     };
 
     const handleSearch = async () => {
-        setError(null);
+        setError(null); 
         setShakeField(null);
-
+        
         if (isCitationMode) {
             if (mode === 'ticket') {
-                if (!ticketNum) { setError("Enter a ticket number"); setShakeField('ticket'); return; }
-                if (ticketNum.length !== 9) { setError("Ticket number must be 9 digits"); setShakeField('ticket'); return; }
-                if (!ticketNum.startsWith('0') && !ticketNum.startsWith('71')) { setError("Ticket must start with 0 or 71"); setShakeField('ticket'); return; }
-                if (!luhnValidate(ticketNum)) { setError("Invalid ticket number"); setShakeField('ticket'); return; }
+                if (!ticketNum) { 
+                    setError("Enter a ticket number"); 
+                    setShakeField('ticket'); 
+                    vibrate([10, 100, 10]);
+                    return; 
+                }
+                if (ticketNum.length !== 9) { 
+                    setError("Ticket number must be 9 digits"); 
+                    setShakeField('ticket'); 
+                    vibrate([10, 100, 10]);
+                    return; 
+                }
+                if (!ticketNum.startsWith('0') && !ticketNum.startsWith('71')) { 
+                    setError("Ticket must start with 0 or 71"); 
+                    setShakeField('ticket'); 
+                    vibrate([10, 100, 10]);
+                    return; 
+                }
+                if (!luhnValidate(ticketNum)) { 
+                    setError("Invalid ticket number"); 
+                    setShakeField('ticket'); 
+                    vibrate([10, 100, 10]);
+                    return; 
+                }
             } else {
-                if (!plateNum) { setError("Enter a license plate"); setShakeField('plate'); return; }
+                if (!plateNum) { 
+                    setError("Enter a license plate"); 
+                    setShakeField('plate'); 
+                    vibrate([10, 100, 10]);
+                    return; 
+                }
             }
+            
+            vibrate(10);
             formRef.current.submit();
-            setTicketNum(''); setPlateNum(''); setPlateState('IN');
+            setTicketNum(''); 
+            setPlateNum(''); 
+            setPlateState('IN');
             return;
         }
-
+        
         if (mode === 'id') {
-            if (!startId) { setError("Please enter a Start ID"); setShakeField('start'); return; }
-            if (startId.length < 3) { setError("Meter ID too short (min 3 digits)"); setShakeField('start'); return; }
-            if (endId && parseInt(endId) <= parseInt(startId)) { setError("End ID must be greater than Start ID"); setShakeField('end'); return; }
+            if (!startId) { 
+                setError("Please enter a Start ID"); 
+                setShakeField('start'); 
+                vibrate([10, 100, 10]);
+                return; 
+            }
+            if (startId.length < 3) { 
+                setError("Meter ID too short (min 3 digits)"); 
+                setShakeField('start'); 
+                vibrate([10, 100, 10]);
+                return; 
+            }
+            if (endId && parseInt(endId) <= parseInt(startId)) { 
+                setError("End ID must be greater than Start ID"); 
+                setShakeField('end'); 
+                vibrate([10, 100, 10]);
+                return; 
+            }
         } else {
-            if (!streetQuery || streetQuery.trim().length < 2) { setError("Please select a valid street name"); setShakeField('street'); return; }
+            if (!streetQuery || streetQuery.trim().length < 2) { 
+                setError("Please select a valid street name"); 
+                setShakeField('street'); 
+                vibrate([10, 100, 10]);
+                return; 
+            }
         }
-
-        // Call the reusable search function
+        
         executeSearch(mode, startId, endId, streetQuery);
     };
 
     const handleNewSearch = () => {
         setIsExpanding(false); 
-        setTimeout(() => {
-            setView('search');
-            setStartId(''); setEndId(''); setStreetQuery('');
-            setResults([]); setError(null);
+        vibrate(10);
+        setTimeout(() => { 
+            setView('search'); 
+            setStartId(''); 
+            setEndId(''); 
+            setStreetQuery(''); 
+            setResults([]); 
+            setError(null); 
         }, 300);
     };
 
     const handleNumericInput = (setter) => (e) => {
-        const val = e.target.value;
+        const val = e.target.value; 
         if (val === '' || (/^[1-9]\d*$/.test(val))) setter(val);
     };
 
     const handleTicketInput = (e) => {
-        const val = e.target.value.replace(/\D/g,'');
+        const val = e.target.value.replace(/\D/g,''); 
         setTicketNum(val);
+    };
+
+    const handleRecentSelect = (search) => {
+        vibrate(10);
+        if (search.mode === 'id') {
+            const parts = search.query.split('-');
+            setStartId(parts[0]);
+            setEndId(parts[1] || '');
+            setMode('id');
+        } else {
+            setStreetQuery(search.query);
+            setMode('street');
+        }
+    };
+
+    const handleFavoriteSelect = (favorite) => {
+        vibrate(10);
+        setResults([favorite]);
+        setView('results');
     };
 
     return (
         <div className="h-screen w-screen relative flex flex-col font-sans text-white">
             <style>{customStyles}</style>
 
-            <form 
-                ref={formRef} 
-                action={ETIMS_ENDPOINT} 
-                method="POST" 
-                target="_blank"
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+            {/* Hidden File Input for Camera */}
+            <input 
+                type="file" 
+                accept="image/*" 
+                capture="environment"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
                 className="hidden"
-            >
+            />
+
+            {/* Barcode Scanner Overlay */}
+            {showBarcodeScanner && (
+                <BarcodeScannerModal 
+                    onClose={() => setShowBarcodeScanner(false)} 
+                    onDetected={handleBarcodeDetected} 
+                />
+            )}
+
+            <form ref={formRef} action={CONFIG.ETIMS_ENDPOINT} method="POST" target="_blank" className="hidden">
                 <input type="hidden" name="clientcode" value="5I" />
                 <input type="hidden" name="requestType" value="submit" />
                 <input type="hidden" name="requestCount" value="1" />
@@ -624,60 +1237,51 @@ export default function App() {
                 <input type="submit" value="Submit" />
             </form>
 
-            {/* --- BACKGROUND --- */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#003B71_0%,#001f3f_100%)] z-0" />
-            <div className="absolute inset-0 opacity-10 pointer-events-none z-0" 
-                 style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
-            </div>
+            <div className="absolute inset-0 opacity-10 pointer-events-none z-0" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
 
-            {/* --- HEADER --- */}
-            <header className={`relative z-10 pt-safe-top px-6 py-6 grid grid-cols-[1fr_auto_1fr] sm:flex sm:justify-between items-center transition-opacity duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <header className={`relative z-10 safe-top px-6 py-6 grid grid-cols-[1fr_auto_1fr] sm:flex sm:justify-between items-center transition-opacity duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                 <div className="col-start-2">
                     <button onClick={toggleCitationMode} className="focus:outline-none active:scale-95 transition-transform block">
-                        <img 
-                            src="./logo.png" 
-                            alt="Open Curb" 
-                            className="h-14 sm:h-16 w-auto object-contain drop-shadow-md" 
-                        />
+                        <img src="https://github.com/dugann/indy-locator-web/blob/main/logo.png?raw=true" alt="Open Curb" className="h-12 sm:h-14 w-auto object-contain drop-shadow-md" />
                     </button>
                 </div>
                 
                 <div className="flex gap-2 col-start-3 justify-self-end">
-                    {/* INSTALL BUTTON: Only shows if installable AND not currently running as standalone app */}
+                    {!isOnline && (
+                        <div className="p-3 bg-red-500/20 rounded-full animate-pulse" title="Offline">
+                            <WifiOff size={24} className="text-red-300" />
+                        </div>
+                    )}
                     {installPrompt && !isStandalone && (
-                        <button 
-                            onClick={handleInstallClick} 
-                            className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors animate-in zoom-in"
-                            title="Install App"
-                        >
-                            <Download size={20} className="text-white/80" />
+                        <button onClick={handleInstallClick} className="p-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors slide-in-down" title="Install App">
+                            <Download size={24} className="text-white/80" />
                         </button>
                     )}
-                    {/* INFO BUTTON: Temporarily hidden */}
-                    {/* <button onClick={() => setShowInfoModal(true)} className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors">
-                        <Info size={20} className="text-white/80" />
-                    </button> 
-                    */}
+                    <button 
+                        onClick={() => setShowSettingsModal(true)} 
+                        className="p-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+                        title="Settings"
+                    >
+                        <Settings size={24} className="text-white/80" />
+                    </button>
                 </div>
             </header>
 
-            {/* --- MAIN CONTENT (SEARCH) --- */}
             <main className={`flex-1 relative z-10 flex flex-col transition-all duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}`}>
-                
-                <div className="mt-10 sm:mt-12 px-6">
-                    <div className="w-full max-w-sm mx-auto space-y-4 sm:space-y-6 relative z-10">
-                        
-                        <div className="flex bg-white/10 p-1 rounded-2xl backdrop-blur-sm border border-white/20">
+                <div className="mt-8 sm:mt-16 px-6 flex flex-col gap-8 sm:gap-12">
+                    <div className="w-full max-w-md mx-auto space-y-4 sm:space-y-6 relative z-10">
+                        <div className="flex bg-white/10 p-1.5 sm:p-2 rounded-2xl backdrop-blur-sm border border-white/20">
                             <button 
-                                onClick={() => { setMode(isCitationMode ? 'ticket' : 'id'); setError(null); }}
-                                className={`flex-1 py-3 px-2 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'id' || mode === 'ticket' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                                onClick={() => { setMode(isCitationMode ? 'ticket' : 'id'); setError(null); vibrate(10); }} 
+                                className={`flex-1 py-4 px-2 sm:px-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'id' || mode === 'ticket' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
                             >
                                 {isCitationMode ? 'Ticket #' : 'Meter ID'}
                             </button>
                             <div className="w-[1px] bg-white/10 my-2"></div>
                             <button 
-                                onClick={() => { setMode(isCitationMode ? 'plate' : 'street'); setError(null); }}
-                                className={`flex-1 py-3 px-2 sm:px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'street' || mode === 'plate' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                                onClick={() => { setMode(isCitationMode ? 'plate' : 'street'); setError(null); vibrate(10); }} 
+                                className={`flex-1 py-4 px-2 sm:px-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'street' || mode === 'plate' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
                             >
                                 {isCitationMode ? 'License Plate' : 'Street Name'}
                             </button>
@@ -689,20 +1293,20 @@ export default function App() {
                                     <input 
                                         type="tel" 
                                         placeholder="Start" 
-                                        className={`w-1/2 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 sm:py-4 px-4 sm:px-6 text-center text-xl sm:text-2xl font-mono outline-none transition-all ${shakeField === 'start' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
-                                        value={startId}
-                                        onChange={handleNumericInput(setStartId)}
-                                        maxLength={6}
+                                        className={`w-1/2 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 h-14 sm:h-16 px-4 sm:px-6 text-center text-xl sm:text-2xl font-mono outline-none transition-all ${shakeField === 'start' ? 'shake-input border-[#D11241]' : 'border-white/10'}`} 
+                                        value={startId} 
+                                        onChange={handleNumericInput(setStartId)} 
+                                        maxLength={6} 
                                     />
                                     <span className="text-white/40 font-light text-2xl">-</span>
                                     <input 
                                         type="tel" 
                                         placeholder="End" 
-                                        className={`w-1/2 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 sm:py-4 px-4 sm:px-6 text-center text-xl sm:text-2xl font-mono outline-none transition-all disabled:opacity-30 ${shakeField === 'end' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
-                                        value={endId}
-                                        onChange={handleNumericInput(setEndId)}
-                                        disabled={startId.length < 3}
-                                        maxLength={6}
+                                        className={`w-1/2 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 h-14 sm:h-16 px-4 sm:px-6 text-center text-xl sm:text-2xl font-mono outline-none transition-all disabled:opacity-30 ${shakeField === 'end' ? 'shake-input border-[#D11241]' : 'border-white/10'}`} 
+                                        value={endId} 
+                                        onChange={handleNumericInput(setEndId)} 
+                                        disabled={startId.length < 3} 
+                                        maxLength={6} 
                                     />
                                 </div>
                             )}
@@ -710,11 +1314,11 @@ export default function App() {
                             {!isCitationMode && mode === 'street' && (
                                 <div className="relative animate-in fade-in slide-in-from-bottom-4 duration-300">
                                     <input 
-                                        list="streets"
+                                        list="streets" 
                                         placeholder="Search Street Name..." 
-                                        className={`w-full bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 sm:py-4 px-4 sm:px-6 text-lg font-medium outline-none transition-all ${shakeField === 'street' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
-                                        value={streetQuery}
-                                        onChange={(e) => setStreetQuery(e.target.value)}
+                                        className={`w-full bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 h-14 sm:h-16 px-4 sm:px-6 text-lg font-medium outline-none transition-all ${shakeField === 'street' ? 'shake-input border-[#D11241]' : 'border-white/10'}`} 
+                                        value={streetQuery} 
+                                        onChange={(e) => setStreetQuery(e.target.value)} 
                                     />
                                     <datalist id="streets">
                                         {streets.map(s => <option key={s} value={s} />)}
@@ -726,63 +1330,166 @@ export default function App() {
                             )}
 
                             {isCitationMode && mode === 'ticket' && (
-                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-                                    <input 
-                                        type="tel"
-                                        placeholder="Ticket Number" 
-                                        className={`w-full bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 sm:py-4 px-4 sm:px-6 text-center text-xl sm:text-2xl font-mono outline-none transition-all ${shakeField === 'ticket' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
-                                        value={ticketNum}
-                                        onChange={handleTicketInput}
-                                        maxLength={9} 
-                                    />
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col items-center gap-4 w-full">
+                                    <div className="flex items-center gap-2 w-full">
+                                        <input 
+                                            type="tel" 
+                                            placeholder="Ticket Number" 
+                                            className={`flex-1 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 h-14 sm:h-16 px-4 text-center text-xl sm:text-2xl font-mono outline-none transition-all ${shakeField === 'ticket' ? 'shake-input border-[#D11241]' : 'border-white/10'}`} 
+                                            value={ticketNum} 
+                                            onChange={handleTicketInput} 
+                                            maxLength={9} 
+                                        />
+                                        <button 
+                                            onClick={() => setShowBarcodeScanner(true)}
+                                            className="w-14 sm:w-16 h-14 sm:h-16 flex items-center justify-center rounded-3xl bg-white/20 border-2 border-white/10 hover:bg-white/30 text-white transition-all active:scale-95 flex-shrink-0"
+                                            title="Scan Barcode"
+                                        >
+                                            <ScanBarcode size={24} />
+                                        </button>
+                                    </div>
+                                    {ticketNum.length > 3 && (
+                                        <div className="flex gap-2 w-full px-4 slide-in-up">
+                                            {navigator.share && (
+                                                <button 
+                                                    onClick={handleCitationShare} 
+                                                    className="flex-1 py-2.5 bg-white/10 rounded-xl hover:bg-white/20 transition-colors text-xs font-bold flex items-center justify-center gap-2 active:scale-95"
+                                                >
+                                                    <Share2 size={14} /> Share
+                                                </button>
+                                            )}
+                                            <button 
+                                                onClick={handleCitationCopy} 
+                                                className="flex-1 py-2.5 bg-white/10 rounded-xl hover:bg-white/20 transition-colors text-xs font-bold flex items-center justify-center gap-2 active:scale-95"
+                                            >
+                                                {copyFeedback ? <CheckCircle size={14} className="text-green-400"/> : <Copy size={14} />}
+                                                {copyFeedback || "Copy Link"}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
                             {isCitationMode && mode === 'plate' && (
-                                <div className="flex items-center space-x-2 animate-in fade-in slide-in-from-bottom-4 duration-300">
-                                    <div className="relative w-1/3">
-                                        <select 
-                                            value={plateState}
-                                            onChange={(e) => setPlateState(e.target.value)}
-                                            className="w-full bg-white/20 border-2 border-white/10 focus:border-white/50 text-white rounded-3xl py-3 sm:py-4 px-2 sm:px-4 text-center text-base sm:text-lg font-bold appearance-none outline-none transition-all"
+                                <div className="flex flex-col items-center w-full space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                    <div className="flex items-center gap-2 w-full">
+                                        <div className="relative w-[80px] flex-shrink-0">
+                                            <select 
+                                                value={plateState} 
+                                                onChange={(e) => setPlateState(e.target.value)} 
+                                                className="w-full bg-white/20 border-2 border-white/10 focus:border-white/50 text-white rounded-3xl py-3 h-14 sm:h-16 px-2 text-center text-base sm:text-lg font-bold appearance-none outline-none transition-all"
+                                            >
+                                                {US_STATES.map(s => <option key={s} value={s} className="text-black">{s}</option>)}
+                                            </select>
+                                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-white/60">▼</div>
+                                        </div>
+                                        <input 
+                                            type="text" 
+                                            placeholder="PLATE #" 
+                                            className={`flex-1 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 h-14 sm:h-16 px-4 text-center text-xl sm:text-xl font-mono uppercase outline-none transition-all ${shakeField === 'plate' ? 'shake-input border-[#D11241]' : 'border-white/10'}`} 
+                                            value={plateNum} 
+                                            onChange={(e) => setPlateNum(e.target.value.toUpperCase())} 
+                                        />
+                                        <button 
+                                            onClick={handleCameraClick}
+                                            disabled={isScanning}
+                                            className={`w-14 sm:w-16 h-14 sm:h-16 flex items-center justify-center rounded-3xl bg-white/20 border-2 border-white/10 hover:bg-white/30 text-white transition-all active:scale-95 flex-shrink-0 ${isScanning ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            title="Scan Plate"
                                         >
-                                            {US_STATES.map(s => <option key={s} value={s} className="text-black">{s}</option>)}
-                                        </select>
-                                        <div className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/60">▼</div>
+                                            {isScanning ? <Loader2 size={24} className="animate-spin" /> : <Camera size={24} />}
+                                        </button>
                                     </div>
-                                    <input 
-                                        type="text" 
-                                        placeholder="PLATE #" 
-                                        className={`w-2/3 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 sm:py-4 px-4 sm:px-6 text-center text-xl sm:text-xl font-mono uppercase outline-none transition-all ${shakeField === 'plate' ? 'shake-input border-[#D11241]' : 'border-white/10'}`}
-                                        value={plateNum}
-                                        onChange={(e) => setPlateNum(e.target.value.toUpperCase())}
-                                    />
+                                    {plateNum.length > 2 && (
+                                        <div className="flex gap-2 w-full px-4 slide-in-up">
+                                            {navigator.share && (
+                                                <button 
+                                                    onClick={handleCitationShare} 
+                                                    className="flex-1 py-2.5 bg-white/10 rounded-xl hover:bg-white/20 transition-colors text-xs font-bold flex items-center justify-center gap-2 active:scale-95"
+                                                >
+                                                    <Share2 size={14} /> Share
+                                                </button>
+                                            )}
+                                            <button 
+                                                onClick={handleCitationCopy} 
+                                                className="flex-1 py-2.5 bg-white/10 rounded-xl hover:bg-white/20 transition-colors text-xs font-bold flex items-center justify-center gap-2 active:scale-95"
+                                            >
+                                                {copyFeedback ? <CheckCircle size={14} className="text-green-400"/> : <Copy size={14} />}
+                                                {copyFeedback || "Copy Link"}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
 
                         {error && (
-                            <div className="bg-[#D11241]/20 border border-[#D11241] rounded-2xl p-3 text-center animate-in zoom-in duration-200">
+                            <div className="bg-[#D11241]/20 border border-[#D11241] rounded-2xl p-3 text-center slide-in-down">
                                 <p className="text-white text-sm font-semibold flex items-center justify-center gap-2">
                                     <AlertTriangle size={16} /> {error}
                                 </p>
                             </div>
                         )}
+
+                        {/* Recent Searches */}
+                        {!isCitationMode && recent.length > 0 && (
+                            <div className="space-y-2 slide-in-up">
+                                <div className="flex items-center justify-between px-2">
+                                    <h3 className="text-white/60 text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                                        <History size={16} /> Recent
+                                    </h3>
+                                    <button 
+                                        onClick={() => { clearRecent(); vibrate(10); }} 
+                                        className="text-white/40 hover:text-white/60 text-xs flex items-center gap-1 transition-colors"
+                                    >
+                                        <Trash2 size={14} /> Clear
+                                    </button>
+                                </div>
+                                <div className="space-y-1 max-h-40 overflow-y-auto hide-scroll">
+                                    {recent.slice(0, 5).map((search, idx) => (
+                                        <RecentSearchItem 
+                                            key={idx} 
+                                            search={search} 
+                                            onSelect={handleRecentSelect}
+                                            onRemove={(s) => {
+                                                const updated = recent.filter(r => r.query !== s.query);
+                                                storage.set(CONFIG.STORAGE_KEYS.RECENT, updated);
+                                                vibrate(10);
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Favorites */}
+                        {!isCitationMode && favorites.length > 0 && (
+                            <div className="space-y-2 slide-in-up" style={{ animationDelay: '0.1s' }}>
+                                <h3 className="text-white/60 text-sm font-bold uppercase tracking-wider flex items-center gap-2 px-2">
+                                    <Star size={16} className="text-yellow-500 fill-yellow-500" /> Favorites
+                                </h3>
+                                <div className="space-y-1 max-h-40 overflow-y-auto hide-scroll">
+                                    {favorites.slice(0, 5).map((fav) => (
+                                        <FavoriteItem 
+                                            key={fav.id} 
+                                            favorite={fav} 
+                                            onSelect={handleFavoriteSelect}
+                                            onRemove={(id) => { removeFavorite(id); vibrate(10); }}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                <div className="flex-1 flex items-center justify-center relative pb-32">
+                <div className="flex-grow flex items-center justify-center relative pb-32">
                     <div className="absolute w-48 h-48 sm:w-64 sm:h-64 border border-white/5 rounded-full pointer-events-none" />
                     <div className="absolute w-36 h-36 sm:w-48 sm:h-48 border border-white/10 rounded-full pointer-events-none" />
-                    
-                    <div 
-                        className={`circle-transition ${isExpanding ? 'expanding' : ''} ${!isExpanding && view !== 'search' && !isCitationMode ? 'closing' : ''}`}
-                    />
+                    <div className={`circle-transition ${isExpanding ? 'expanding' : ''} ${!isExpanding && view !== 'search' && !isCitationMode ? 'closing' : ''}`} />
 
-                    {/* COLD START WARNING */}
                     {loading && !isExpanding && (
                         <div className="absolute -top-24 sm:-top-20 left-0 right-0 flex justify-center z-40 px-6">
-                            <div className="bg-[#003B71]/80 backdrop-blur-md border border-white/10 p-3 rounded-2xl max-w-xs text-center animate-pulse">
+                            <div className="bg-[#003B71]/80 backdrop-blur-md border border-white/10 p-3 rounded-2xl max-w-xs text-center animate-pulse slide-in-down">
                                 <div className="flex justify-center mb-1">
                                     <CloudOff className="text-white/60" size={20} />
                                 </div>
@@ -795,106 +1502,232 @@ export default function App() {
                     )}
 
                     <button 
-                        onClick={handleSearch}
-                        className="group relative w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-white shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.3)] transition-all duration-300 active:scale-95 flex items-center justify-center z-30"
+                        onClick={handleSearch} 
+                        disabled={loading}
+                        className="group relative w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-white shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.3)] transition-all duration-300 active:scale-95 flex items-center justify-center z-30 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <div className="absolute inset-1 rounded-full border-4 border-double border-[#003B71]/10 group-hover:border-[#003B71]/30 transition-colors" />
                         <div className="flex flex-col items-center text-[#003B71]">
                             {loading && !isExpanding ? (
-                                <RotateCw className="animate-spin" size={24} />
+                                <RotateCw className="animate-spin" size={32} />
                             ) : (
                                 <>
-                                    {isCitationMode ? <Search size={24} strokeWidth={2.5} className="sm:hidden" /> : <Search size={24} strokeWidth={2.5} className="sm:hidden" />}
-                                    {isCitationMode ? <Search size={32} strokeWidth={2.5} className="hidden sm:block" /> : <Search size={32} strokeWidth={2.5} className="hidden sm:block" />}
-                                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest mt-1">
+                                    {isCitationMode ? <Search size={32} strokeWidth={2.5} className="sm:hidden" /> : <Search size={32} strokeWidth={2.5} className="sm:hidden" />}
+                                    {isCitationMode ? <Search size={40} strokeWidth={2.5} className="hidden sm:block" /> : <Search size={40} strokeWidth={2.5} className="hidden sm:block" />}
+                                    <span className="text-xs sm:text-sm font-black uppercase tracking-widest mt-1">
                                         {isCitationMode ? 'Lookup' : 'Find'}
                                     </span>
                                 </>
                             )}
                         </div>
                     </button>
+
+                    {/* Navigation tabs */}
+                    <div className="absolute inset-x-0 top-1/2 -mt-16 pointer-events-none">
+                        <div className={`absolute left-0 transition-transform duration-500 ${isCitationMode ? 'translate-x-0' : '-translate-x-full'}`}>
+                            <button 
+                                onClick={toggleCitationMode} 
+                                className="pointer-events-auto bg-white/10 backdrop-blur-md hover:bg-white/20 border-r border-y border-white/20 text-white py-4 pl-4 pr-6 rounded-r-2xl shadow-lg flex items-center gap-2 group transition-all active:scale-95"
+                            >
+                                <ChevronLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
+                                <div className="text-left">
+                                    <span className="block text-[10px] uppercase font-bold opacity-60">Go To</span>
+                                    <span className="block font-bold text-sm">Space Locator</span>
+                                </div>
+                            </button>
+                        </div>
+
+                        <div className={`absolute right-0 transition-transform duration-500 ${!isCitationMode ? 'translate-x-0' : 'translate-x-full'}`}>
+                            <button 
+                                onClick={toggleCitationMode} 
+                                className="pointer-events-auto bg-white/10 backdrop-blur-md hover:bg-white/20 border-l border-y border-white/20 text-white py-4 pl-6 pr-4 rounded-l-2xl shadow-lg flex items-center gap-2 group transition-all active:scale-95"
+                            >
+                                <div className="text-right">
+                                    <span className="block text-[10px] uppercase font-bold opacity-60">Go To</span>
+                                    <span className="block font-bold text-sm">Citation Portal</span>
+                                </div>
+                                <ChevronRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </main>
 
             <div className={`fixed bottom-6 left-0 right-0 text-center z-10 transition-opacity duration-300 ${view === 'results' ? 'opacity-0' : 'opacity-80'}`}>
-                <div className="flex flex-col items-center gap-4 text-xs" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)' }}>
-                    
-                    {/* NEW SWITCH BUTTON */}
-                    <button 
-                        onClick={toggleCitationMode}
-                        className="mb-2 bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full backdrop-blur-md text-xs sm:text-sm font-bold transition-all active:scale-95 flex items-center gap-2 border border-white/20 shadow-lg group"
-                    >
-                        {isCitationMode ? (
-                            <>
-                                <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
-                                Switch to Space Locator
-                            </>
-                        ) : (
-                            <>
-                                Switch to Citation Portal 
-                                <ChevronLeft size={16} className="rotate-180 group-hover:translate-x-1 transition-transform" />
-                            </>
-                        )}
-                    </button>
-
+                <div className="flex flex-col items-center gap-4 text-sm" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)' }}>
                     <div className="flex items-center gap-3">
                         <span className="font-medium">Built by <span style={{ color: '#fff' }}>William Dugann</span></span>
                         <span>|</span>
                         <a href="https://github.com/dugann" className="hover:text-white transition-colors p-1" target="_blank" rel="noreferrer">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
                         </a>
                         <a href="https://www.linkedin.com/in/dugann/" className="transition-colors p-1 hover:text-white" style={{ color: 'white' }} target="_blank" rel="noreferrer">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div className={`fixed inset-x-0 bottom-0 z-30 bg-slate-200 text-[#003B71] rounded-t-[2.5rem] shadow-2xl transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col ${view === 'results' ? 'translate-y-0 h-[85vh]' : 'translate-y-full h-[85vh]'}`}>
-                
+            {/* Results Panel */}
+            <div className={`fixed inset-x-0 bottom-0 z-30 bg-slate-200 text-[#003B71] rounded-t-[2.5rem] shadow-2xl transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col safe-bottom ${view === 'results' ? 'translate-y-0 h-[85vh]' : 'translate-y-full h-[85vh]'}`}>
                 <div className="px-6 py-4 flex items-center justify-between bg-[#003B71] rounded-t-[2.5rem] sticky top-0 z-40 shadow-md">
                     <button 
-                        onClick={handleNewSearch}
+                        onClick={handleNewSearch} 
                         className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl transition-colors text-sm font-bold active:scale-95"
                     >
-                        <RotateCw size={18} />
-                        New Search
+                        <RotateCw size={18} /> New Search
                     </button>
                     <div className="text-right">
-                        <span className="block font-bold text-white text-xl leading-none">
-                            {results.length}
-                        </span>
+                        <span className="block font-bold text-white text-xl leading-none">{results.length}</span>
                         <span className="text-[10px] text-white/60 font-bold uppercase tracking-wider">Results</span>
                     </div>
                 </div>
-
-                {/* REMOVED 'prevent-overscroll' class from below */}
-                <div className="flex-1 overflow-y-auto hide-scroll p-4 bg-slate-200">
-                    {dataDate && (
-                        <div className="mb-4 p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex items-start gap-3 shadow-sm">
-                            <Info className="text-blue-600 shrink-0 mt-0.5" size={18} />
-                            <p className="text-xs text-blue-800 leading-relaxed font-medium">
-                                These results are dependent on the accuracy of City maintained records which were last updated on <span className="font-bold">{dataDate}</span>.
-                            </p>
+                
+                <div className="flex-1 overflow-y-auto hide-scroll bg-slate-200">
+                    {loading ? (
+                        <LoadingSkeleton />
+                    ) : results.length === 0 ? (
+                        <EmptyState 
+                            message="No results found. Try adjusting your search." 
+                            icon={Search}
+                            action={
+                                <button 
+                                    onClick={handleNewSearch}
+                                    className="px-6 py-2.5 bg-[#003B71] text-white rounded-xl font-bold active:scale-95 transition-all"
+                                >
+                                    New Search
+                                </button>
+                            }
+                        />
+                    ) : (
+                        <div className="p-4">
+                            {dataDate && (
+                                <div className="mb-4 p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex items-start gap-3 shadow-sm slide-in-up">
+                                    <Info className="text-blue-600 shrink-0 mt-0.5" size={18} />
+                                    <p className="text-xs text-blue-800 leading-relaxed font-medium">
+                                        These results are dependent on the accuracy of City maintained records which were last updated on <span className="font-bold">{dataDate}</span>.
+                                    </p>
+                                </div>
+                            )}
+                            <div className={view === 'results' ? 'fade-enter-active' : 'fade-enter'}>
+                                {results.map((item, idx) => ( 
+                                    <ResultItem 
+                                        key={idx} 
+                                        item={item} 
+                                        onFavorite={(fav) => {
+                                            if (isFavorite(fav.id)) {
+                                                removeFavorite(fav.id);
+                                                showToast('Removed from favorites', 'info');
+                                            } else {
+                                                addFavorite(fav);
+                                                showToast('Added to favorites', 'success');
+                                            }
+                                        }}
+                                        isFavorite={isFavorite(item.ids.join('-'))}
+                                    /> 
+                                ))}
+                            </div>
                         </div>
                     )}
-
-                    <div className={view === 'results' ? 'fade-enter-active' : 'fade-enter'}>
-                        {results.map((item, idx) => (
-                            <ResultItem key={idx} item={item} />
-                        ))}
-                    </div>
                 </div>
             </div>
 
+            {/* Settings Modal */}
+            {showSettingsModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 fade-in">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowSettingsModal(false)} />
+                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm relative z-10 slide-in-up text-black">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-[#003B71] flex items-center gap-2">
+                                <Settings size={24} /> Settings
+                            </h2>
+                            <button 
+                                onClick={() => setShowSettingsModal(false)} 
+                                className="p-1 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+                            >
+                                <X size={20} className="text-gray-500" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="bg-gray-50 rounded-2xl p-4">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <Zap size={18} className="text-[#003B71]" />
+                                        <span className="font-bold text-sm">Performance</span>
+                                    </div>
+                                </div>
+                                <p className="text-xs text-gray-600">
+                                    {isOnline ? 
+                                        <span className="flex items-center gap-2"><Wifi size={14} className="text-green-500" /> Connected</span> : 
+                                        <span className="flex items-center gap-2"><WifiOff size={14} className="text-red-500" /> Offline</span>
+                                    }
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 rounded-2xl p-4">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <History size={18} className="text-[#003B71]" />
+                                        <span className="font-bold text-sm">Data</span>
+                                    </div>
+                                    <button 
+                                        onClick={() => {
+                                            clearRecent();
+                                            showToast('Recent searches cleared', 'success');
+                                            vibrate(10);
+                                        }}
+                                        className="text-xs text-red-600 hover:text-red-700 font-bold"
+                                    >
+                                        Clear Recent
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-600">
+                                    {recent.length} recent searches • {favorites.length} favorites
+                                </p>
+                            </div>
+
+                            {dataDate && (
+                                <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Info size={18} className="text-blue-600" />
+                                        <span className="font-bold text-sm text-blue-900">Data Source</span>
+                                    </div>
+                                    <p className="text-xs text-blue-700">
+                                        IndyGIS metered-parking layer
+                                    </p>
+                                    <p className="text-xs text-blue-600 mt-1">
+                                        Last updated: <span className="font-bold">{dataDate}</span>
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        <button 
+                            onClick={() => setShowInfoModal(true)} 
+                            className="w-full mt-6 py-3 bg-[#003B71] text-white font-bold rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
+                        >
+                            <Info size={18} /> About Open Curb
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Info Modal */}
             {showInfoModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 fade-in">
                     <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowInfoModal(false)} />
-                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm relative z-10 animate-in zoom-in-95 duration-200 text-black">
+                    <div className="bg-white rounded-3xl p-6 w-full max-w-sm relative z-10 slide-in-up text-black">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-bold text-[#003B71]">System Intel</h2>
-                            <button onClick={() => setShowInfoModal(false)} className="p-1 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"><X size={20} className="text-gray-500" /></button>
+                            <button 
+                                onClick={() => setShowInfoModal(false)} 
+                                className="p-1 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+                            >
+                                <X size={20} className="text-gray-500" />
+                            </button>
                         </div>
+                        
                         <p className="text-gray-600 text-sm leading-relaxed mb-6">
                             This utility bridges a direct connection to Indy's Open Data MapServer (Transportation Layer 14) for field asset verification.
                         </p>
@@ -916,12 +1749,18 @@ export default function App() {
                                 </a>
                             </div>
                         </div>
-
+                        
                         <div className="bg-gray-50 rounded-2xl p-4 mb-4">
                             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Data Source</p>
                             <p className="text-[#003B71] font-mono text-xs">IndyGIS :: metered-parking</p>
                         </div>
-                        <button onClick={() => setShowInfoModal(false)} className="w-full py-3 bg-[#003B71] text-white font-bold rounded-xl active:scale-95 transition-transform">Dismiss</button>
+                        
+                        <button 
+                            onClick={() => setShowInfoModal(false)} 
+                            className="w-full py-3 bg-[#003B71] text-white font-bold rounded-xl active:scale-95 transition-transform"
+                        >
+                            Dismiss
+                        </button>
                     </div>
                 </div>
             )}
