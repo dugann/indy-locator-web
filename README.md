@@ -1,4 +1,4 @@
-<div align="center">
+<div align="left">
 
 # 🅿️ Open Curb
 ### Indianapolis Parking Asset & Citation Utility
