@@ -1324,7 +1324,7 @@ export default function App() {
             <header className={`relative z-10 safe-top px-6 py-6 grid grid-cols-[1fr_auto_1fr] sm:flex sm:justify-between items-center transition-opacity duration-300 ${view !== 'search' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                 <div className="col-start-2">
                     <button onClick={toggleCitationMode} className="focus:outline-none active:scale-95 transition-transform block">
-                        <img src="https://raw.githubusercontent.com/dugann/indy-locator-web/main/logo.png" alt="Open Curb" className="h-10 sm:h-14 w-auto object-contain drop-shadow-md" />
+                        <img src="https://raw.githubusercontent.com/dugann/indy-locator-web/main/logo.png" alt="Open Curb" className="h-8 sm:h-14 w-auto object-contain drop-shadow-md" />
                     </button>
                 </div>
                 
@@ -1607,7 +1607,7 @@ export default function App() {
 
                     <button 
                         onClick={toggleCitationMode}
-                        className="mt-8 flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl backdrop-blur-md transition-all active:scale-95 border border-white/10 group z-30"
+                        className="mt-8 sm:my-auto flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl backdrop-blur-md transition-all active:scale-95 border border-white/10 group z-30"
                     >
                         {isCitationMode ? <MapIcon size={20} className="text-white/80 group-hover:text-white" /> : <FileText size={20} className="text-white/80 group-hover:text-white" />}
                         <div className="text-left">
