@@ -7,36 +7,16 @@ import {
 import { Html5Qrcode } from "html5-qrcode";
 import { CONFIG, US_STATES, luhnValidate, vibrate, fetchWithRetry, storage } from './utils';
 
-// --- DYNAMIC STYLES ---
-const customStyles = `
-    @keyframes pulse-ring { 0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); } 70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); } 100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
-    @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes slideInDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
-    .circle-transition { position: absolute; top: 50%; left: 50%; width: 128px; height: 128px; background-color: #E1E8F0; border-radius: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; pointer-events: none; z-index: 25; }
-    .circle-transition.expanding { opacity: 1; transform: translate(-50%, -50%) scale(25); transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.1s ease-in; }
-    .circle-transition.closing { transform: translate(-50%, -50%) scale(0); transition: transform 0.5s cubic-bezier(0.5, 0, 0.75, 0); }
-    .fade-enter { opacity: 0; transform: translateY(10px); }
-    .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.4s ease-out, transform 0.4s ease-out; }
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
-    .shake-input { animation: shake 0.3s ease-in-out; border-color: #D11241 !important; }
-    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-    .slide-in-up { animation: slideInUp 0.3s ease-out; }
-    .slide-in-down { animation: slideInDown 0.3s ease-out; }
-    .fade-in { animation: fadeIn 0.3s ease-out; }
-    .safe-top { padding-top: env(safe-area-inset-top); }
-    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-    #reader { width: 100%; border-radius: 1rem; overflow: hidden; background: black; min-height: 250px; }
-    #reader video { object-fit: cover; border-radius: 1rem; }
-`;
-
 // --- CUSTOM ICONS ---
 const GoogleDirectionsIcon = ({ size = 20, className = "" }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg"><path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/></svg>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/>
+    </svg>
 );
 const GooglePegmanIcon = ({ size = 20, className = "" }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg"><path d="M12 2C9.5 2 7.5 4 7.5 6.5C7.5 8.7 9.1 10.5 11.15 10.9V22H12.85V16H14.5V22H16.2V10.9C18.25 10.5 19.85 8.7 19.85 6.5C19.85 4 17.85 2 15.35 2H12ZM12 4H15.35C16.75 4 17.85 5.1 17.85 6.5C17.85 7.9 16.75 9 15.35 9C14.85 9 14.4 8.85 14 8.6V7H12V8.6C11.6 8.85 11.15 9 10.65 9C9.25 9 8.15 7.9 8.15 6.5C8.15 5.1 9.25 4 10.65 4H12Z"/></svg>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C9.5 2 7.5 4 7.5 6.5C7.5 8.7 9.1 10.5 11.15 10.9V22H12.85V16H14.5V22H16.2V10.9C18.25 10.5 19.85 8.7 19.85 6.5C19.85 4 17.85 2 15.35 2H12ZM12 4H15.35C16.75 4 17.85 5.1 17.85 6.5C17.85 7.9 16.75 9 15.35 9C14.85 9 14.4 8.85 14 8.6V7H12V8.6C11.6 8.85 11.15 9 10.65 9C9.25 9 8.15 7.9 8.15 6.5C8.15 5.1 9.25 4 10.65 4H12Z"/>
+    </svg>
 );
 
 // --- HOOKS ---
@@ -88,7 +68,7 @@ function useRecentSearches() {
     return { recent, addRecent, clearRecent };
 }
 
-// --- COMPONENTS ---
+// --- SUB-COMPONENTS ---
 const LoadingSkeleton = () => (
     <div className="space-y-4 p-4">
         {[1, 2, 3].map(i => (
@@ -259,6 +239,7 @@ export default function App() {
     const [isExpanding, setIsExpanding] = useState(false);
     const [isScanning, setIsScanning] = useState(false); 
     const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+    const [copyFeedback, setCopyFeedback] = useState(null);
     
     const [streets, setStreets] = useState([]);
     const [dataDate, setDataDate] = useState(null);
@@ -276,7 +257,6 @@ export default function App() {
     const [toast, setToast] = useState(null);
     const [installPrompt, setInstallPrompt] = useState(null);
     const [isStandalone, setIsStandalone] = useState(false);
-    const [copyFeedback, setCopyFeedback] = useState(null);
     
     const isOnline = useOnlineStatus();
     const { favorites, addFavorite, removeFavorite, isFavorite } = useFavorites();
@@ -418,7 +398,6 @@ export default function App() {
 
     return (
         <div className="h-screen w-screen relative flex flex-col font-sans text-white">
-            <style>{customStyles}</style>
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <input type="file" accept="image/*" capture="environment" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
             {showBarcodeScanner && <BarcodeScannerModal onClose={() => setShowBarcodeScanner(false)} onDetected={handleBarcodeDetected} />}
