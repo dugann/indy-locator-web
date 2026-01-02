@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --indy-blue: #003B71;
+    --indy-red: #D11241;
+}
+body {
+    background-color: var(--indy-blue);
+    color: white;
+    font-family: 'Inter', sans-serif;
+    overscroll-behavior-y: auto; 
+}
+.hide-scroll::-webkit-scrollbar { display: none; }
+.hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+@supports (padding-top: env(safe-area-inset-top)) {
+    .safe-top { padding-top: env(safe-area-inset-top); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+}
+/* Animations extracted from index.html */
+@keyframes pulse-ring {
+    0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); }
+    70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); }
+    100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+@keyframes slideInUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+@keyframes slideInDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shimmer {
+    0% { background-position: -468px 0; }
+    100% { background-position: 468px 0; }
+}
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+.shake-input { animation: shake 0.3s ease-in-out; border-color: #D11241 !important; }
+.slide-in-up { animation: slideInUp 0.3s ease-out; }
+.slide-in-down { animation: slideInDown 0.3s ease-out; }
+.fade-in { animation: fadeIn 0.3s ease-out; }
+.circle-transition {
+    position: absolute; top: 50%; left: 50%; width: 128px; height: 128px;
+    background-color: #E1E8F0; border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0); opacity: 0; pointer-events: none; z-index: 25;
+}
+.circle-transition.expanding {
+    opacity: 1; transform: translate(-50%, -50%) scale(25);
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.1s ease-in;
+}
+.circle-transition.closing {
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.5s cubic-bezier(0.5, 0, 0.75, 0);
+}
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%; animation: shimmer 1.5s infinite;
+}
+/* Barcode Scanner */
+#reader { width: 100%; border-radius: 1rem; overflow: hidden; }
+#reader video { object-fit: cover; border-radius: 1rem; }
