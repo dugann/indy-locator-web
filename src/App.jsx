@@ -2,10 +2,45 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
     Search, MapPin, Info, X, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download, 
     Map as MapIcon, CloudOff, Share2, History, Trash2, Camera, Settings, BookmarkPlus, Bookmark,
-    Wifi, WifiOff, Zap, Clock, Loader2, ScanBarcode, FileText
+    Wifi, WifiOff, Zap, Clock, Loader2, ScanBarcode, FileText, ChevronLeft, ChevronRight, Navigation
 } from 'lucide-react';
-import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 import { CONFIG, US_STATES, luhnValidate, vibrate, fetchWithRetry, storage } from './utils';
+
+// --- DYNAMIC STYLES (From your original file) ---
+const customStyles = `
+    @keyframes pulse-ring {
+        0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); }
+        70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); }
+        100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+    }
+    @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes slideInDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
+    
+    .circle-transition {
+        position: absolute; top: 50%; left: 50%; width: 128px; height: 128px;
+        background-color: #E1E8F0; border-radius: 50%;
+        transform: translate(-50%, -50%) scale(0); opacity: 0; pointer-events: none; z-index: 25;
+    }
+    .circle-transition.expanding {
+        opacity: 1; transform: translate(-50%, -50%) scale(25);
+        transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.1s ease-in;
+    }
+    .circle-transition.closing {
+        transform: translate(-50%, -50%) scale(0);
+        transition: transform 0.5s cubic-bezier(0.5, 0, 0.75, 0);
+    }
+    .fade-enter { opacity: 0; transform: translateY(10px); }
+    .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.4s ease-out, transform 0.4s ease-out; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+    .shake-input { animation: shake 0.3s ease-in-out; border-color: #D11241 !important; }
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    .slide-in-up { animation: slideInUp 0.3s ease-out; }
+    .slide-in-down { animation: slideInDown 0.3s ease-out; }
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+`;
 
 // --- CUSTOM ICONS ---
 const GoogleDirectionsIcon = ({ size = 20, className = "" }) => (
@@ -256,6 +291,7 @@ export default function App() {
     const [toast, setToast] = useState(null);
     const [installPrompt, setInstallPrompt] = useState(null);
     const [isStandalone, setIsStandalone] = useState(false);
+    const [copyFeedback, setCopyFeedback] = useState(null);
     
     const isOnline = useOnlineStatus();
     const { favorites, addFavorite, removeFavorite, isFavorite } = useFavorites();
@@ -310,16 +346,64 @@ export default function App() {
         finally { setIsScanning(false); event.target.value = null; }
     };
 
+    const handleBarcodeDetected = (code) => {
+        setTicketNum(code);
+        showToast(`Ticket scanned: ${code}`, 'success');
+    };
+
+    const getCitationShareData = () => {
+        let shareUrl = window.location.origin + window.location.pathname;
+        let text = "";
+        if (mode === 'ticket' && ticketNum) {
+            shareUrl += `?ticket=${ticketNum}`;
+            text = `Pay citation #${ticketNum}: ${shareUrl}`;
+        } else if (mode === 'plate' && plateNum) {
+            shareUrl += `?plate=${plateNum}&state=${plateState}`;
+            text = `Pay citations for ${plateState} plate ${plateNum}: ${shareUrl}`;
+        }
+        return { shareUrl, text };
+    };
+
+    const handleCitationShare = async () => {
+        const { shareUrl, text } = getCitationShareData();
+        if (!text) return;
+        if (navigator.share) {
+            try { await navigator.share({ title: "Open Curb Citation", text: text, url: shareUrl }); vibrate(10); } catch (err) { console.log('Share dismissed'); }
+        } else {
+            handleCitationCopy();
+        }
+    };
+
+    const handleCitationCopy = async () => {
+        const { text } = getCitationShareData();
+        if (!text) return;
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopyFeedback("Copied!"); vibrate([10, 50, 10]);
+            setTimeout(() => setCopyFeedback(null), 2000);
+        } catch (err) { console.error("Copy failed"); }
+    };
+
     const handleSearchClick = () => {
         setError(null); setShakeField(null);
         if (isCitationMode) {
-             if (mode === 'ticket') { if(!luhnValidate(ticketNum) || ticketNum.length !== 9) { setError("Invalid Ticket"); setShakeField('ticket'); vibrate(100); return; } }
-             else { if(!plateNum) { setError("Enter Plate"); setShakeField('plate'); vibrate(100); return; } }
+             if (mode === 'ticket') { 
+                 if(!luhnValidate(ticketNum) || ticketNum.length !== 9) { setError("Invalid Ticket"); setShakeField('ticket'); vibrate(100); return; } 
+             } else { 
+                 if(!plateNum) { setError("Enter Plate"); setShakeField('plate'); vibrate(100); return; } 
+             }
              vibrate(10); formRef.current.submit(); return;
         }
         if (mode === 'id' && startId.length < 3) { setError("ID too short"); setShakeField('start'); vibrate(100); return; }
         if (mode === 'street' && streetQuery.length < 2) { setError("Select street"); setShakeField('street'); vibrate(100); return; }
         executeSearch(mode, startId, endId, streetQuery);
+    };
+
+    const handleNewSearch = () => {
+        setIsExpanding(false); vibrate(10);
+        setTimeout(() => { 
+            setView('search'); setStartId(''); setEndId(''); setStreetQuery(''); setResults([]); setError(null); 
+        }, 300);
     };
 
     useEffect(() => {
@@ -338,18 +422,23 @@ export default function App() {
         }
     }, [mode, isCitationMode]);
 
-    // --- FIX INCLUDED HERE ---
+    // --- YOUR EXACT WORKING TOGGLE FUNCTION ---
     const toggleCitationMode = () => {
-        setIsCitationMode(prev => !prev);
-        setMode(prev => !prev ? 'ticket' : 'id'); 
+        setIsCitationMode(!isCitationMode);
+        setMode(isCitationMode ? 'id' : 'ticket');
+        setError(null); 
+        setResults([]); 
+        setView('search');
+        vibrate(10);
     };
-    // -------------------------
+    // ------------------------------------------
 
     return (
         <div className="h-screen w-screen relative flex flex-col font-sans text-white">
+            <style>{customStyles}</style>
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <input type="file" accept="image/*" capture="environment" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
-            {showBarcodeScanner && <BarcodeScannerModal onClose={() => setShowBarcodeScanner(false)} onDetected={(c) => { setTicketNum(c); showToast(`Scanned: ${c}`, 'success'); }} />}
+            {showBarcodeScanner && <BarcodeScannerModal onClose={() => setShowBarcodeScanner(false)} onDetected={handleBarcodeDetected} />}
             <form ref={formRef} action={CONFIG.ETIMS_ENDPOINT} method="POST" target="_blank" className="hidden">
                  <input type="hidden" name="clientcode" value="5I" /><input type="hidden" name="requestType" value="submit" /><input type="hidden" name="clientAccount" value="6" />
                  <input type="hidden" name="paymentType" value={mode === 'ticket' ? 'T' : 'P'} /><input type="hidden" name="documentNum" value={mode === 'ticket' ? ticketNum : `${plateState}${plateNum}`} />
@@ -370,8 +459,8 @@ export default function App() {
                 <div className="mt-4 sm:mt-16 px-6 flex flex-col gap-8">
                     <div className="w-full max-w-md mx-auto space-y-4 relative z-10">
                         <div className="flex bg-white/10 p-1.5 rounded-2xl border border-white/20">
-                            <button onClick={() => setMode(isCitationMode ? 'ticket' : 'id')} className={`flex-1 py-4 rounded-xl font-semibold transition-all ${mode === 'id' || mode === 'ticket' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60'}`}>{isCitationMode ? 'Ticket #' : 'Meter ID'}</button>
-                            <button onClick={() => setMode(isCitationMode ? 'plate' : 'street')} className={`flex-1 py-4 rounded-xl font-semibold transition-all ${mode === 'street' || mode === 'plate' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60'}`}>{isCitationMode ? 'License Plate' : 'Street Name'}</button>
+                            <button onClick={() => { setMode(isCitationMode ? 'ticket' : 'id'); setError(null); vibrate(10); }} className={`flex-1 py-4 rounded-xl font-semibold transition-all ${mode === 'id' || mode === 'ticket' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60'}`}>{isCitationMode ? 'Ticket #' : 'Meter ID'}</button>
+                            <button onClick={() => { setMode(isCitationMode ? 'plate' : 'street'); setError(null); vibrate(10); }} className={`flex-1 py-4 rounded-xl font-semibold transition-all ${mode === 'street' || mode === 'plate' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60'}`}>{isCitationMode ? 'License Plate' : 'Street Name'}</button>
                         </div>
                         
                         <div className="min-h-[80px] flex flex-col justify-center">
@@ -415,21 +504,29 @@ export default function App() {
                             <div className="flex flex-col items-center text-[#003B71]">{loading ? <RotateCw className="animate-spin" size={32} /> : <Search size={32} strokeWidth={2.5} />}<span className="text-xs font-black uppercase mt-1">{isCitationMode ? 'Lookup' : 'Find'}</span></div>
                         </button>
                     </div>
-                    <button onClick={() => { setIsCitationMode(!isCitationMode); setMode(isCitationMode ? 'id' : 'ticket'); }} className="mt-8 flex items-center gap-2 bg-white/10 px-6 py-3 rounded-xl border border-white/10 group z-30">
-                        {isCitationMode ? <MapIcon size={20} /> : <FileText size={20} />}
-                        <div className="text-left"><span className="block text-[10px] uppercase font-bold text-white/60">Switch To</span><span className="block font-bold text-sm text-white">{isCitationMode ? "Space Locator" : "Citation Portal"}</span></div>
-                    </button>
+                    <div className="mt-8 flex items-center gap-2">
+                        <div className={`transition-transform duration-500 ${isCitationMode ? 'translate-x-0' : '-translate-x-full'}`}>
+                            <button onClick={toggleCitationMode} className="bg-white/10 hover:bg-white/20 border border-white/20 text-white py-3 px-6 rounded-xl flex items-center gap-2">
+                                <ChevronLeft size={20} /> Space Locator
+                            </button>
+                        </div>
+                        <div className={`transition-transform duration-500 ${!isCitationMode ? 'translate-x-0' : 'translate-x-full'}`}>
+                            <button onClick={toggleCitationMode} className="bg-white/10 hover:bg-white/20 border border-white/20 text-white py-3 px-6 rounded-xl flex items-center gap-2">
+                                Citation Portal <ChevronRight size={20} />
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </main>
 
             {/* RESULTS PANEL */}
             <div className={`fixed inset-x-0 bottom-0 z-30 bg-slate-200 text-[#003B71] rounded-t-[2.5rem] shadow-2xl transition-transform duration-500 flex flex-col safe-bottom ${view === 'results' ? 'translate-y-0 h-[85vh]' : 'translate-y-full h-[85vh]'}`}>
                 <div className="px-6 py-4 flex items-center justify-between bg-[#003B71] rounded-t-[2.5rem] sticky top-0 z-40 shadow-md">
-                    <button onClick={() => { setIsExpanding(false); setTimeout(() => { setView('search'); setResults([]); }, 300); }} className="flex items-center gap-2 bg-white/10 text-white px-5 py-2.5 rounded-xl text-sm font-bold"><RotateCw size={18} /> New Search</button>
+                    <button onClick={handleNewSearch} className="flex items-center gap-2 bg-white/10 text-white px-5 py-2.5 rounded-xl text-sm font-bold"><RotateCw size={18} /> New Search</button>
                     <div className="text-right"><span className="block font-bold text-white text-xl leading-none">{results.length}</span><span className="text-[10px] text-white/60 font-bold uppercase">Results</span></div>
                 </div>
                 <div className="flex-1 overflow-y-auto hide-scroll bg-slate-200 p-4">
-                    {loading ? <LoadingSkeleton /> : results.length === 0 ? <EmptyState message="No results found." icon={Search} /> : (
+                    {loading ? <LoadingSkeleton /> : results.length === 0 ? <EmptyState message="No results found." icon={Search} action={<button onClick={handleNewSearch} className="px-6 py-2.5 bg-[#003B71] text-white rounded-xl font-bold">New Search</button>} /> : (
                         <div>
                             {dataDate && <div className="mb-4 p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex items-start gap-3"><Info className="text-blue-600 shrink-0" size={18} /><p className="text-xs text-blue-800">Updated: <b>{dataDate}</b></p></div>}
                             {results.map((item, idx) => <ResultItem key={idx} item={item} onFavorite={(fav) => isFavorite(fav.id) ? removeFavorite(fav.id) : addFavorite(fav)} isFavorite={isFavorite(item.ids.join('-'))} />)}
