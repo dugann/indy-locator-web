@@ -264,6 +264,12 @@ export default function App() {
     const formRef = useRef(null);
     const fileInputRef = useRef(null);
 
+    // --- VERSION VALIDATION LOG ---
+    useEffect(() => {
+        console.log("%c ⭐⭐⭐ VERSION 3.0 LOADED (SIDE-TABS & SCANNER) ⭐⭐⭐", "background: green; color: white; font-size: 20px");
+    }, []);
+    // ------------------------------
+
     const showToast = useCallback((message, type = 'info') => { setToast({ message, type }); }, []);
 
     const executeSearch = async (searchMode, sId, eId, sQuery) => {
@@ -398,6 +404,13 @@ export default function App() {
 
     return (
         <div className="h-screen w-screen relative flex flex-col font-sans text-white">
+            
+            {/* --- DEBUG BANNER (REMOVE AFTER CONFIRMING) --- */}
+            <div className="fixed top-0 left-0 right-0 bg-red-600 text-white text-[10px] font-bold text-center z-[100] safe-top">
+                DEBUG: VERSION 3.0 LOADED
+            </div>
+            {/* ------------------------------------------- */}
+
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <input type="file" accept="image/*" capture="environment" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
             {showBarcodeScanner && <BarcodeScannerModal onClose={() => setShowBarcodeScanner(false)} onDetected={handleBarcodeDetected} />}
