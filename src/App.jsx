@@ -337,10 +337,14 @@ export default function App() {
             else fetchWithRetry(`${CONFIG.BACKEND_URL}/api/streets`).then(r=>r.json()).then(s => { setStreets(s); storage.set(CONFIG.STORAGE_KEYS.STREETS, s); });
         }
     }, [mode, isCitationMode]);
-const toggleCitationMode = () => {
+
+    // --- FIX INCLUDED HERE ---
+    const toggleCitationMode = () => {
         setIsCitationMode(prev => !prev);
         setMode(prev => !prev ? 'ticket' : 'id'); 
     };
+    // -------------------------
+
     return (
         <div className="h-screen w-screen relative flex flex-col font-sans text-white">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
