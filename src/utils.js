@@ -1,7 +1,7 @@
 export const CONFIG = {
-    BACKEND_URL: import.meta.env.VITE_BACKEND_URL || "https://indy-locator-exchange.onrender.com",
+    BACKEND_URL: import.meta.env.VITE_BACKEND_URL || "https://indy-locator-handshake.onrender.com",
     ETIMS_ENDPOINT: "https://prodpci.etimspayments.com/pbw/inputAction.doh",
-    SNAPSHOT_PROXY_URL: "https://indy-locator-exchange.onrender.com/api/proxy/lpr", 
+    SNAPSHOT_PROXY_URL: "https://indy-locator-handshake.onrender.com/api/proxy/lpr", 
     STORAGE_KEYS: {
         STREETS: "opencurb_streets_data",
         META: "opencurb_meta_check",
