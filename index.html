@@ -18,11 +18,18 @@
     <!-- PWA Manifest Link -->
     <link rel="manifest" href="manifest.json">
     
-    <!-- iOS Meta Tags -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#003B71">
-    <link rel="apple-touch-icon" href="icon-192.png">
+<!-- Apple-specific icons (still needed for reliable home screen icon on iOS) -->
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png"> <!-- Your existing one -->
+<!-- Optional: Add more sizes for different devices -->
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+
+<!-- Cross-platform theme color (affects browser UI/status bar on Android & some iOS contexts) -->
+<meta name="theme-color" content="#003B71">
+
+<!-- Legacy Apple tags (optional – keep if you need custom status bar or splash screens; safe to remove if testing shows no issues) -->
+<!-- <meta name="apple-mobile-web-app-capable" content="yes"> -->
+<!-- <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> -->
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
