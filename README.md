@@ -1,154 +1,145 @@
 # Open Curb
 
-![Screenshot placeholder – Home / Search View](docs/screenshot-1.png)
-![Screenshot placeholder – Results / Citation View](docs/screenshot-2.png)
+**[Launch Application](https://dugann.github.io/indy-locator-web/)**
 
-**Open Curb** is a mobile-first Progressive Web App that can be used directly in a web browser **or installed as an app on your phone straight from the website**. There is no app store, no account creation, and no setup friction. Once installed, it launches from the home screen, runs full-screen, and behaves like a purpose-built parking utility rather than a traditional website.
+![Screenshot placeholder: Home / Search View](docs/screenshot-1.png)
+![Screenshot placeholder: Results / Citation View](docs/screenshot-2.png)
 
-The app is designed for real-world use on the street, by the public and by people who work with the public. It prioritizes speed, clarity, and physical usability over feature bloat or administrative complexity.
+**Open Curb** is a mobile-first Progressive Web App for finding parking meters and looking up citations in Indianapolis. Use it directly in any browser or install it as an app on your phone: straight from the website, no app store required.
 
----
+Once installed, it launches from your home screen, runs full-screen, and works like a native app. No account creation, no setup friction.
 
-## Privacy-First by Design
-
-Open Curb does **not** save, retain, or log any information entered into either search mode.
-
-- Meter searches, street searches, ticket numbers, and license plates are processed only to complete the immediate action
-- No user-entered data is stored server-side
-- No searches are retained after the page is closed or refreshed
-- Open Curb does not track users or build usage profiles
-
-Any saved favorites or recent locations are stored **only on the user’s own device** using browser storage and are never transmitted elsewhere.
+> **Important:** Open Curb is a private, independent effort. It is not sponsored by, supported by, or affiliated with the City of Indianapolis.
 
 ---
 
-## Ticket Lookup Is Safe, Validated, and Redirect-Only
+## Privacy-First
 
-The citation lookup feature is intentionally designed to be **safe, temporary, and verifiable**.
+**Open Curb does not save, retain, or log anything you enter.**
 
-### No Data Retention
-When a ticket number or license plate is entered:
-- Open Curb does **not** save or retain the information
-- The data is not logged or stored
-- The app simply launches a new page pointing to the **official Indianapolis citation payment site**
+- Meter searches, ticket numbers, and license plates are processed only to complete your request
+- Nothing is stored server-side
+- No searches are retained after you close the page
+- No user tracking or usage profiling
 
-Open Curb never acts as a payment processor and never sits between the user and the official system.
+Favorites and recent locations are stored **only on your device** using browser storage and are never transmitted elsewhere.
 
-### Official Payment Site Only
-All citation lookups ultimately redirect to the **external, official payment portal used by the City of Indianapolis**. Payments occur entirely outside of Open Curb.
+---
 
-This ensures:
-- Accuracy of balances and citation status
-- Compliance with official payment workflows
-- No handling of financial or sensitive data by Open Curb
+## Citation Lookup: Safe and Redirect-Only
+
+The citation lookup feature redirects you to the **official Indianapolis citation payment portal**. Open Curb never handles payments or sits between you and the official system.
+
+### How It Works
+When you enter a ticket number or license plate:
+- Open Curb validates the format (for ticket numbers)
+- You're redirected to the city's official payment site
+- All balances, citation details, and payments happen there
+- Open Curb doesn't save or log your entry
+
+This ensures accuracy, compliance with official workflows, and zero handling of financial data.
 
 ---
 
 ## Built-In Ticket Number Validation
 
-A key feature of the ticket lookup form is **real-time validation** that prevents invalid or mistyped ticket numbers from being submitted.
+Indianapolis parking citations follow a specific format with a built-in checksum. Open Curb validates ticket numbers **before** redirecting you.
 
-- Indianapolis parking citation numbers follow a defined format
-- Ticket numbers include a checksum that can be validated mathematically
-- The form blocks submission of numbers that do not pass validation
-- Users receive immediate feedback before being redirected
+Why this matters: The official payment portal allows payment for tickets not yet registered in the system. This feature was designed to handle delays between citation issuance and database entry. While well-intentioned, it means **you can accidentally pay for invalid or mistyped ticket numbers.**
 
-This significantly reduces common errors that cause failed lookups on payment portals.
+Because all Indianapolis parking tickets can be mathematically validated, this workaround isn't necessary. Open Curb prevents payment errors by:
+- Validating ticket numbers in real-time as you type
+- Blocking submission of invalid or malformed numbers
+- Providing immediate feedback before you're redirected
+
+This protects you from paying for citations that don't exist due to typos or entry errors.
 
 ---
 
-## Barcode Scanning Support
+## Automatic Data Capture
 
-Every official Indianapolis parking citation includes a barcode representing the ticket number. Open Curb supports this directly.
+Open Curb eliminates typing by scanning information directly from your citation or vehicle.
 
-Users can:
-- Scan the barcode on a physical ticket using their phone camera
-- Automatically populate the ticket number field
-- Avoid manual typing errors entirely
+**Ticket barcodes:** Point your camera at the barcode on a physical citation and the ticket number populates automatically.
 
-Barcode scanning works alongside manual entry and validation to provide a faster, more reliable experience.
+**License plates:** Take a photo of your license plate and Open Curb reads both the plate number and state instantly.
+
+Both features work alongside manual entry for fast, error-free lookups.
 
 ---
 
 ## Why Open Curb Exists
 
-Parking and citation systems already exist, but they are often fragmented across vendor portals, PDFs, and mobile-unfriendly pages. The result is unnecessary friction for people who simply want to find a meter or pay a citation.
+Parking systems work, but they're often fragmented across vendor portals, PDFs, and mobile-unfriendly interfaces. Finding a meter or paying a citation shouldn't require multiple steps or guesswork.
 
-Open Curb acts as a **single, fast entry point**. It connects users to existing systems without attempting to replace them. The goal is to reduce time-on-task, eliminate guesswork, and make common actions obvious and reliable.
+Open Curb is a **single, fast entry point** that connects you to existing systems without replacing them. The goal: reduce friction, eliminate confusion, and make common tasks obvious.
 
 ---
 
-## Use It Online or Install It as an App
+## Installation
 
-Open Curb works immediately in any modern browser. Because it is a Progressive Web App, it can also be installed directly from the site.
+Open Curb works immediately in any modern browser. To install it as an app:
 
-- Use it instantly in the browser with no download
-- Install it on **iPhone or Android** from the website
-- Launch it from the home screen like a native app
-- Run full-screen without browser controls
-- Automatically receive updates on refresh
+- **Desktop:** Click the install icon in the browser address bar
+- **iPhone:** Tap Share → Add to Home Screen
+- **Android:** Use the browser menu → Install App
 
-There is no separate “app version.” The web version and installed version are the same codebase.
+The web version and installed version are identical. Updates happen automatically when you refresh.
 
 ---
 
 ## Core Features
 
-### Space Locator Mode
-- Search by **meter ID** or **meter ID range**
-- Search by **street name**
-- View meters grouped by physical address
-- Copy or share meter IDs instantly
-- Save frequently used locations as favorites
-- Open walking directions in Google Maps
-- Jump directly into Street View for visual confirmation
+Open Curb has two modes that you can switch between instantly:
 
-### Citation Portal Mode
-- Look up citations by **ticket number**
-- Look up citations by **license plate**
-- Scan ticket barcodes using the phone camera
-- Capture license plates using an image instead of manual entry
-- Share or copy official payment links
-- Validate ticket numbers before redirecting
+| Mode | What It Does |
+|------|--------------|
+| **Space Locator** | Search by meter ID, meter ID range, or street name. View meters grouped by address, save favorites, get walking directions in Google Maps, or jump into Street View for visual confirmation. |
+| **Citation Portal** | Look up citations by ticket number or license plate. Scan ticket barcodes with your camera, capture license plates from images, and get redirected to the official payment portal with validated information. |
+
+---
+
+## Who Uses This
+
+- **Public users** navigating parking and citations
+- **Parking operators** assisting customers with meter identification
+- **Contractors and inspectors** identifying assets in work zones
+- **Public-facing staff** needing quick spatial confirmation
 
 ---
 
 ## What Open Curb Is Not
 
-- It does not issue citations
-- It does not store or retain user-entered data
-- It does not process payments
-- It does not replace municipal or vendor systems
-- It does not claim real-time enforcement authority
+- Not a citation issuing system
+- Not a payment processor
+- Not a replacement for municipal or vendor systems
+- Not a real-time enforcement tool
 
-Open Curb is an access and navigation layer, not a regulatory system.
-
----
-
-## Deployment Notes
-
-The backend runs on free-tier hosting and may take 30 to 50 seconds to respond after periods of inactivity. This behavior is surfaced intentionally so users understand what is happening rather than assuming the app has failed.
-
-The frontend is a single HTML file and can be hosted on any static hosting provider.
+It's an access layer, not a regulatory system.
 
 ---
 
-## Intended Audience
+## Technical Notes
 
-- Members of the public navigating parking and citations
-- Public-facing staff needing fast spatial confirmation
-- Civic technologists exploring pragmatic tools
-- Reviewers evaluating real-world product and systems thinking
+### Deployment
+The backend runs on free-tier hosting and may take 30-50 seconds to respond after periods of inactivity. This behavior is surfaced to users so they understand what's happening rather than assuming the app has failed.
+
+The frontend is a single HTML file and can be hosted on any static provider.
+
+### Data Retention
+No user-entered data is stored or logged. The app processes requests and discards them immediately. Any saved preferences (favorites, recent locations) exist only in browser storage on the user's device.
 
 ---
 
-## License and Use
+## License
 
-This repository is proprietary and not licensed for redistribution without permission. It is published for demonstration, review, and discussion purposes.
+This repository is proprietary and not licensed for redistribution without permission. Published for demonstration, review, and discussion.
 
 ---
 
 ## Author
 
-Built by **William Dugann**  
-https://github.com/dugann
+Built by **William Dugann**
+
+- [GitHub Repository](https://github.com/dugann/indy-locator-web)
+- [Report Issues](https://github.com/dugann/indy-locator-web/issues)
