@@ -1661,7 +1661,7 @@ export default function App() {
       backgroundSize: '40px 40px'
     }
   }), /*#__PURE__*/React.createElement("header", {
-    className: "relative z-10 safe-top px-6 py-6 flex justify-between items-center transition-opacity duration-300 ".concat(view !== 'search' ? 'opacity-0 pointer-events-none' : 'opacity-100')
+    className: "relative z-10 safe-top px-6 py-6 flex justify-start items-center gap-4 transition-opacity duration-300 ".concat(view !== 'search' ? 'opacity-0 pointer-events-none' : 'opacity-100')
   }, /*#__PURE__*/React.createElement("div", {
     className: ""
   }, /*#__PURE__*/React.createElement("button", {
@@ -1670,9 +1670,9 @@ export default function App() {
   }, /*#__PURE__*/React.createElement("img", {
     src: "https://raw.githubusercontent.com/dugann/indy-locator-web/main/logo.png",
     alt: "Open Curb",
-    className: "h-10 sm:h-12 w-auto object-contain drop-shadow-md"
+    className: "h-16 sm:h-16 w-auto object-contain drop-shadow-md"
   }))), /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-2"
+    className: "flex gap-2 ml-auto"
   }, !isOnline && /*#__PURE__*/React.createElement("div", {
     className: "p-3 bg-red-500/20 rounded-full animate-pulse",
     title: "Offline"
@@ -2282,6 +2282,7 @@ root.render(/*#__PURE__*/React.createElement(App, null));
 </body>
 
 </html>
+
 
 
 
