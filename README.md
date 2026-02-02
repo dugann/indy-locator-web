@@ -77,7 +77,7 @@ We never see your credit card info, we never process transactions, and we never 
 ### Install as an App
 Since this is a PWA, you can add it to your home screen for an "app-like" experience without the App Store:
 * **iOS:** Tap the **Share** icon and select **"Add to Home Screen."**
-* **Android:** Tap the **Three Dots** and select **"Install App"** or **"Add to Home Screen."**
+* **Android:** The easiest way to install this as an app is to tap the download icon at the top right of your screen. You can also tap the **Three Dots** and select **"Install App"** or **"Add to Home Screen."**
 
 ---
 
