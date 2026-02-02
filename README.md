@@ -4,150 +4,87 @@
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](https://github.com/dugann/indy-locator-web)
 [![Stack: React](https://img.shields.io/badge/Stack-React_18-blue)](https://react.dev/)
 [![Hosting: Render](https://img.shields.io/badge/Hosting-Render-darkgreen)](https://render.com/)
-[![Status: Private effort](https://img.shields.io/badge/Status-Independent_Project-orange)](#important)
+[![Status: Independent](https://img.shields.io/badge/Status-Independent_Project-orange)](#important)
 
-**Open Curb** is a mobile-first Progressive Web App that makes parking and citations in Indianapolis actually manageable. Find meters by ID or street name. Look up citations by ticket number or license plate. All without downloading anything from an app store or creating an account.
+**Open Curb** is a mobile-first Progressive Web App (PWA) designed to make parking and citations in Indianapolis manageable. Find meters by ID, search by street name, or look up citations by ticket number and license plate, all without app store downloads or account registration.
 
-Think of it like having a direct line to the city's parking data—but through an interface that actually makes sense.
+Think of it as a clean, intuitive lens for the city's parking data.
 
-> **Important:** This is an independent project. It's not sponsored by, affiliated with, or endorsed by the City of Indianapolis. It's just built by someone who thought the parking experience could be better.
+> **Important:** This is an independent project. It is not sponsored by, affiliated with, or endorsed by the City of Indianapolis. It was built to solve a specific problem: making the local parking experience more user-friendly.
 
 ---
 
 ## Your Privacy is Non-Negotiable
 
-Here's the thing about entering license plate numbers and ticket information: it feels invasive. So here's the deal—**Open Curb operates on a strict "Zero-Retention" policy**.
+Entering a license plate or ticket number can feel invasive. Open Curb is built on a **Zero-Retention** philosophy to ensure your data stays yours.
 
-* **Nothing is logged.** Your searches aren't saved, tracked, or stored anywhere.
-* **No server-side memory.** When you search for a meter or look up a ticket, the request is processed and immediately forgotten. Like a conversation that never happened.
-* **No cookies for tracking.** The app doesn't watch what you're doing or build a profile on you.
-* **Session amnesia.** Close the page, and everything you entered vanishes. It's like erasing a whiteboard.
-
-Think of it this way: if this app were a librarian, it would hand you the book you asked for and then immediately forget you were ever there.
+* **No Logging:** Your search queries, plate numbers, and ticket IDs are never saved, tracked, or stored.
+* **Stateless Processing:** When you look up a meter or ticket, the request is processed in real-time and immediately discarded. 
+* **No Tracking:** There are no tracking cookies or user profiling scripts.
+* **Session Amnesia:** Closing the browser tab wipes the slate clean. It’s like a conversation that never happened.
 
 ---
 
-## How Information Flows: The Middle Man Explained
+## How Information Flows
 
-You know how when you go to a bank, the teller doesn't hand you the vault keys? That's basically what's happening here. The frontend (what you see in your browser) never gets direct access to sensitive API keys. Instead, everything goes through a secure middleware—like a bouncer checking IDs before letting anyone into the club.
+To keep sensitive data and API keys secure, Open Curb uses a "Middle Man" architecture. Your browser never talks directly to external data providers; instead, it communicates through a secure gateway.
 
 ```mermaid
 sequenceDiagram
     participant U as You (Browser)
-    participant F as Frontend (GitHub Pages)
-    participant B as Middleware (Render)
-    participant E as Data Sources (IndyGIS/Plate Recognizer)
+    participant F as Frontend (GitHub)
+    participant B as Secure Middleware (Render)
+    participant E as City Data / APIs
     participant P as City Payment Portal
 
     U->>F: "Find meter 12345"
-    F->>B: "Hey, get meter data for 12345"
-    B->>E: [Uses secret API key to ask for data]
-    E-->>B: "Here's the meter info"
-    B-->>F: "Here you go, cleaned up"
-    F-->>U: [Shows you the results]
+    F->>B: Request meter info
+    B->>E: [Secure API Call]
+    E-->>B: Return raw data
+    B-->>F: Cleaned, formatted data
+    F-->>U: Visual Results
     
     Note over U,P: For Citations
-    U->>F: "Look up ticket 012345678"
-    F->>P: [Sends you directly to city portal]
-    U->>P: [Official payment site handles everything]
+    U->>F: "Look up ticket X"
+    F->>P: [Direct Hand-off]
+    U->>P: Official Payment Site
 ```
 
-**Why this matters:** API keys are like house keys. You don't leave them lying around. By routing everything through a secure server, those keys stay locked up where they belong.
+**Why this matters:** This architecture ensures that API credentials stay locked on the server, never exposed to the public internet or the client-side code.
 
 ---
 
-## Citations: We Don't Touch Your Money
+## Payments & Citations
 
-When you look up a citation, Open Curb does **exactly two things**:
+Open Curb is a discovery tool, not a payment processor. 
 
-1. **Checks if the ticket number is valid** using something called the Luhn algorithm (it's like a spell-checker for numbers—if the format is wrong, it catches it before bothering the city's servers).
-2. **Sends you directly to the official Indianapolis payment portal**. That's it. We're out of the picture.
+1.  **Validation:** We use local logic to verify ticket formats before querying the city, saving you time.
+2.  **The Hand-off:** Once a valid citation is identified, we provide a direct link to the **Official Indianapolis Payment Portal**. 
 
-Open Curb never sees your payment info, never processes transactions, and never sits between you and the city's financial system. It's a door that opens and then gets out of your way.
-
----
-
-## The Technical Stuff (In Plain English)
-
-### What It's Built With
-
-**Frontend (What You See)**
-- **React 18** - Think of this as the framework that makes the app interactive. It's what lets buttons do things when you click them.
-- **Tailwind CSS** - This handles how everything looks. Instead of writing custom style rules, it uses pre-made building blocks. Like LEGOs for design.
-- **Lucide React** - The icon library. Those little magnifying glasses and map pins? That's Lucide.
-- **Pre-compiled JSX** - Here's where it gets interesting. React uses JSX (a mix of JavaScript and HTML), but browsers don't understand JSX natively. So we compile it beforehand—like translating a book before publishing it, rather than expecting readers to translate as they read.
-
-**Backend (The Behind-the-Scenes Stuff)**
-- **Node.js/Express** - The middleware server that handles API requests and keeps your keys secure.
-- **Hosted on Render** - This is where the backend lives. Fair warning: it's on a free tier, which means the first request after a period of inactivity can take 30-50 seconds while the server "wakes up." Think of it like a laptop coming out of sleep mode.
-
-**Hosting**
-- **GitHub Pages** - Where the frontend lives. Free, fast, and reliable.
-- **Progressive Web App (PWA)** - You can "install" this app on your phone without going through an app store. It's just a website that acts like a native app.
-
-### Why Pre-Compilation Matters
-
-Here's the deal: browsers speak JavaScript. React speaks JSX. Traditionally, apps would translate JSX to JavaScript *in the browser*, every time the page loads. That works, but it's inefficient—like having a translator read a book aloud to you instead of just reading the translated book yourself.
-
-By compiling JSX to JavaScript before deployment, the browser gets code it already understands. No translation needed. Faster load times, better performance, and one less thing that can go wrong.
-
-**How it works:**
-1. We write code in JSX (developer-friendly)
-2. Babel translates JSX → JavaScript (browser-friendly)
-3. The browser gets pure JavaScript (no extra work required)
+We never see your credit card info, we never process transactions, and we never sit between you and the city’s financial systems.
 
 ---
 
-## Building It Yourself
+## Technical Architecture
 
-If you want to build this from source or contribute, here's what you need:
+### The Stack
+* **Frontend:** Built with **React 18** and styled with **Tailwind CSS**. We use **Lucide** for a consistent, lightweight iconography set.
+* **Performance:** The code is pre-compiled and bundled, ensuring the browser receives lean, production-ready JavaScript for fast execution on mobile hardware.
+* **Middleware:** A **Node.js/Express** server hosted on Render handles secure API proxying. 
+    * *Note: On the free tier, the server may take 30 seconds to "wake up" if it hasn't been used recently.*
+* **Deployment:** The UI is hosted on **GitHub Pages**, providing high availability and fast global delivery.
 
-### Prerequisites
-- **Node.js 16+** and npm (the JavaScript ecosystem's package manager)
-- **Python 3.7+** (for the build scripts)
-
-### Build Process
-
-```bash
-# 1. Install the compilation tools
-npm install @babel/cli @babel/core @babel/preset-react @babel/preset-env
-
-# 2. Run the build script
-python build_WORKING.py
-
-# Output: index_working.html (production-ready file)
-```
-
-**What the build script does:**
-1. **Extracts the React code** from the source HTML (it's embedded in a `<script>` tag)
-2. **Compiles JSX → JavaScript** using Babel with ES module output (browser-native format)
-3. **Removes development tools** (like the Babel CDN that was doing runtime compilation)
-4. **Bundles everything** into a single production-ready HTML file
-
-### Deploy
-
-Upload these files to GitHub Pages:
-- `index.html` (the compiled file—rename `index_working.html`)
-- `manifest.json` (PWA configuration)
-- `service-worker.js` (offline caching)
-- Icon files (`icon-192.png`, `icon-512.png`, logos, etc.)
+### Install as an App
+Since this is a PWA, you can add it to your home screen for an "app-like" experience without the App Store:
+* **iOS:** Tap the **Share** icon and select **"Add to Home Screen."**
+* **Android:** Tap the **Three Dots** and select **"Install App"** or **"Add to Home Screen."**
 
 ---
 
 ## Security
-
-- **Client-side validation** - Ticket numbers are checked locally using the Luhn algorithm before ever hitting a server
-- **API keys never exposed** - All sensitive credentials live on the backend server
-- **HTTPS everywhere** - All communication is encrypted
-- **No authentication required** - The app is stateless and doesn't need you to log in
-
----
-
-## Why This Exists
-
-Parking enforcement data should be accessible. Citation lookup shouldn't require navigating a maze of city websites. And checking meter locations shouldn't feel like detective work.
-
-This is a tool built out of frustration with unnecessarily complicated systems. It connects directly to Indianapolis's open data and makes it actually usable.
+* **SSL/TLS:** All traffic is encrypted via HTTPS.
+* **Credential Isolation:** API keys are stored in environment variables on the backend, never in the frontend code.
+* **No Auth Required:** By design, the app does not require a login, eliminating the risk of credential leaks.
 
 ---
 
@@ -163,4 +100,4 @@ Built by **William Dugann**
 
 ## License
 
-This project is proprietary. It's publicly viewable for transparency, but not licensed for redistribution or commercial use.
+This project is proprietary. The source code is publicly viewable for transparency and security auditing, but it is not licensed for redistribution or commercial use.
