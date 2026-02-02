@@ -93,37 +93,17 @@
     }
   </script>
 
-  <script type="module">"use strict";
-
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = App;
-var _react = _interopRequireWildcard(require("react"));
-var _client = require("react-dom/client");
-var _lucideReact = require("lucide-react");
-function _interopRequireWildcard(e, t) { if ("function" == typeof WeakMap) var r = new WeakMap(), n = new WeakMap(); return (_interopRequireWildcard = function _interopRequireWildcard(e, t) { if (!t && e && e.__esModule) return e; var o, i, f = { __proto__: null, "default": e }; if (null === e || "object" != _typeof(e) && "function" != typeof e) return f; if (o = t ? n : r) { if (o.has(e)) return o.get(e); o.set(e, f); } for (var _t10 in e) "default" !== _t10 && {}.hasOwnProperty.call(e, _t10) && ((i = (o = Object.defineProperty) && Object.getOwnPropertyDescriptor(e, _t10)) && (i.get || i.set) ? o(f, _t10, i) : f[_t10] = e[_t10]); return f; })(e, t); }
-function _regeneratorValues(e) { if (null != e) { var t = e["function" == typeof Symbol && Symbol.iterator || "@@iterator"], r = 0; if (t) return t.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) return { next: function next() { return e && r >= e.length && (e = void 0), { value: e && e[r++], done: !e }; } }; } throw new TypeError(_typeof(e) + " is not iterable"); }
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+  <script type="module">function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Search, MapPin, Navigation, Info, X, ChevronLeft, ChevronRight, Star, RotateCw, AlertTriangle, CheckCircle, User, ExternalLink, Copy, Download, Map as MapIcon, CloudOff, Share2, Link as LinkIcon, History, Trash2, Camera, Moon, Sun, Settings, ArrowLeft, BookmarkPlus, Bookmark, Wifi, WifiOff, Zap, Clock, Loader2, ScanBarcode, FileText } from 'lucide-react';
+
 // ============================================================================
 // CONSTANTS & CONFIG
 // ============================================================================
@@ -182,114 +162,47 @@ function fetchWithTimeout(_x) {
   return _fetchWithTimeout.apply(this, arguments);
 }
 function _fetchWithTimeout() {
-  _fetchWithTimeout = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0(url) {
-    var options,
-      timeout,
-      controller,
-      id,
-      response,
-      _args0 = arguments,
-      _t9;
-    return _regenerator().w(function (_context0) {
-      while (1) switch (_context0.p = _context0.n) {
-        case 0:
-          options = _args0.length > 1 && _args0[1] !== undefined ? _args0[1] : {};
-          timeout = _args0.length > 2 && _args0[2] !== undefined ? _args0[2] : CONFIG.REQUEST_TIMEOUT;
-          controller = new AbortController();
-          id = setTimeout(function () {
-            return controller.abort();
-          }, timeout);
-          _context0.p = 1;
-          _context0.n = 2;
-          return fetch(url, _objectSpread(_objectSpread({}, options), {}, {
-            signal: controller.signal
-          }));
-        case 2:
-          response = _context0.v;
-          clearTimeout(id);
-          return _context0.a(2, response);
-        case 3:
-          _context0.p = 3;
-          _t9 = _context0.v;
-          clearTimeout(id);
-          throw _t9;
-        case 4:
-          return _context0.a(2);
-      }
-    }, _callee0, null, [[1, 3]]);
-  }));
+  _fetchWithTimeout = _asyncToGenerator(function* (url) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var timeout = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : CONFIG.REQUEST_TIMEOUT;
+    var controller = new AbortController();
+    var id = setTimeout(() => controller.abort(), timeout);
+    try {
+      var response = yield fetch(url, _objectSpread(_objectSpread({}, options), {}, {
+        signal: controller.signal
+      }));
+      clearTimeout(id);
+      return response;
+    } catch (error) {
+      clearTimeout(id);
+      throw error;
+    }
+  });
   return _fetchWithTimeout.apply(this, arguments);
 }
 function fetchWithRetry(_x2) {
   return _fetchWithRetry.apply(this, arguments);
 }
 function _fetchWithRetry() {
-  _fetchWithRetry = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1(url) {
-    var options,
-      retries,
-      _loop,
-      _ret,
-      i,
-      _args10 = arguments;
-    return _regenerator().w(function (_context10) {
-      while (1) switch (_context10.n) {
-        case 0:
-          options = _args10.length > 1 && _args10[1] !== undefined ? _args10[1] : {};
-          retries = _args10.length > 2 && _args10[2] !== undefined ? _args10[2] : CONFIG.RETRY_ATTEMPTS;
-          _loop = /*#__PURE__*/_regenerator().m(function _loop(i) {
-            var _t0, _t1;
-            return _regenerator().w(function (_context1) {
-              while (1) switch (_context1.p = _context1.n) {
-                case 0:
-                  _context1.p = 0;
-                  _context1.n = 1;
-                  return fetchWithTimeout(url, options);
-                case 1:
-                  _t0 = _context1.v;
-                  return _context1.a(2, {
-                    v: _t0
-                  });
-                case 2:
-                  _context1.p = 2;
-                  _t1 = _context1.v;
-                  if (!(i === retries - 1)) {
-                    _context1.n = 3;
-                    break;
-                  }
-                  throw _t1;
-                case 3:
-                  _context1.n = 4;
-                  return new Promise(function (resolve) {
-                    return setTimeout(resolve, CONFIG.RETRY_DELAY * (i + 1));
-                  });
-                case 4:
-                  return _context1.a(2);
-              }
-            }, _loop, null, [[0, 2]]);
-          });
-          i = 0;
-        case 1:
-          if (!(i < retries)) {
-            _context10.n = 4;
-            break;
-          }
-          return _context10.d(_regeneratorValues(_loop(i)), 2);
-        case 2:
-          _ret = _context10.v;
-          if (!_ret) {
-            _context10.n = 3;
-            break;
-          }
-          return _context10.a(2, _ret.v);
-        case 3:
-          i++;
-          _context10.n = 1;
-          break;
-        case 4:
-          return _context10.a(2);
-      }
-    }, _callee1);
-  }));
+  _fetchWithRetry = _asyncToGenerator(function* (url) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var retries = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : CONFIG.RETRY_ATTEMPTS;
+    var _loop = function* _loop(i) {
+        try {
+          return {
+            v: yield fetchWithTimeout(url, options)
+          };
+        } catch (error) {
+          if (i === retries - 1) throw error;
+          yield new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY * (i + 1)));
+        }
+      },
+      _ret;
+    for (var i = 0; i < retries; i++) {
+      _ret = yield* _loop(i);
+      if (_ret) return _ret.v;
+    }
+  });
   return _fetchWithRetry.apply(this, arguments);
 }
 var storage = {
@@ -302,7 +215,7 @@ var storage = {
       return defaultValue;
     }
   },
-  set: function set(key, value) {
+  set: (key, value) => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
       return true;
@@ -310,7 +223,7 @@ var storage = {
       return false;
     }
   },
-  remove: function remove(key) {
+  remove: key => {
     try {
       localStorage.removeItem(key);
       return true;
@@ -325,35 +238,35 @@ var storage = {
 // ============================================================================
 
 var customStyles = "\n    @keyframes pulse-ring { 0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); } 70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); } 100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }\n    @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }\n    @keyframes slideInDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }\n    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }\n    @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }\n    .circle-transition { position: absolute; top: 50%; left: 50%; width: 128px; height: 128px; background-color: #E1E8F0; border-radius: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; pointer-events: none; z-index: 25; }\n    .circle-transition.expanding { opacity: 1; transform: translate(-50%, -50%) scale(25); transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.1s ease-in; }\n    .circle-transition.closing { transform: translate(-50%, -50%) scale(0); transition: transform 0.5s cubic-bezier(0.5, 0, 0.75, 0); }\n    .fade-enter { opacity: 0; transform: translateY(10px); }\n    .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 0.4s ease-out, transform 0.4s ease-out; }\n    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }\n    .shake-input { animation: shake 0.3s ease-in-out; border-color: #D11241 !important; }\n    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }\n    .slide-in-up { animation: slideInUp 0.3s ease-out; }\n    .slide-in-down { animation: slideInDown 0.3s ease-out; }\n    .fade-in { animation: fadeIn 0.3s ease-out; }\n    .dark { --indy-blue: #001f3f; --indy-sky: #1a2332; }\n    .dark body { background-color: var(--indy-blue); }\n";
-var GoogleDirectionsIcon = function GoogleDirectionsIcon(_ref) {
-  var _ref$size = _ref.size,
-    size = _ref$size === void 0 ? 20 : _ref$size,
-    _ref$className = _ref.className,
-    className = _ref$className === void 0 ? "" : _ref$className;
-  return /*#__PURE__*/_react["default"].createElement("svg", {
+var GoogleDirectionsIcon = _ref => {
+  var {
+    size = 20,
+    className = ""
+  } = _ref;
+  return /*#__PURE__*/React.createElement("svg", {
     width: size,
     height: size,
     viewBox: "0 0 24 24",
     fill: "currentColor",
     className: className,
     xmlns: "http://www.w3.org/2000/svg"
-  }, /*#__PURE__*/_react["default"].createElement("path", {
+  }, /*#__PURE__*/React.createElement("path", {
     d: "M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"
   }));
 };
-var GooglePegmanIcon = function GooglePegmanIcon(_ref2) {
-  var _ref2$size = _ref2.size,
-    size = _ref2$size === void 0 ? 20 : _ref2$size,
-    _ref2$className = _ref2.className,
-    className = _ref2$className === void 0 ? "" : _ref2$className;
-  return /*#__PURE__*/_react["default"].createElement("svg", {
+var GooglePegmanIcon = _ref2 => {
+  var {
+    size = 20,
+    className = ""
+  } = _ref2;
+  return /*#__PURE__*/React.createElement("svg", {
     width: size,
     height: size,
     viewBox: "0 0 24 24",
     fill: "currentColor",
     className: className,
     xmlns: "http://www.w3.org/2000/svg"
-  }, /*#__PURE__*/_react["default"].createElement("path", {
+  }, /*#__PURE__*/React.createElement("path", {
     d: "M12 2C9.5 2 7.5 4 7.5 6.5C7.5 8.7 9.1 10.5 11.15 10.9V22H12.85V16H14.5V22H16.2V10.9C18.25 10.5 19.85 8.7 19.85 6.5C19.85 4 17.85 2 15.35 2H12ZM12 4H15.35C16.75 4 17.85 5.1 17.85 6.5C17.85 7.9 16.75 9 15.35 9C14.85 9 14.4 8.85 14 8.6V7H12V8.6C11.6 8.85 11.15 9 10.65 9C9.25 9 8.15 7.9 8.15 6.5C8.15 5.1 9.25 4 10.65 4H12Z"
   }));
 };
@@ -363,20 +276,13 @@ var GooglePegmanIcon = function GooglePegmanIcon(_ref2) {
 // ============================================================================
 
 function useOnlineStatus() {
-  var _useState = (0, _react.useState)(navigator.onLine),
-    _useState2 = _slicedToArray(_useState, 2),
-    isOnline = _useState2[0],
-    setIsOnline = _useState2[1];
-  (0, _react.useEffect)(function () {
-    var handleOnline = function handleOnline() {
-      return setIsOnline(true);
-    };
-    var handleOffline = function handleOffline() {
-      return setIsOnline(false);
-    };
+  var [isOnline, setIsOnline] = useState(navigator.onLine);
+  useEffect(() => {
+    var handleOnline = () => setIsOnline(true);
+    var handleOffline = () => setIsOnline(false);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    return function () {
+    return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
@@ -384,68 +290,48 @@ function useOnlineStatus() {
   return isOnline;
 }
 function useFavorites() {
-  var _useState3 = (0, _react.useState)(function () {
-      return storage.get(CONFIG.STORAGE_KEYS.FAVORITES, []);
-    }),
-    _useState4 = _slicedToArray(_useState3, 2),
-    favorites = _useState4[0],
-    setFavorites = _useState4[1];
-  var addFavorite = (0, _react.useCallback)(function (item) {
-    setFavorites(function (prev) {
-      var updated = [item].concat(_toConsumableArray(prev.filter(function (f) {
-        return f.id !== item.id;
-      }))).slice(0, CONFIG.MAX_FAVORITES);
+  var [favorites, setFavorites] = useState(() => storage.get(CONFIG.STORAGE_KEYS.FAVORITES, []));
+  var addFavorite = useCallback(item => {
+    setFavorites(prev => {
+      var updated = [item, ...prev.filter(f => f.id !== item.id)].slice(0, CONFIG.MAX_FAVORITES);
       storage.set(CONFIG.STORAGE_KEYS.FAVORITES, updated);
       return updated;
     });
   }, []);
-  var removeFavorite = (0, _react.useCallback)(function (id) {
-    setFavorites(function (prev) {
-      var updated = prev.filter(function (f) {
-        return f.id !== id;
-      });
+  var removeFavorite = useCallback(id => {
+    setFavorites(prev => {
+      var updated = prev.filter(f => f.id !== id);
       storage.set(CONFIG.STORAGE_KEYS.FAVORITES, updated);
       return updated;
     });
   }, []);
-  var isFavorite = (0, _react.useCallback)(function (id) {
-    return favorites.some(function (f) {
-      return f.id === id;
-    });
-  }, [favorites]);
+  var isFavorite = useCallback(id => favorites.some(f => f.id === id), [favorites]);
   return {
-    favorites: favorites,
-    addFavorite: addFavorite,
-    removeFavorite: removeFavorite,
-    isFavorite: isFavorite
+    favorites,
+    addFavorite,
+    removeFavorite,
+    isFavorite
   };
 }
 function useRecentSearches() {
-  var _useState5 = (0, _react.useState)(function () {
-      return storage.get(CONFIG.STORAGE_KEYS.RECENT, []);
-    }),
-    _useState6 = _slicedToArray(_useState5, 2),
-    recent = _useState6[0],
-    setRecent = _useState6[1];
-  var addRecent = (0, _react.useCallback)(function (search) {
-    setRecent(function (prev) {
+  var [recent, setRecent] = useState(() => storage.get(CONFIG.STORAGE_KEYS.RECENT, []));
+  var addRecent = useCallback(search => {
+    setRecent(prev => {
       var updated = [_objectSpread(_objectSpread({}, search), {}, {
         timestamp: Date.now()
-      })].concat(_toConsumableArray(prev.filter(function (s) {
-        return s.query !== search.query;
-      }))).slice(0, CONFIG.MAX_RECENT);
+      }), ...prev.filter(s => s.query !== search.query)].slice(0, CONFIG.MAX_RECENT);
       storage.set(CONFIG.STORAGE_KEYS.RECENT, updated);
       return updated;
     });
   }, []);
-  var clearRecent = (0, _react.useCallback)(function () {
+  var clearRecent = useCallback(() => {
     setRecent([]);
     storage.remove(CONFIG.STORAGE_KEYS.RECENT);
   }, []);
   return {
-    recent: recent,
-    addRecent: addRecent,
-    clearRecent: clearRecent
+    recent,
+    addRecent,
+    clearRecent
   };
 }
 
@@ -453,109 +339,97 @@ function useRecentSearches() {
 // COMPONENTS
 // ============================================================================
 
-var LoadingSkeleton = function LoadingSkeleton() {
-  return /*#__PURE__*/_react["default"].createElement("div", {
-    className: "space-y-4 p-4"
-  }, [1, 2, 3].map(function (i) {
-    return /*#__PURE__*/_react["default"].createElement("div", {
-      key: i,
-      className: "bg-white rounded-2xl p-4 shadow-sm border border-gray-300 slide-in-up",
-      style: {
-        animationDelay: "".concat(i * 0.1, "s")
-      }
-    }, /*#__PURE__*/_react["default"].createElement("div", {
-      className: "flex gap-4"
-    }, /*#__PURE__*/_react["default"].createElement("div", {
-      className: "flex-1 space-y-3"
-    }, /*#__PURE__*/_react["default"].createElement("div", {
-      className: "skeleton h-6 w-3/4 rounded"
-    }), /*#__PURE__*/_react["default"].createElement("div", {
-      className: "skeleton h-4 w-1/2 rounded"
-    }), /*#__PURE__*/_react["default"].createElement("div", {
-      className: "skeleton h-16 w-full rounded-xl"
-    }), /*#__PURE__*/_react["default"].createElement("div", {
-      className: "flex gap-2"
-    }, /*#__PURE__*/_react["default"].createElement("div", {
-      className: "skeleton h-10 w-24 rounded-lg"
-    }), /*#__PURE__*/_react["default"].createElement("div", {
-      className: "skeleton h-10 w-24 rounded-lg"
-    }))), /*#__PURE__*/_react["default"].createElement("div", {
-      className: "skeleton w-36 h-36 rounded-2xl"
-    })));
-  }));
-};
-var EmptyState = function EmptyState(_ref3) {
-  var message = _ref3.message,
-    Icon = _ref3.icon,
-    action = _ref3.action;
-  return /*#__PURE__*/_react["default"].createElement("div", {
+var LoadingSkeleton = () => /*#__PURE__*/React.createElement("div", {
+  className: "space-y-4 p-4"
+}, [1, 2, 3].map(i => /*#__PURE__*/React.createElement("div", {
+  key: i,
+  className: "bg-white rounded-2xl p-4 shadow-sm border border-gray-300 slide-in-up",
+  style: {
+    animationDelay: "".concat(i * 0.1, "s")
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  className: "flex gap-4"
+}, /*#__PURE__*/React.createElement("div", {
+  className: "flex-1 space-y-3"
+}, /*#__PURE__*/React.createElement("div", {
+  className: "skeleton h-6 w-3/4 rounded"
+}), /*#__PURE__*/React.createElement("div", {
+  className: "skeleton h-4 w-1/2 rounded"
+}), /*#__PURE__*/React.createElement("div", {
+  className: "skeleton h-16 w-full rounded-xl"
+}), /*#__PURE__*/React.createElement("div", {
+  className: "flex gap-2"
+}, /*#__PURE__*/React.createElement("div", {
+  className: "skeleton h-10 w-24 rounded-lg"
+}), /*#__PURE__*/React.createElement("div", {
+  className: "skeleton h-10 w-24 rounded-lg"
+}))), /*#__PURE__*/React.createElement("div", {
+  className: "skeleton w-36 h-36 rounded-2xl"
+})))));
+var EmptyState = _ref3 => {
+  var {
+    message,
+    icon: Icon,
+    action
+  } = _ref3;
+  return /*#__PURE__*/React.createElement("div", {
     className: "flex flex-col items-center justify-center py-16 px-6 text-center fade-in"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "bg-white/5 rounded-full p-6 mb-4"
-  }, /*#__PURE__*/_react["default"].createElement(Icon, {
+  }, /*#__PURE__*/React.createElement(Icon, {
     size: 48,
     className: "text-white/40"
-  })), /*#__PURE__*/_react["default"].createElement("p", {
+  })), /*#__PURE__*/React.createElement("p", {
     className: "text-white/60 text-sm mb-4"
   }, message), action && action);
 };
-var Toast = function Toast(_ref4) {
-  var message = _ref4.message,
-    _ref4$type = _ref4.type,
-    type = _ref4$type === void 0 ? 'info' : _ref4$type,
-    onClose = _ref4.onClose;
-  (0, _react.useEffect)(function () {
+var Toast = _ref4 => {
+  var {
+    message,
+    type = 'info',
+    onClose
+  } = _ref4;
+  useEffect(() => {
     var timer = setTimeout(onClose, 3000);
-    return function () {
-      return clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [onClose]);
   var bgColor = type === 'error' ? 'bg-red-500' : type === 'success' ? 'bg-green-500' : 'bg-blue-500';
-  return /*#__PURE__*/_react["default"].createElement("div", {
+  return /*#__PURE__*/React.createElement("div", {
     className: "fixed top-20 left-1/2 -translate-x-1/2 ".concat(bgColor, " text-white px-6 py-3 rounded-full shadow-lg z-50 slide-in-down flex items-center gap-2")
-  }, type === 'success' && /*#__PURE__*/_react["default"].createElement(_lucideReact.CheckCircle, {
+  }, type === 'success' && /*#__PURE__*/React.createElement(CheckCircle, {
     size: 18
-  }), type === 'error' && /*#__PURE__*/_react["default"].createElement(_lucideReact.AlertTriangle, {
+  }), type === 'error' && /*#__PURE__*/React.createElement(AlertTriangle, {
     size: 18
-  }), type === 'info' && /*#__PURE__*/_react["default"].createElement(_lucideReact.Info, {
+  }), type === 'info' && /*#__PURE__*/React.createElement(Info, {
     size: 18
-  }), /*#__PURE__*/_react["default"].createElement("span", {
+  }), /*#__PURE__*/React.createElement("span", {
     className: "font-medium"
   }, message));
 };
-var ResultItem = function ResultItem(_ref5) {
-  var item = _ref5.item,
-    onFavorite = _ref5.onFavorite,
-    isFavorite = _ref5.isFavorite;
-  var _useState7 = (0, _react.useState)(false),
-    _useState8 = _slicedToArray(_useState7, 2),
-    copied = _useState8[0],
-    setCopied = _useState8[1];
+var ResultItem = _ref5 => {
+  var {
+    item,
+    onFavorite,
+    isFavorite
+  } = _ref5;
+  var [copied, setCopied] = useState(false);
   var centroid = null,
     mainActionUrl = '#',
     navigateUrl = '#',
     streetViewUrl = '#';
   if (item.geoms && item.geoms.length > 0) {
     var total = item.geoms.length;
-    var avgX = item.geoms.reduce(function (sum, g) {
-      return sum + g.x;
-    }, 0) / total;
-    var avgY = item.geoms.reduce(function (sum, g) {
-      return sum + g.y;
-    }, 0) / total;
+    var avgX = item.geoms.reduce((sum, g) => sum + g.x, 0) / total;
+    var avgY = item.geoms.reduce((sum, g) => sum + g.y, 0) / total;
     centroid = {
       x: avgX,
       y: avgY
     };
-    var sortedGeoms = _toConsumableArray(item.geoms).sort(function (a, b) {
-      return parseInt(a.id) - parseInt(b.id);
-    });
+    var sortedGeoms = [...item.geoms].sort((a, b) => parseInt(a.id) - parseInt(b.id));
     if (sortedGeoms.length > 1) {
       var first = sortedGeoms[0];
       var last = sortedGeoms[sortedGeoms.length - 1];
-      var waypoints = sortedGeoms.slice(1, -1).slice(0, 20).map(function (g) {
-        return "".concat(g.y, ",").concat(g.x);
-      }).join('|');
+      var waypoints = sortedGeoms.slice(1, -1).slice(0, 20).map(g => "".concat(g.y, ",").concat(g.x)).join('|');
       mainActionUrl = "https://www.google.com/maps/dir/?api=1&origin=".concat(first.y, ",").concat(first.x, "&destination=").concat(last.y, ",").concat(last.x, "&waypoints=").concat(waypoints, "&travelmode=walking");
     } else {
       mainActionUrl = "https://www.google.com/maps/search/?api=1&query=".concat(centroid.y, ",").concat(centroid.x);
@@ -563,70 +437,50 @@ var ResultItem = function ResultItem(_ref5) {
     navigateUrl = "https://www.google.com/maps/dir/?api=1&destination=".concat(encodeURIComponent(item.address + ', Indianapolis, IN'));
     streetViewUrl = "https://www.google.com/maps?q=&layer=c&cbll=".concat(centroid.y, ",").concat(centroid.x);
   }
-  var handleCopy = function handleCopy() {
+  var handleCopy = () => {
     try {
       var text = item.ids.join(', ');
       navigator.clipboard.writeText(text);
       setCopied(true);
       vibrate([10, 50, 10]);
-      setTimeout(function () {
-        return setCopied(false);
-      }, 2000);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Copy failed', err);
     }
   };
   var handleShare = /*#__PURE__*/function () {
-    var _ref6 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var _t;
-      return _regenerator().w(function (_context) {
-        while (1) switch (_context.p = _context.n) {
-          case 0:
-            if (navigator.share) {
-              _context.n = 1;
-              break;
-            }
-            return _context.a(2);
-          case 1:
-            _context.p = 1;
-            _context.n = 2;
-            return navigator.share({
-              title: "Parking at ".concat(item.address),
-              text: "Check out parking meters ".concat(item.ids.join(', '), " at ").concat(item.address),
-              url: "".concat(window.location.origin).concat(window.location.pathname, "?q=").concat(item.ids.join('-'))
-            });
-          case 2:
-            _context.n = 4;
-            break;
-          case 3:
-            _context.p = 3;
-            _t = _context.v;
-            console.log('Share dismissed');
-          case 4:
-            return _context.a(2);
-        }
-      }, _callee, null, [[1, 3]]);
-    }));
+    var _ref6 = _asyncToGenerator(function* () {
+      if (!navigator.share) return;
+      try {
+        yield navigator.share({
+          title: "Parking at ".concat(item.address),
+          text: "Check out parking meters ".concat(item.ids.join(', '), " at ").concat(item.address),
+          url: "".concat(window.location.origin).concat(window.location.pathname, "?q=").concat(item.ids.join('-'))
+        });
+      } catch (err) {
+        console.log('Share dismissed');
+      }
+    });
     return function handleShare() {
       return _ref6.apply(this, arguments);
     };
   }();
-  return /*#__PURE__*/_react["default"].createElement("div", {
+  return /*#__PURE__*/React.createElement("div", {
     className: "bg-white rounded-2xl p-4 shadow-sm border border-gray-300 mb-4 hover:shadow-lg transition-all slide-in-up"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex flex-col-reverse sm:flex-row gap-4"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex-1 min-w-0 flex flex-col justify-between"
-  }, /*#__PURE__*/_react["default"].createElement("div", null, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "flex justify-between items-start mb-2"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex-1"
-  }, /*#__PURE__*/_react["default"].createElement("h3", {
+  }, /*#__PURE__*/React.createElement("h3", {
     className: "font-bold text-[#003B71] text-lg leading-tight text-black truncate pr-2"
-  }, item.address), /*#__PURE__*/_react["default"].createElement("p", {
+  }, item.address), /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-gray-500 uppercase font-bold tracking-wider mt-0.5"
-  }, "Indianapolis, IN")), /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
+  }, "Indianapolis, IN")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
       vibrate(10);
       onFavorite({
         id: item.ids.join('-'),
@@ -636,149 +490,149 @@ var ResultItem = function ResultItem(_ref5) {
       });
     },
     className: "ml-2 p-2 rounded-full hover:bg-gray-100 transition-colors active:scale-95"
-  }, isFavorite ? /*#__PURE__*/_react["default"].createElement(_lucideReact.Bookmark, {
+  }, isFavorite ? /*#__PURE__*/React.createElement(Bookmark, {
     size: 20,
     className: "text-yellow-500 fill-yellow-500"
-  }) : /*#__PURE__*/_react["default"].createElement(_lucideReact.BookmarkPlus, {
+  }) : /*#__PURE__*/React.createElement(BookmarkPlus, {
     size: 20,
     className: "text-gray-400"
-  }))), /*#__PURE__*/_react["default"].createElement("div", {
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "bg-[#003B71]/5 rounded-xl p-2 mb-3 border border-[#003B71]/10 relative group w-fit max-w-full"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-1 px-1 gap-4"
-  }, /*#__PURE__*/_react["default"].createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] uppercase font-bold text-[#003B71]/70"
-  }, "Meter IDs"), /*#__PURE__*/_react["default"].createElement("div", {
+  }, "Meter IDs"), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2"
-  }, navigator.share && /*#__PURE__*/_react["default"].createElement("button", {
+  }, navigator.share && /*#__PURE__*/React.createElement("button", {
     onClick: handleShare,
     className: "flex items-center gap-1 bg-white border border-[#003B71]/20 px-2 py-0.5 rounded text-[10px] font-bold text-[#003B71] hover:bg-[#003B71]/5 transition-colors active:scale-95"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Share2, {
+  }, /*#__PURE__*/React.createElement(Share2, {
     size: 12
-  }), " Share"), /*#__PURE__*/_react["default"].createElement("button", {
+  }), " Share"), /*#__PURE__*/React.createElement("button", {
     onClick: handleCopy,
     className: "flex items-center gap-1 bg-white border border-[#003B71]/20 px-2 py-0.5 rounded text-[10px] font-bold text-[#003B71] hover:bg-[#003B71]/5 transition-colors active:scale-95"
-  }, copied ? /*#__PURE__*/_react["default"].createElement(_lucideReact.CheckCircle, {
+  }, copied ? /*#__PURE__*/React.createElement(CheckCircle, {
     size: 12,
     className: "text-green-600"
-  }) : /*#__PURE__*/_react["default"].createElement(_lucideReact.Copy, {
+  }) : /*#__PURE__*/React.createElement(Copy, {
     size: 12
-  }), copied ? 'Copied' : 'Copy'))), /*#__PURE__*/_react["default"].createElement("div", {
+  }), copied ? 'Copied' : 'Copy'))), /*#__PURE__*/React.createElement("div", {
     className: "flex overflow-x-auto gap-2 pb-1 hide-scroll"
-  }, item.ids.map(function (id) {
-    return /*#__PURE__*/_react["default"].createElement("span", {
-      key: id,
-      className: "inline-flex items-center justify-center bg-white border border-[#003B71]/20 rounded-md px-2 py-1 text-sm font-mono font-bold text-[#003B71] whitespace-nowrap shadow-sm min-w-[3rem]"
-    }, id);
-  })))), /*#__PURE__*/_react["default"].createElement("div", {
+  }, item.ids.map(id => /*#__PURE__*/React.createElement("span", {
+    key: id,
+    className: "inline-flex items-center justify-center bg-white border border-[#003B71]/20 rounded-md px-2 py-1 text-sm font-mono font-bold text-[#003B71] whitespace-nowrap shadow-sm min-w-[3rem]"
+  }, id))))), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-3 mt-auto"
-  }, /*#__PURE__*/_react["default"].createElement("a", {
+  }, /*#__PURE__*/React.createElement("a", {
     href: navigateUrl,
     target: "_blank",
     rel: "noreferrer",
     className: "flex items-center justify-center gap-1.5 bg-white text-[#003B71] border border-[#003B71]/30 py-1.5 px-3 rounded-lg text-[10px] sm:text-xs font-bold active:scale-95 transition-all hover:bg-[#003B71] hover:text-white"
-  }, /*#__PURE__*/_react["default"].createElement(GoogleDirectionsIcon, {
+  }, /*#__PURE__*/React.createElement(GoogleDirectionsIcon, {
     size: 16
-  }), " Navigate"), /*#__PURE__*/_react["default"].createElement("a", {
+  }), " Navigate"), /*#__PURE__*/React.createElement("a", {
     href: streetViewUrl,
     target: "_blank",
     rel: "noreferrer",
     className: "flex items-center justify-center gap-1.5 bg-white text-[#003B71] border border-[#003B71]/30 py-1.5 px-3 rounded-lg text-[10px] sm:text-xs font-bold active:scale-95 transition-all hover:bg-[#003B71] hover:text-white ".concat(!centroid && 'opacity-50 pointer-events-none')
-  }, /*#__PURE__*/_react["default"].createElement(GooglePegmanIcon, {
+  }, /*#__PURE__*/React.createElement(GooglePegmanIcon, {
     size: 16
-  }), " Street View"))), /*#__PURE__*/_react["default"].createElement("div", {
+  }), " Street View"))), /*#__PURE__*/React.createElement("div", {
     className: "w-full sm:w-36 flex-shrink-0 flex flex-col gap-2"
-  }, /*#__PURE__*/_react["default"].createElement("a", {
+  }, /*#__PURE__*/React.createElement("a", {
     href: mainActionUrl,
     target: "_blank",
     rel: "noreferrer",
     className: "w-full h-24 sm:h-36 bg-gray-100 rounded-2xl overflow-hidden border-2 border-white shadow-md relative group block bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-100 to-gray-200"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "w-full h-full flex flex-col items-center justify-center text-[#003B71]/30 group-hover:text-[#003B71]/50 transition-colors"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Map, {
+  }, /*#__PURE__*/React.createElement(MapIcon, {
     size: 36,
     strokeWidth: 1.5
-  })), /*#__PURE__*/_react["default"].createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
     className: "absolute inset-0 flex items-center justify-center pointer-events-none"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.MapPin, {
+  }, /*#__PURE__*/React.createElement(MapPin, {
     className: "text-[#D11241] fill-[#D11241] drop-shadow-lg transform -translate-y-1",
     size: 32
-  })), /*#__PURE__*/_react["default"].createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
     className: "absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.ExternalLink, {
+  }, /*#__PURE__*/React.createElement(ExternalLink, {
     size: 20,
     className: "text-[#003B71] opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md bg-white/80 p-1 rounded-full"
-  }))), /*#__PURE__*/_react["default"].createElement("div", {
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "bg-[#003B71] text-white text-[10px] font-bold py-1.5 rounded-lg text-center tracking-wide uppercase shadow-sm"
   }, item.ids.length, " ", item.ids.length === 1 ? 'Unit' : 'Units'))));
 };
-var RecentSearchItem = function RecentSearchItem(_ref7) {
-  var search = _ref7.search,
-    onSelect = _ref7.onSelect,
-    onRemove = _ref7.onRemove;
-  return /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
-      return onSelect(search);
-    },
+var RecentSearchItem = _ref7 => {
+  var {
+    search,
+    onSelect,
+    onRemove
+  } = _ref7;
+  return /*#__PURE__*/React.createElement("button", {
+    onClick: () => onSelect(search),
     className: "w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors group"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 flex-1 min-w-0"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Clock, {
+  }, /*#__PURE__*/React.createElement(Clock, {
     size: 16,
     className: "text-white/40 flex-shrink-0"
-  }), /*#__PURE__*/_react["default"].createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "text-left flex-1 min-w-0"
-  }, /*#__PURE__*/_react["default"].createElement("p", {
+  }, /*#__PURE__*/React.createElement("p", {
     className: "text-white font-medium text-sm truncate"
-  }, search.query), /*#__PURE__*/_react["default"].createElement("p", {
+  }, search.query), /*#__PURE__*/React.createElement("p", {
     className: "text-white/40 text-xs"
-  }, search.mode === 'id' ? 'Meter ID' : 'Street Name'))), /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick(e) {
+  }, search.mode === 'id' ? 'Meter ID' : 'Street Name'))), /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
       e.stopPropagation();
       onRemove(search);
     },
     className: "p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10 rounded"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.X, {
+  }, /*#__PURE__*/React.createElement(X, {
     size: 16,
     className: "text-white/60"
   })));
 };
-var FavoriteItem = function FavoriteItem(_ref8) {
-  var favorite = _ref8.favorite,
-    onSelect = _ref8.onSelect,
-    onRemove = _ref8.onRemove;
-  return /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
-      return onSelect(favorite);
-    },
+var FavoriteItem = _ref8 => {
+  var {
+    favorite,
+    onSelect,
+    onRemove
+  } = _ref8;
+  return /*#__PURE__*/React.createElement("button", {
+    onClick: () => onSelect(favorite),
     className: "w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors group"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 flex-1 min-w-0"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Star, {
+  }, /*#__PURE__*/React.createElement(Star, {
     size: 16,
     className: "text-yellow-500 fill-yellow-500 flex-shrink-0"
-  }), /*#__PURE__*/_react["default"].createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "text-left flex-1 min-w-0"
-  }, /*#__PURE__*/_react["default"].createElement("p", {
+  }, /*#__PURE__*/React.createElement("p", {
     className: "text-white font-medium text-sm truncate"
-  }, favorite.address), /*#__PURE__*/_react["default"].createElement("p", {
+  }, favorite.address), /*#__PURE__*/React.createElement("p", {
     className: "text-white/40 text-xs"
-  }, favorite.ids.length, " ", favorite.ids.length === 1 ? 'meter' : 'meters'))), /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick(e) {
+  }, favorite.ids.length, " ", favorite.ids.length === 1 ? 'meter' : 'meters'))), /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
       e.stopPropagation();
       onRemove(favorite.id);
     },
     className: "p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10 rounded"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.X, {
+  }, /*#__PURE__*/React.createElement(X, {
     size: 16,
     className: "text-white/60"
   })));
 };
-var BarcodeScannerModal = function BarcodeScannerModal(_ref9) {
-  var onClose = _ref9.onClose,
-    onDetected = _ref9.onDetected;
-  var scannerRef = (0, _react.useRef)(null);
-  (0, _react.useEffect)(function () {
+var BarcodeScannerModal = _ref9 => {
+  var {
+    onClose,
+    onDetected
+  } = _ref9;
+  var scannerRef = useRef(null);
+  useEffect(() => {
     var html5QrCode = new Html5Qrcode("reader");
     scannerRef.current = html5QrCode;
     html5QrCode.start({
@@ -791,36 +645,36 @@ var BarcodeScannerModal = function BarcodeScannerModal(_ref9) {
       },
       aspectRatio: 1.0,
       formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39, Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.UPC_A]
-    }, function (decodedText) {
+    }, decodedText => {
       vibrate([50]);
       onDetected(decodedText);
-      html5QrCode.stop().then(onClose)["catch"](console.error);
-    }, function (errorMessage) {})["catch"](function (err) {
+      html5QrCode.stop().then(onClose).catch(console.error);
+    }, errorMessage => {}).catch(err => {
       console.error("Error starting scanner", err);
     });
-    return function () {
+    return () => {
       if (scannerRef.current && scannerRef.current.isScanning) {
-        scannerRef.current.stop()["catch"](console.error);
+        scannerRef.current.stop().catch(console.error);
       }
     };
   }, []);
-  return /*#__PURE__*/_react["default"].createElement("div", {
+  return /*#__PURE__*/React.createElement("div", {
     className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm fade-in"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "w-full max-w-md bg-white rounded-3xl overflow-hidden relative"
-  }, /*#__PURE__*/_react["default"].createElement("button", {
+  }, /*#__PURE__*/React.createElement("button", {
     onClick: onClose,
     className: "absolute top-4 right-4 z-10 p-2 bg-black/50 rounded-full text-white hover:bg-black/70"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.X, {
+  }, /*#__PURE__*/React.createElement(X, {
     size: 24
-  })), /*#__PURE__*/_react["default"].createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
     id: "reader",
     className: "w-full h-64 bg-black"
-  }), /*#__PURE__*/_react["default"].createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "p-4 text-center"
-  }, /*#__PURE__*/_react["default"].createElement("p", {
+  }, /*#__PURE__*/React.createElement("p", {
     className: "text-[#003B71] font-bold"
-  }, "Scan Ticket Barcode"), /*#__PURE__*/_react["default"].createElement("p", {
+  }, "Scan Ticket Barcode"), /*#__PURE__*/React.createElement("p", {
     className: "text-gray-500 text-xs mt-1"
   }, "Align the barcode within the frame"))));
 };
@@ -829,332 +683,188 @@ var BarcodeScannerModal = function BarcodeScannerModal(_ref9) {
 // MAIN APP COMPONENT
 // ============================================================================
 
-function App() {
-  var _useState9 = (0, _react.useState)(false),
-    _useState0 = _slicedToArray(_useState9, 2),
-    isCitationMode = _useState0[0],
-    setIsCitationMode = _useState0[1];
-  var _useState1 = (0, _react.useState)('id'),
-    _useState10 = _slicedToArray(_useState1, 2),
-    mode = _useState10[0],
-    setMode = _useState10[1];
-  var _useState11 = (0, _react.useState)('search'),
-    _useState12 = _slicedToArray(_useState11, 2),
-    view = _useState12[0],
-    setView = _useState12[1];
-  var _useState13 = (0, _react.useState)(false),
-    _useState14 = _slicedToArray(_useState13, 2),
-    loading = _useState14[0],
-    setLoading = _useState14[1];
-  var _useState15 = (0, _react.useState)(false),
-    _useState16 = _slicedToArray(_useState15, 2),
-    isExpanding = _useState16[0],
-    setIsExpanding = _useState16[1];
-  var _useState17 = (0, _react.useState)(null),
-    _useState18 = _slicedToArray(_useState17, 2),
-    copyFeedback = _useState18[0],
-    setCopyFeedback = _useState18[1];
-  var _useState19 = (0, _react.useState)(false),
-    _useState20 = _slicedToArray(_useState19, 2),
-    isScanning = _useState20[0],
-    setIsScanning = _useState20[1];
-  var _useState21 = (0, _react.useState)(false),
-    _useState22 = _slicedToArray(_useState21, 2),
-    showBarcodeScanner = _useState22[0],
-    setShowBarcodeScanner = _useState22[1];
-  var _useState23 = (0, _react.useState)([]),
-    _useState24 = _slicedToArray(_useState23, 2),
-    streets = _useState24[0],
-    setStreets = _useState24[1];
-  var _useState25 = (0, _react.useState)(null),
-    _useState26 = _slicedToArray(_useState25, 2),
-    dataDate = _useState26[0],
-    setDataDate = _useState26[1];
-  var _useState27 = (0, _react.useState)(''),
-    _useState28 = _slicedToArray(_useState27, 2),
-    startId = _useState28[0],
-    setStartId = _useState28[1];
-  var _useState29 = (0, _react.useState)(''),
-    _useState30 = _slicedToArray(_useState29, 2),
-    endId = _useState30[0],
-    setEndId = _useState30[1];
-  var _useState31 = (0, _react.useState)(''),
-    _useState32 = _slicedToArray(_useState31, 2),
-    streetQuery = _useState32[0],
-    setStreetQuery = _useState32[1];
-  var _useState33 = (0, _react.useState)(''),
-    _useState34 = _slicedToArray(_useState33, 2),
-    ticketNum = _useState34[0],
-    setTicketNum = _useState34[1];
-  var _useState35 = (0, _react.useState)('IN'),
-    _useState36 = _slicedToArray(_useState35, 2),
-    plateState = _useState36[0],
-    setPlateState = _useState36[1];
-  var _useState37 = (0, _react.useState)(''),
-    _useState38 = _slicedToArray(_useState37, 2),
-    plateNum = _useState38[0],
-    setPlateNum = _useState38[1];
-  var _useState39 = (0, _react.useState)([]),
-    _useState40 = _slicedToArray(_useState39, 2),
-    results = _useState40[0],
-    setResults = _useState40[1];
-  var _useState41 = (0, _react.useState)(null),
-    _useState42 = _slicedToArray(_useState41, 2),
-    error = _useState42[0],
-    setError = _useState42[1];
-  var _useState43 = (0, _react.useState)(null),
-    _useState44 = _slicedToArray(_useState43, 2),
-    shakeField = _useState44[0],
-    setShakeField = _useState44[1];
-  var _useState45 = (0, _react.useState)(false),
-    _useState46 = _slicedToArray(_useState45, 2),
-    showInfoModal = _useState46[0],
-    setShowInfoModal = _useState46[1];
-  var _useState47 = (0, _react.useState)(false),
-    _useState48 = _slicedToArray(_useState47, 2),
-    showSettingsModal = _useState48[0],
-    setShowSettingsModal = _useState48[1];
-  var _useState49 = (0, _react.useState)(null),
-    _useState50 = _slicedToArray(_useState49, 2),
-    toast = _useState50[0],
-    setToast = _useState50[1];
-  var _useState51 = (0, _react.useState)(null),
-    _useState52 = _slicedToArray(_useState51, 2),
-    installPrompt = _useState52[0],
-    setInstallPrompt = _useState52[1];
-  var _useState53 = (0, _react.useState)(false),
-    _useState54 = _slicedToArray(_useState53, 2),
-    isStandalone = _useState54[0],
-    setIsStandalone = _useState54[1];
+export default function App() {
+  var [isCitationMode, setIsCitationMode] = useState(false);
+  var [mode, setMode] = useState('id');
+  var [view, setView] = useState('search');
+  var [loading, setLoading] = useState(false);
+  var [isExpanding, setIsExpanding] = useState(false);
+  var [copyFeedback, setCopyFeedback] = useState(null);
+  var [isScanning, setIsScanning] = useState(false);
+  var [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  var [streets, setStreets] = useState([]);
+  var [dataDate, setDataDate] = useState(null);
+  var [startId, setStartId] = useState('');
+  var [endId, setEndId] = useState('');
+  var [streetQuery, setStreetQuery] = useState('');
+  var [ticketNum, setTicketNum] = useState('');
+  var [plateState, setPlateState] = useState('IN');
+  var [plateNum, setPlateNum] = useState('');
+  var [results, setResults] = useState([]);
+  var [error, setError] = useState(null);
+  var [shakeField, setShakeField] = useState(null);
+  var [showInfoModal, setShowInfoModal] = useState(false);
+  var [showSettingsModal, setShowSettingsModal] = useState(false);
+  var [toast, setToast] = useState(null);
+  var [installPrompt, setInstallPrompt] = useState(null);
+  var [isStandalone, setIsStandalone] = useState(false);
   var isOnline = useOnlineStatus();
-  var _useFavorites = useFavorites(),
-    favorites = _useFavorites.favorites,
-    addFavorite = _useFavorites.addFavorite,
-    removeFavorite = _useFavorites.removeFavorite,
-    isFavorite = _useFavorites.isFavorite;
-  var _useRecentSearches = useRecentSearches(),
-    recent = _useRecentSearches.recent,
-    addRecent = _useRecentSearches.addRecent,
-    clearRecent = _useRecentSearches.clearRecent;
-  var formRef = (0, _react.useRef)(null);
-  var fileInputRef = (0, _react.useRef)(null);
-  var showToast = (0, _react.useCallback)(function (message) {
+  var {
+    favorites,
+    addFavorite,
+    removeFavorite,
+    isFavorite
+  } = useFavorites();
+  var {
+    recent,
+    addRecent,
+    clearRecent
+  } = useRecentSearches();
+  var formRef = useRef(null);
+  var fileInputRef = useRef(null);
+  var showToast = useCallback(function (message) {
     var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'info';
     setToast({
-      message: message,
-      type: type
+      message,
+      type
     });
   }, []);
   var executeSearch = /*#__PURE__*/function () {
-    var _ref0 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(searchMode, sId, eId, sQuery) {
-      var params, res, data, groups, resultList, _t2;
-      return _regenerator().w(function (_context2) {
-        while (1) switch (_context2.p = _context2.n) {
-          case 0:
-            if (isOnline) {
-              _context2.n = 1;
-              break;
-            }
-            setError("No internet connection");
-            vibrate([10, 100, 10]);
-            return _context2.a(2);
-          case 1:
-            setLoading(true);
-            setError(null);
-            _context2.p = 2;
-            params = new URLSearchParams({
-              mode: searchMode
-            });
-            if (searchMode === 'id') {
-              params.append('start', sId);
-              if (eId) params.append('end', eId);
-            } else {
-              params.append('street', sQuery);
-            }
-            _context2.n = 3;
-            return fetchWithRetry("".concat(CONFIG.BACKEND_URL, "/api/search?").concat(params));
-          case 3:
-            res = _context2.v;
-            if (res.ok) {
-              _context2.n = 4;
-              break;
-            }
-            throw new Error("Server error: ".concat(res.status));
-          case 4:
-            _context2.n = 5;
-            return res.json();
-          case 5:
-            data = _context2.v;
-            if (!data.features || data.features.length === 0) {
-              setResults([]);
-              setLoading(false);
-              setError("No parking assets found.");
-              vibrate([10, 100, 10]);
-            } else {
-              groups = {};
-              data.features.forEach(function (f) {
-                var addr = f.attributes.FULL_ADDRESS ? f.attributes.FULL_ADDRESS.trim() : "Unknown Location";
-                if (!groups[addr]) groups[addr] = {
-                  ids: [],
-                  geoms: []
-                };
-                groups[addr].ids.push(f.attributes.SPACE_NUMBER);
-                if (f.geometry && f.geometry.x && f.geometry.y) groups[addr].geoms.push({
-                  id: f.attributes.SPACE_NUMBER,
-                  x: f.geometry.x,
-                  y: f.geometry.y
-                });
-              });
-              resultList = Object.keys(groups).sort().map(function (addr) {
-                return {
-                  address: addr,
-                  ids: groups[addr].ids.sort(function (a, b) {
-                    return a - b;
-                  }),
-                  geoms: groups[addr].geoms
-                };
-              });
-              setResults(resultList);
-              setIsExpanding(true);
-              addRecent({
-                query: searchMode === 'id' ? "".concat(sId).concat(eId ? "-".concat(eId) : '') : sQuery,
-                mode: searchMode
-              });
-              vibrate(10);
-              setTimeout(function () {
-                setView('results');
-                setLoading(false);
-              }, 400);
-            }
-            _context2.n = 7;
-            break;
-          case 6:
-            _context2.p = 6;
-            _t2 = _context2.v;
-            console.error('Search error:', _t2);
-            setError(_t2.name === 'AbortError' ? "Request timed out. Try again." : "Connection failed. Check your internet.");
-            setLoading(false);
-            vibrate([10, 100, 10, 100, 10]);
-          case 7:
-            return _context2.a(2);
+    var _ref0 = _asyncToGenerator(function* (searchMode, sId, eId, sQuery) {
+      if (!isOnline) {
+        setError("No internet connection");
+        vibrate([10, 100, 10]);
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        var params = new URLSearchParams({
+          mode: searchMode
+        });
+        if (searchMode === 'id') {
+          params.append('start', sId);
+          if (eId) params.append('end', eId);
+        } else {
+          params.append('street', sQuery);
         }
-      }, _callee2, null, [[2, 6]]);
-    }));
+        var res = yield fetchWithRetry("".concat(CONFIG.BACKEND_URL, "/api/search?").concat(params));
+        if (!res.ok) throw new Error("Server error: ".concat(res.status));
+        var data = yield res.json();
+        if (!data.features || data.features.length === 0) {
+          setResults([]);
+          setLoading(false);
+          setError("No parking assets found.");
+          vibrate([10, 100, 10]);
+        } else {
+          var groups = {};
+          data.features.forEach(f => {
+            var addr = f.attributes.FULL_ADDRESS ? f.attributes.FULL_ADDRESS.trim() : "Unknown Location";
+            if (!groups[addr]) groups[addr] = {
+              ids: [],
+              geoms: []
+            };
+            groups[addr].ids.push(f.attributes.SPACE_NUMBER);
+            if (f.geometry && f.geometry.x && f.geometry.y) groups[addr].geoms.push({
+              id: f.attributes.SPACE_NUMBER,
+              x: f.geometry.x,
+              y: f.geometry.y
+            });
+          });
+          var resultList = Object.keys(groups).sort().map(addr => ({
+            address: addr,
+            ids: groups[addr].ids.sort((a, b) => a - b),
+            geoms: groups[addr].geoms
+          }));
+          setResults(resultList);
+          setIsExpanding(true);
+          addRecent({
+            query: searchMode === 'id' ? "".concat(sId).concat(eId ? "-".concat(eId) : '') : sQuery,
+            mode: searchMode
+          });
+          vibrate(10);
+          setTimeout(() => {
+            setView('results');
+            setLoading(false);
+          }, 400);
+        }
+      } catch (e) {
+        console.error('Search error:', e);
+        setError(e.name === 'AbortError' ? "Request timed out. Try again." : "Connection failed. Check your internet.");
+        setLoading(false);
+        vibrate([10, 100, 10, 100, 10]);
+      }
+    });
     return function executeSearch(_x3, _x4, _x5, _x6) {
       return _ref0.apply(this, arguments);
     };
   }();
-  var handleCameraClick = function handleCameraClick() {
+  var handleCameraClick = () => {
     if (fileInputRef.current) fileInputRef.current.click();
   };
   var handleImageUpload = /*#__PURE__*/function () {
-    var _ref1 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(event) {
-      var file, formData, response, errorDetails, data, bestMatch, plate, regionCode, _t3, _t4;
-      return _regenerator().w(function (_context3) {
-        while (1) switch (_context3.p = _context3.n) {
-          case 0:
-            file = event.target.files[0];
-            if (file) {
-              _context3.n = 1;
-              break;
-            }
-            return _context3.a(2);
-          case 1:
-            setIsScanning(true);
-            setError(null);
-            vibrate(10);
-            formData = new FormData();
-            formData.append('upload', file);
-            formData.append('regions', 'us');
-            _context3.p = 2;
-            _context3.n = 3;
-            return fetch(CONFIG.SNAPSHOT_PROXY_URL, {
-              method: 'POST',
-              body: formData
-            });
-          case 3:
-            response = _context3.v;
-            if (response.ok) {
-              _context3.n = 10;
-              break;
-            }
-            errorDetails = {};
-            _context3.p = 4;
-            _context3.n = 5;
-            return response.json();
-          case 5:
-            errorDetails = _context3.v;
-            _context3.n = 7;
-            break;
-          case 6:
-            _context3.p = 6;
-            _t3 = _context3.v;
-          case 7:
-            if (!(response.status === 502 && errorDetails.details && errorDetails.details.includes('403'))) {
-              _context3.n = 8;
-              break;
-            }
-            throw new Error('Backend LPR Token Invalid');
-          case 8:
-            if (!(response.status === 404)) {
-              _context3.n = 9;
-              break;
-            }
-            throw new Error('LPR Endpoint not found on server');
-          case 9:
-            throw new Error('API Error');
-          case 10:
-            _context3.n = 11;
-            return response.json();
-          case 11:
-            data = _context3.v;
-            if (data.results && data.results.length > 0) {
-              bestMatch = data.results[0];
-              plate = bestMatch.plate.toUpperCase();
-              setPlateNum(plate);
-              if (bestMatch.region && bestMatch.region.code) {
-                regionCode = bestMatch.region.code.split('-').pop().toUpperCase();
-                if (US_STATES.includes(regionCode)) setPlateState(regionCode);
-              }
-              showToast("Plate detected: ".concat(plate), 'success');
-              vibrate([10, 50, 10]);
-            } else {
-              setError("No license plate detected. Try again.");
-              vibrate([10, 100, 10]);
-            }
-            _context3.n = 13;
-            break;
-          case 12:
-            _context3.p = 12;
-            _t4 = _context3.v;
-            console.error("LPR Error:", _t4);
-            if (_t4.message === 'Backend LPR Token Invalid') {
-              showToast("Backend API Token missing (403)", "error");
-            } else if (_t4.message.includes('Endpoint not found')) {
-              showToast("Server update required (404)", "error");
-            } else {
-              setError("Failed to scan plate. Please enter manually.");
-            }
-            vibrate([10, 100, 10]);
-          case 13:
-            _context3.p = 13;
-            setIsScanning(false);
-            event.target.value = null;
-            return _context3.f(13);
-          case 14:
-            return _context3.a(2);
+    var _ref1 = _asyncToGenerator(function* (event) {
+      var file = event.target.files[0];
+      if (!file) return;
+      setIsScanning(true);
+      setError(null);
+      vibrate(10);
+      var formData = new FormData();
+      formData.append('upload', file);
+      formData.append('regions', 'us');
+      try {
+        var response = yield fetch(CONFIG.SNAPSHOT_PROXY_URL, {
+          method: 'POST',
+          body: formData
+        });
+        if (!response.ok) {
+          var errorDetails = {};
+          try {
+            errorDetails = yield response.json();
+          } catch (e) {}
+          if (response.status === 502 && errorDetails.details && errorDetails.details.includes('403')) throw new Error('Backend LPR Token Invalid');
+          if (response.status === 404) throw new Error('LPR Endpoint not found on server');
+          throw new Error('API Error');
         }
-      }, _callee3, null, [[4, 6], [2, 12, 13, 14]]);
-    }));
+        var data = yield response.json();
+        if (data.results && data.results.length > 0) {
+          var bestMatch = data.results[0];
+          var plate = bestMatch.plate.toUpperCase();
+          setPlateNum(plate);
+          if (bestMatch.region && bestMatch.region.code) {
+            var regionCode = bestMatch.region.code.split('-').pop().toUpperCase();
+            if (US_STATES.includes(regionCode)) setPlateState(regionCode);
+          }
+          showToast("Plate detected: ".concat(plate), 'success');
+          vibrate([10, 50, 10]);
+        } else {
+          setError("No license plate detected. Try again.");
+          vibrate([10, 100, 10]);
+        }
+      } catch (err) {
+        console.error("LPR Error:", err);
+        if (err.message === 'Backend LPR Token Invalid') {
+          showToast("Backend API Token missing (403)", "error");
+        } else if (err.message.includes('Endpoint not found')) {
+          showToast("Server update required (404)", "error");
+        } else {
+          setError("Failed to scan plate. Please enter manually.");
+        }
+        vibrate([10, 100, 10]);
+      } finally {
+        setIsScanning(false);
+        event.target.value = null;
+      }
+    });
     return function handleImageUpload(_x7) {
       return _ref1.apply(this, arguments);
     };
   }();
-  var handleBarcodeDetected = function handleBarcodeDetected(code) {
+  var handleBarcodeDetected = code => {
     setTicketNum(code);
     showToast("Ticket scanned: ".concat(code), 'success');
   };
-  var getCitationShareData = function getCitationShareData() {
+  var getCitationShareData = () => {
     var shareUrl = window.location.origin + window.location.pathname,
       text = "";
     if (mode === 'ticket' && ticketNum) {
@@ -1165,105 +875,66 @@ function App() {
       text = "Pay citations for ".concat(plateState, " plate ").concat(plateNum, ": ").concat(shareUrl);
     }
     return {
-      shareUrl: shareUrl,
-      text: text
+      shareUrl,
+      text
     };
   };
   var handleCitationShare = /*#__PURE__*/function () {
-    var _ref10 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
-      var _getCitationShareData, shareUrl, text, _t5;
-      return _regenerator().w(function (_context4) {
-        while (1) switch (_context4.p = _context4.n) {
-          case 0:
-            _getCitationShareData = getCitationShareData(), shareUrl = _getCitationShareData.shareUrl, text = _getCitationShareData.text;
-            if (text) {
-              _context4.n = 1;
-              break;
-            }
-            return _context4.a(2);
-          case 1:
-            if (!navigator.share) {
-              _context4.n = 6;
-              break;
-            }
-            _context4.p = 2;
-            _context4.n = 3;
-            return navigator.share({
-              title: "Open Curb Citation",
-              text: text,
-              url: shareUrl
-            });
-          case 3:
-            vibrate(10);
-            _context4.n = 5;
-            break;
-          case 4:
-            _context4.p = 4;
-            _t5 = _context4.v;
-          case 5:
-            _context4.n = 7;
-            break;
-          case 6:
-            handleCitationCopy();
-          case 7:
-            return _context4.a(2);
-        }
-      }, _callee4, null, [[2, 4]]);
-    }));
+    var _ref10 = _asyncToGenerator(function* () {
+      var {
+        shareUrl,
+        text
+      } = getCitationShareData();
+      if (!text) return;
+      if (navigator.share) {
+        try {
+          yield navigator.share({
+            title: "Open Curb Citation",
+            text: text,
+            url: shareUrl
+          });
+          vibrate(10);
+        } catch (err) {}
+      } else {
+        handleCitationCopy();
+      }
+    });
     return function handleCitationShare() {
       return _ref10.apply(this, arguments);
     };
   }();
   var handleCitationCopy = /*#__PURE__*/function () {
-    var _ref11 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5() {
-      var _getCitationShareData2, text, _t6;
-      return _regenerator().w(function (_context5) {
-        while (1) switch (_context5.p = _context5.n) {
-          case 0:
-            _getCitationShareData2 = getCitationShareData(), text = _getCitationShareData2.text;
-            if (text) {
-              _context5.n = 1;
-              break;
-            }
-            return _context5.a(2);
-          case 1:
-            _context5.p = 1;
-            _context5.n = 2;
-            return navigator.clipboard.writeText(text);
-          case 2:
-            setCopyFeedback("Copied!");
-            vibrate([10, 50, 10]);
-            setTimeout(function () {
-              return setCopyFeedback(null);
-            }, 2000);
-            _context5.n = 4;
-            break;
-          case 3:
-            _context5.p = 3;
-            _t6 = _context5.v;
-            console.error("Copy failed");
-          case 4:
-            return _context5.a(2);
-        }
-      }, _callee5, null, [[1, 3]]);
-    }));
+    var _ref11 = _asyncToGenerator(function* () {
+      var {
+        text
+      } = getCitationShareData();
+      if (!text) return;
+      try {
+        yield navigator.clipboard.writeText(text);
+        setCopyFeedback("Copied!");
+        vibrate([10, 50, 10]);
+        setTimeout(() => setCopyFeedback(null), 2000);
+      } catch (err) {
+        console.error("Copy failed");
+      }
+    });
     return function handleCitationCopy() {
       return _ref11.apply(this, arguments);
     };
   }();
-  (0, _react.useEffect)(function () {
-    var handleInstallPrompt = function handleInstallPrompt(e) {
+  useEffect(() => {
+    var handleInstallPrompt = e => {
       e.preventDefault();
       setInstallPrompt(e);
     };
-    var handleAppInstalled = function handleAppInstalled() {
+    var handleAppInstalled = () => {
       setInstallPrompt(null);
       showToast('App installed successfully!', 'success');
     };
-    var checkStandalone = function checkStandalone() {
+    var checkStandalone = () => {
       setIsStandalone(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://'));
     };
-    var handleShareTarget = function handleShareTarget() {
+    var handleShareTarget = () => {
       var params = new URLSearchParams(window.location.search);
       var query = params.get('share_text') || params.get('q') || params.get('text');
       var ticketParam = params.get('ticket'),
@@ -1306,7 +977,7 @@ function App() {
     } catch (e) {
       mediaQuery.addListener(checkStandalone);
     }
-    return function () {
+    return () => {
       window.removeEventListener('beforeinstallprompt', handleInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
       try {
@@ -1316,90 +987,54 @@ function App() {
       }
     };
   }, []);
-  (0, _react.useEffect)(function () {
+  useEffect(() => {
     var checkMeta = /*#__PURE__*/function () {
-      var _ref12 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
-        var _data$data, res, data, dateStr, cachedMeta, _t7;
-        return _regenerator().w(function (_context6) {
-          while (1) switch (_context6.p = _context6.n) {
-            case 0:
-              _context6.p = 0;
-              _context6.n = 1;
-              return fetchWithRetry("".concat(CONFIG.BACKEND_URL, "/api/meta"));
-            case 1:
-              res = _context6.v;
-              _context6.n = 2;
-              return res.json();
-            case 2:
-              data = _context6.v;
-              if ((_data$data = data.data) !== null && _data$data !== void 0 && (_data$data = _data$data[0]) !== null && _data$data !== void 0 && (_data$data = _data$data.attributes) !== null && _data$data !== void 0 && _data$data.modified) {
-                dateStr = new Date(data.data[0].attributes.modified).toLocaleDateString();
-                setDataDate(dateStr);
-                cachedMeta = storage.get(CONFIG.STORAGE_KEYS.META);
-                if ((cachedMeta === null || cachedMeta === void 0 ? void 0 : cachedMeta.timestamp) < data.data[0].attributes.modified) {
-                  storage.remove(CONFIG.STORAGE_KEYS.STREETS);
-                }
-                storage.set(CONFIG.STORAGE_KEYS.META, {
-                  timestamp: data.data[0].attributes.modified,
-                  displayDate: dateStr
-                });
-              }
-              _context6.n = 4;
-              break;
-            case 3:
-              _context6.p = 3;
-              _t7 = _context6.v;
-              console.error("Meta handshake failed.", _t7);
-            case 4:
-              return _context6.a(2);
+      var _ref12 = _asyncToGenerator(function* () {
+        try {
+          var _data$data;
+          var res = yield fetchWithRetry("".concat(CONFIG.BACKEND_URL, "/api/meta"));
+          var data = yield res.json();
+          if ((_data$data = data.data) !== null && _data$data !== void 0 && (_data$data = _data$data[0]) !== null && _data$data !== void 0 && (_data$data = _data$data.attributes) !== null && _data$data !== void 0 && _data$data.modified) {
+            var dateStr = new Date(data.data[0].attributes.modified).toLocaleDateString();
+            setDataDate(dateStr);
+            var cachedMeta = storage.get(CONFIG.STORAGE_KEYS.META);
+            if ((cachedMeta === null || cachedMeta === void 0 ? void 0 : cachedMeta.timestamp) < data.data[0].attributes.modified) {
+              storage.remove(CONFIG.STORAGE_KEYS.STREETS);
+            }
+            storage.set(CONFIG.STORAGE_KEYS.META, {
+              timestamp: data.data[0].attributes.modified,
+              displayDate: dateStr
+            });
           }
-        }, _callee6, null, [[0, 3]]);
-      }));
+        } catch (e) {
+          console.error("Meta handshake failed.", e);
+        }
+      });
       return function checkMeta() {
         return _ref12.apply(this, arguments);
       };
     }();
     checkMeta();
   }, []);
-  (0, _react.useEffect)(function () {
+  useEffect(() => {
     if (!isCitationMode && mode === 'street' && streets.length === 0) {
       var loadStreets = /*#__PURE__*/function () {
-        var _ref13 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7() {
-          var cached, res, sorted, _t8;
-          return _regenerator().w(function (_context7) {
-            while (1) switch (_context7.p = _context7.n) {
-              case 0:
-                cached = storage.get(CONFIG.STORAGE_KEYS.STREETS);
-                if (!cached) {
-                  _context7.n = 1;
-                  break;
-                }
-                setStreets(cached);
-                return _context7.a(2);
-              case 1:
-                _context7.p = 1;
-                _context7.n = 2;
-                return fetchWithRetry("".concat(CONFIG.BACKEND_URL, "/api/streets"));
-              case 2:
-                res = _context7.v;
-                _context7.n = 3;
-                return res.json();
-              case 3:
-                sorted = _context7.v;
-                storage.set(CONFIG.STORAGE_KEYS.STREETS, sorted);
-                setStreets(sorted);
-                _context7.n = 5;
-                break;
-              case 4:
-                _context7.p = 4;
-                _t8 = _context7.v;
-                console.error("Street handshake failed", _t8);
-                showToast('Failed to load street names', 'error');
-              case 5:
-                return _context7.a(2);
-            }
-          }, _callee7, null, [[1, 4]]);
-        }));
+        var _ref13 = _asyncToGenerator(function* () {
+          var cached = storage.get(CONFIG.STORAGE_KEYS.STREETS);
+          if (cached) {
+            setStreets(cached);
+            return;
+          }
+          try {
+            var res = yield fetchWithRetry("".concat(CONFIG.BACKEND_URL, "/api/streets"));
+            var sorted = yield res.json();
+            storage.set(CONFIG.STORAGE_KEYS.STREETS, sorted);
+            setStreets(sorted);
+          } catch (e) {
+            console.error("Street handshake failed", e);
+            showToast('Failed to load street names', 'error');
+          }
+        });
         return function loadStreets() {
           return _ref13.apply(this, arguments);
         };
@@ -1408,34 +1043,19 @@ function App() {
     }
   }, [mode, isCitationMode]);
   var handleInstallClick = /*#__PURE__*/function () {
-    var _ref14 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8() {
-      var _yield$installPrompt$, outcome;
-      return _regenerator().w(function (_context8) {
-        while (1) switch (_context8.n) {
-          case 0:
-            if (installPrompt) {
-              _context8.n = 1;
-              break;
-            }
-            return _context8.a(2);
-          case 1:
-            installPrompt.prompt();
-            _context8.n = 2;
-            return installPrompt.userChoice;
-          case 2:
-            _yield$installPrompt$ = _context8.v;
-            outcome = _yield$installPrompt$.outcome;
-            if (outcome === 'accepted') setInstallPrompt(null);
-          case 3:
-            return _context8.a(2);
-        }
-      }, _callee8);
-    }));
+    var _ref14 = _asyncToGenerator(function* () {
+      if (!installPrompt) return;
+      installPrompt.prompt();
+      var {
+        outcome
+      } = yield installPrompt.userChoice;
+      if (outcome === 'accepted') setInstallPrompt(null);
+    });
     return function handleInstallClick() {
       return _ref14.apply(this, arguments);
     };
   }();
-  var toggleCitationMode = function toggleCitationMode() {
+  var toggleCitationMode = () => {
     setIsCitationMode(!isCitationMode);
     setMode(isCitationMode ? 'id' : 'ticket');
     setError(null);
@@ -1444,132 +1064,87 @@ function App() {
     vibrate(10);
   };
   var handleSearch = /*#__PURE__*/function () {
-    var _ref15 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9() {
-      return _regenerator().w(function (_context9) {
-        while (1) switch (_context9.n) {
-          case 0:
-            setError(null);
-            setShakeField(null);
-            if (!isCitationMode) {
-              _context9.n = 7;
-              break;
-            }
-            if (!(mode === 'ticket')) {
-              _context9.n = 5;
-              break;
-            }
-            if (ticketNum) {
-              _context9.n = 1;
-              break;
-            }
+    var _ref15 = _asyncToGenerator(function* () {
+      setError(null);
+      setShakeField(null);
+      if (isCitationMode) {
+        if (mode === 'ticket') {
+          if (!ticketNum) {
             setError("Enter a ticket number");
             setShakeField('ticket');
             vibrate([10, 100, 10]);
-            return _context9.a(2);
-          case 1:
-            if (!(ticketNum.length !== 9)) {
-              _context9.n = 2;
-              break;
-            }
+            return;
+          }
+          if (ticketNum.length !== 9) {
             setError("Ticket number must be 9 digits");
             setShakeField('ticket');
             vibrate([10, 100, 10]);
-            return _context9.a(2);
-          case 2:
-            if (!(!ticketNum.startsWith('0') && !ticketNum.startsWith('71'))) {
-              _context9.n = 3;
-              break;
-            }
+            return;
+          }
+          if (!ticketNum.startsWith('0') && !ticketNum.startsWith('71')) {
             setError("Ticket must start with 0 or 71");
             setShakeField('ticket');
             vibrate([10, 100, 10]);
-            return _context9.a(2);
-          case 3:
-            if (luhnValidate(ticketNum)) {
-              _context9.n = 4;
-              break;
-            }
+            return;
+          }
+          if (!luhnValidate(ticketNum)) {
             setError("Invalid ticket number");
             setShakeField('ticket');
             vibrate([10, 100, 10]);
-            return _context9.a(2);
-          case 4:
-            _context9.n = 6;
-            break;
-          case 5:
-            if (plateNum) {
-              _context9.n = 6;
-              break;
-            }
+            return;
+          }
+        } else {
+          if (!plateNum) {
             setError("Enter a license plate");
             setShakeField('plate');
             vibrate([10, 100, 10]);
-            return _context9.a(2);
-          case 6:
-            vibrate(10);
-            formRef.current.submit();
-            setTicketNum('');
-            setPlateNum('');
-            setPlateState('IN');
-            return _context9.a(2);
-          case 7:
-            if (!(mode === 'id')) {
-              _context9.n = 11;
-              break;
-            }
-            if (startId) {
-              _context9.n = 8;
-              break;
-            }
-            setError("Please enter a Start ID");
-            setShakeField('start');
-            vibrate([10, 100, 10]);
-            return _context9.a(2);
-          case 8:
-            if (!(startId.length < 3)) {
-              _context9.n = 9;
-              break;
-            }
-            setError("Meter ID too short (min 3 digits)");
-            setShakeField('start');
-            vibrate([10, 100, 10]);
-            return _context9.a(2);
-          case 9:
-            if (!(endId && parseInt(endId) <= parseInt(startId))) {
-              _context9.n = 10;
-              break;
-            }
-            setError("End ID must be greater than Start ID");
-            setShakeField('end');
-            vibrate([10, 100, 10]);
-            return _context9.a(2);
-          case 10:
-            _context9.n = 12;
-            break;
-          case 11:
-            if (!(!streetQuery || streetQuery.trim().length < 2)) {
-              _context9.n = 12;
-              break;
-            }
-            setError("Please select a valid street name");
-            setShakeField('street');
-            vibrate([10, 100, 10]);
-            return _context9.a(2);
-          case 12:
-            executeSearch(mode, startId, endId, streetQuery);
-          case 13:
-            return _context9.a(2);
+            return;
+          }
         }
-      }, _callee9);
-    }));
+        vibrate(10);
+        formRef.current.submit();
+        setTicketNum('');
+        setPlateNum('');
+        setPlateState('IN');
+        return;
+      }
+      if (mode === 'id') {
+        if (!startId) {
+          setError("Please enter a Start ID");
+          setShakeField('start');
+          vibrate([10, 100, 10]);
+          return;
+        }
+        if (startId.length < 3) {
+          setError("Meter ID too short (min 3 digits)");
+          setShakeField('start');
+          vibrate([10, 100, 10]);
+          return;
+        }
+        if (endId && parseInt(endId) <= parseInt(startId)) {
+          setError("End ID must be greater than Start ID");
+          setShakeField('end');
+          vibrate([10, 100, 10]);
+          return;
+        }
+      } else {
+        if (!streetQuery || streetQuery.trim().length < 2) {
+          setError("Please select a valid street name");
+          setShakeField('street');
+          vibrate([10, 100, 10]);
+          return;
+        }
+      }
+      executeSearch(mode, startId, endId, streetQuery);
+    });
     return function handleSearch() {
       return _ref15.apply(this, arguments);
     };
   }();
-  var handleNewSearch = function handleNewSearch() {
+  var handleNewSearch = () => {
     setIsExpanding(false);
     vibrate(10);
-    setTimeout(function () {
+    setTimeout(() => {
       setView('search');
       setStartId('');
       setEndId('');
@@ -1578,17 +1153,15 @@ function App() {
       setError(null);
     }, 300);
   };
-  var handleNumericInput = function handleNumericInput(setter) {
-    return function (e) {
-      var val = e.target.value;
-      if (val === '' || /^[1-9]\d*$/.test(val)) setter(val);
-    };
+  var handleNumericInput = setter => e => {
+    var val = e.target.value;
+    if (val === '' || /^[1-9]\d*$/.test(val)) setter(val);
   };
-  var handleTicketInput = function handleTicketInput(e) {
+  var handleTicketInput = e => {
     var val = e.target.value.replace(/\D/g, '');
     setTicketNum(val);
   };
-  var handleRecentSelect = function handleRecentSelect(search) {
+  var handleRecentSelect = search => {
     vibrate(10);
     if (search.mode === 'id') {
       var parts = search.query.split('-');
@@ -1600,145 +1173,139 @@ function App() {
       setMode('street');
     }
   };
-  var handleFavoriteSelect = function handleFavoriteSelect(favorite) {
+  var handleFavoriteSelect = favorite => {
     vibrate(10);
     setResults([favorite]);
     setView('results');
   };
-  return /*#__PURE__*/_react["default"].createElement("div", {
+  return /*#__PURE__*/React.createElement("div", {
     className: "h-screen w-screen relative flex flex-col font-sans text-white"
-  }, /*#__PURE__*/_react["default"].createElement("style", null, customStyles), toast && /*#__PURE__*/_react["default"].createElement(Toast, {
+  }, /*#__PURE__*/React.createElement("style", null, customStyles), toast && /*#__PURE__*/React.createElement(Toast, {
     message: toast.message,
     type: toast.type,
-    onClose: function onClose() {
-      return setToast(null);
-    }
-  }), /*#__PURE__*/_react["default"].createElement("input", {
+    onClose: () => setToast(null)
+  }), /*#__PURE__*/React.createElement("input", {
     type: "file",
     accept: "image/*",
     capture: "environment",
     ref: fileInputRef,
     onChange: handleImageUpload,
     className: "hidden"
-  }), showBarcodeScanner && /*#__PURE__*/_react["default"].createElement(BarcodeScannerModal, {
-    onClose: function onClose() {
-      return setShowBarcodeScanner(false);
-    },
+  }), showBarcodeScanner && /*#__PURE__*/React.createElement(BarcodeScannerModal, {
+    onClose: () => setShowBarcodeScanner(false),
     onDetected: handleBarcodeDetected
-  }), /*#__PURE__*/_react["default"].createElement("form", {
+  }), /*#__PURE__*/React.createElement("form", {
     ref: formRef,
     action: CONFIG.ETIMS_ENDPOINT,
     method: "POST",
     target: "_blank",
     className: "hidden"
-  }, /*#__PURE__*/_react["default"].createElement("input", {
+  }, /*#__PURE__*/React.createElement("input", {
     type: "hidden",
     name: "clientcode",
     value: "5I"
-  }), /*#__PURE__*/_react["default"].createElement("input", {
+  }), /*#__PURE__*/React.createElement("input", {
     type: "hidden",
     name: "requestType",
     value: "submit"
-  }), /*#__PURE__*/_react["default"].createElement("input", {
+  }), /*#__PURE__*/React.createElement("input", {
     type: "hidden",
     name: "requestCount",
     value: "1"
-  }), /*#__PURE__*/_react["default"].createElement("input", {
+  }), /*#__PURE__*/React.createElement("input", {
     type: "hidden",
     name: "clientAccount",
     value: "6"
-  }), /*#__PURE__*/_react["default"].createElement("input", {
+  }), /*#__PURE__*/React.createElement("input", {
     type: "hidden",
     name: "paymentType",
     value: mode === 'ticket' ? 'T' : 'P'
-  }), /*#__PURE__*/_react["default"].createElement("input", {
+  }), /*#__PURE__*/React.createElement("input", {
     type: "hidden",
     name: "documentNum",
     value: mode === 'ticket' ? ticketNum : "".concat(plateState).concat(plateNum)
-  }), /*#__PURE__*/_react["default"].createElement("input", {
+  }), /*#__PURE__*/React.createElement("input", {
     type: "submit",
     value: "Submit"
-  })), /*#__PURE__*/_react["default"].createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
     className: "absolute inset-0 bg-[radial-gradient(circle_at_center,#003B71_0%,#001f3f_100%)] z-0"
-  }), /*#__PURE__*/_react["default"].createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "absolute inset-0 opacity-10 pointer-events-none z-0",
     style: {
       backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
       backgroundSize: '40px 40px'
     }
-  }), /*#__PURE__*/_react["default"].createElement("header", {
+  }), /*#__PURE__*/React.createElement("header", {
     className: "relative z-10 safe-top px-6 py-6 grid grid-cols-[1fr_auto_1fr] sm:flex sm:justify-between items-center transition-opacity duration-300 ".concat(view !== 'search' ? 'opacity-0 pointer-events-none' : 'opacity-100')
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "col-start-2"
-  }, /*#__PURE__*/_react["default"].createElement("button", {
+  }, /*#__PURE__*/React.createElement("button", {
     onClick: toggleCitationMode,
     className: "focus:outline-none active:scale-95 transition-transform block"
-  }, /*#__PURE__*/_react["default"].createElement("img", {
+  }, /*#__PURE__*/React.createElement("img", {
     src: "https://raw.githubusercontent.com/dugann/indy-locator-web/main/logo.png",
     alt: "Open Curb",
     className: "h-8 sm:h-14 w-auto object-contain drop-shadow-md"
-  }))), /*#__PURE__*/_react["default"].createElement("div", {
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2 col-start-3 justify-self-end"
-  }, !isOnline && /*#__PURE__*/_react["default"].createElement("div", {
+  }, !isOnline && /*#__PURE__*/React.createElement("div", {
     className: "p-3 bg-red-500/20 rounded-full animate-pulse",
     title: "Offline"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.WifiOff, {
+  }, /*#__PURE__*/React.createElement(WifiOff, {
     size: 24,
     className: "text-red-300"
-  })), installPrompt && !isStandalone && /*#__PURE__*/_react["default"].createElement("button", {
+  })), installPrompt && !isStandalone && /*#__PURE__*/React.createElement("button", {
     onClick: handleInstallClick,
     className: "p-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors slide-in-down",
     title: "Install App"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Download, {
+  }, /*#__PURE__*/React.createElement(Download, {
     size: 24,
     className: "text-white/80"
-  })), /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
-      return setShowSettingsModal(true);
-    },
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowSettingsModal(true),
     className: "p-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors",
     title: "Settings"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Settings, {
+  }, /*#__PURE__*/React.createElement(Settings, {
     size: 24,
     className: "text-white/80"
-  })))), /*#__PURE__*/_react["default"].createElement("main", {
+  })))), /*#__PURE__*/React.createElement("main", {
     className: "flex-1 relative z-10 flex flex-col transition-all duration-300 ".concat(view !== 'search' ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100')
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "mt-4 sm:mt-16 px-6 flex flex-col gap-8 sm:gap-12"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "w-full max-w-md mx-auto space-y-4 sm:space-y-6 relative z-10"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex bg-white/10 p-1.5 sm:p-2 rounded-2xl backdrop-blur-sm border border-white/20"
-  }, /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
       setMode(isCitationMode ? 'ticket' : 'id');
       setError(null);
       vibrate(10);
     },
     className: "flex-1 py-4 px-2 sm:px-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 ".concat(mode === 'id' || mode === 'ticket' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60 hover:text-white hover:bg-white/5')
-  }, isCitationMode ? 'Ticket #' : 'Meter ID'), /*#__PURE__*/_react["default"].createElement("div", {
+  }, isCitationMode ? 'Ticket #' : 'Meter ID'), /*#__PURE__*/React.createElement("div", {
     className: "w-[1px] bg-white/10 my-2"
-  }), /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
       setMode(isCitationMode ? 'plate' : 'street');
       setError(null);
       vibrate(10);
     },
     className: "flex-1 py-4 px-2 sm:px-4 rounded-xl text-sm sm:text-base font-semibold transition-all duration-300 flex items-center justify-center gap-2 ".concat(mode === 'street' || mode === 'plate' ? 'bg-white/20 text-white shadow-inner' : 'text-white/60 hover:text-white hover:bg-white/5')
-  }, isCitationMode ? 'License Plate' : 'Street Name')), /*#__PURE__*/_react["default"].createElement("div", {
+  }, isCitationMode ? 'License Plate' : 'Street Name')), /*#__PURE__*/React.createElement("div", {
     className: "min-h-[80px] sm:min-h-[120px] flex flex-col justify-center"
-  }, !isCitationMode && mode === 'id' && /*#__PURE__*/_react["default"].createElement("div", {
+  }, !isCitationMode && mode === 'id' && /*#__PURE__*/React.createElement("div", {
     className: "flex w-full items-center gap-2 animate-in fade-in slide-in-from-bottom-4 duration-300"
-  }, /*#__PURE__*/_react["default"].createElement("input", {
+  }, /*#__PURE__*/React.createElement("input", {
     type: "tel",
     placeholder: "Start",
     className: "flex-1 min-w-0 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 h-14 sm:h-16 px-4 text-center text-xl sm:text-2xl font-mono outline-none transition-all ".concat(shakeField === 'start' ? 'shake-input border-[#D11241]' : 'border-white/10'),
     value: startId,
     onChange: handleNumericInput(setStartId),
     maxLength: 6
-  }), /*#__PURE__*/_react["default"].createElement("span", {
+  }), /*#__PURE__*/React.createElement("span", {
     className: "text-white/40 font-light text-2xl shrink-0 px-1"
-  }, "-"), /*#__PURE__*/_react["default"].createElement("input", {
+  }, "-"), /*#__PURE__*/React.createElement("input", {
     type: "tel",
     placeholder: "End",
     className: "flex-1 min-w-0 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 h-14 sm:h-16 px-4 text-center text-xl sm:text-2xl font-mono outline-none transition-all disabled:opacity-30 ".concat(shakeField === 'end' ? 'shake-input border-[#D11241]' : 'border-white/10'),
@@ -1746,262 +1313,244 @@ function App() {
     onChange: handleNumericInput(setEndId),
     disabled: startId.length < 3,
     maxLength: 6
-  })), !isCitationMode && mode === 'street' && /*#__PURE__*/_react["default"].createElement("div", {
+  })), !isCitationMode && mode === 'street' && /*#__PURE__*/React.createElement("div", {
     className: "relative w-full animate-in fade-in slide-in-from-bottom-4 duration-300"
-  }, /*#__PURE__*/_react["default"].createElement("input", {
+  }, /*#__PURE__*/React.createElement("input", {
     list: "streets",
     placeholder: "Search Street Name...",
     className: "w-full bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 h-14 sm:h-16 px-4 sm:px-6 text-lg font-medium outline-none transition-all ".concat(shakeField === 'street' ? 'shake-input border-[#D11241]' : 'border-white/10'),
     value: streetQuery,
-    onChange: function onChange(e) {
-      return setStreetQuery(e.target.value);
-    }
-  }), /*#__PURE__*/_react["default"].createElement("datalist", {
+    onChange: e => setStreetQuery(e.target.value)
+  }), /*#__PURE__*/React.createElement("datalist", {
     id: "streets"
-  }, streets.map(function (s) {
-    return /*#__PURE__*/_react["default"].createElement("option", {
-      key: s,
-      value: s
-    });
-  })), /*#__PURE__*/_react["default"].createElement("div", {
+  }, streets.map(s => /*#__PURE__*/React.createElement("option", {
+    key: s,
+    value: s
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "absolute right-5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Search, {
+  }, /*#__PURE__*/React.createElement(Search, {
     size: 20
-  }))), isCitationMode && mode === 'ticket' && /*#__PURE__*/_react["default"].createElement("div", {
+  }))), isCitationMode && mode === 'ticket' && /*#__PURE__*/React.createElement("div", {
     className: "animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col items-center gap-4 w-full"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 w-full"
-  }, /*#__PURE__*/_react["default"].createElement("input", {
+  }, /*#__PURE__*/React.createElement("input", {
     type: "tel",
     placeholder: "Ticket Number",
     className: "flex-1 min-w-0 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 h-14 sm:h-16 px-2 sm:px-4 text-center text-lg sm:text-2xl font-mono outline-none transition-all ".concat(shakeField === 'ticket' ? 'shake-input border-[#D11241]' : 'border-white/10'),
     value: ticketNum,
     onChange: handleTicketInput,
     maxLength: 9
-  }), /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
-      return setShowBarcodeScanner(true);
-    },
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowBarcodeScanner(true),
     className: "w-14 sm:w-16 h-14 sm:h-16 flex items-center justify-center rounded-3xl bg-white/20 border-2 border-white/10 hover:bg-white/30 text-white transition-all active:scale-95 flex-none",
     title: "Scan Barcode"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.ScanBarcode, {
+  }, /*#__PURE__*/React.createElement(ScanBarcode, {
     size: 24
-  }))), ticketNum.length > 3 && /*#__PURE__*/_react["default"].createElement("div", {
+  }))), ticketNum.length > 3 && /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2 w-full px-4 slide-in-up"
-  }, navigator.share && /*#__PURE__*/_react["default"].createElement("button", {
+  }, navigator.share && /*#__PURE__*/React.createElement("button", {
     onClick: handleCitationShare,
     className: "flex-1 py-2.5 bg-white/10 rounded-xl hover:bg-white/20 transition-colors text-xs font-bold flex items-center justify-center gap-2 active:scale-95"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Share2, {
+  }, /*#__PURE__*/React.createElement(Share2, {
     size: 14
-  }), " Share"), /*#__PURE__*/_react["default"].createElement("button", {
+  }), " Share"), /*#__PURE__*/React.createElement("button", {
     onClick: handleCitationCopy,
     className: "flex-1 py-2.5 bg-white/10 rounded-xl hover:bg-white/20 transition-colors text-xs font-bold flex items-center justify-center gap-2 active:scale-95"
-  }, copyFeedback ? /*#__PURE__*/_react["default"].createElement(_lucideReact.CheckCircle, {
+  }, copyFeedback ? /*#__PURE__*/React.createElement(CheckCircle, {
     size: 14,
     className: "text-green-400"
-  }) : /*#__PURE__*/_react["default"].createElement(_lucideReact.Copy, {
+  }) : /*#__PURE__*/React.createElement(Copy, {
     size: 14
-  }), copyFeedback || "Copy Link"))), isCitationMode && mode === 'plate' && /*#__PURE__*/_react["default"].createElement("div", {
+  }), copyFeedback || "Copy Link"))), isCitationMode && mode === 'plate' && /*#__PURE__*/React.createElement("div", {
     className: "flex flex-col items-center w-full space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 w-full"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "relative w-[70px] sm:w-[80px] flex-none"
-  }, /*#__PURE__*/_react["default"].createElement("select", {
+  }, /*#__PURE__*/React.createElement("select", {
     value: plateState,
-    onChange: function onChange(e) {
-      return setPlateState(e.target.value);
-    },
+    onChange: e => setPlateState(e.target.value),
     className: "w-full bg-white/20 border-2 border-white/10 focus:border-white/50 text-white rounded-3xl py-3 h-14 sm:h-16 px-2 text-center text-sm sm:text-lg font-bold appearance-none outline-none transition-all"
-  }, US_STATES.map(function (s) {
-    return /*#__PURE__*/_react["default"].createElement("option", {
-      key: s,
-      value: s,
-      className: "text-black"
-    }, s);
-  })), /*#__PURE__*/_react["default"].createElement("div", {
+  }, US_STATES.map(s => /*#__PURE__*/React.createElement("option", {
+    key: s,
+    value: s,
+    className: "text-black"
+  }, s))), /*#__PURE__*/React.createElement("div", {
     className: "absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 pointer-events-none text-white/60 text-xs"
-  }, "\u25BC")), /*#__PURE__*/_react["default"].createElement("input", {
+  }, "\u25BC")), /*#__PURE__*/React.createElement("input", {
     type: "text",
     placeholder: "PLATE #",
     className: "flex-1 min-w-0 bg-white/20 border-2 focus:border-white/50 text-white placeholder-white/40 rounded-3xl py-3 h-14 sm:h-16 px-2 sm:px-4 text-center text-lg sm:text-xl font-mono uppercase outline-none transition-all ".concat(shakeField === 'plate' ? 'shake-input border-[#D11241]' : 'border-white/10'),
     value: plateNum,
-    onChange: function onChange(e) {
-      return setPlateNum(e.target.value.toUpperCase());
-    }
-  }), /*#__PURE__*/_react["default"].createElement("button", {
+    onChange: e => setPlateNum(e.target.value.toUpperCase())
+  }), /*#__PURE__*/React.createElement("button", {
     onClick: handleCameraClick,
     disabled: isScanning,
     className: "w-14 sm:w-16 h-14 sm:h-16 flex items-center justify-center rounded-3xl bg-white/20 border-2 border-white/10 hover:bg-white/30 text-white transition-all active:scale-95 flex-none ".concat(isScanning ? 'opacity-50 cursor-not-allowed' : ''),
     title: "Scan Plate"
-  }, isScanning ? /*#__PURE__*/_react["default"].createElement(_lucideReact.Loader2, {
+  }, isScanning ? /*#__PURE__*/React.createElement(Loader2, {
     size: 24,
     className: "animate-spin"
-  }) : /*#__PURE__*/_react["default"].createElement(_lucideReact.Camera, {
+  }) : /*#__PURE__*/React.createElement(Camera, {
     size: 24
-  }))), plateNum.length > 2 && /*#__PURE__*/_react["default"].createElement("div", {
+  }))), plateNum.length > 2 && /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2 w-full px-4 slide-in-up"
-  }, navigator.share && /*#__PURE__*/_react["default"].createElement("button", {
+  }, navigator.share && /*#__PURE__*/React.createElement("button", {
     onClick: handleCitationShare,
     className: "flex-1 py-2.5 bg-white/10 rounded-xl hover:bg-white/20 transition-colors text-xs font-bold flex items-center justify-center gap-2 active:scale-95"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Share2, {
+  }, /*#__PURE__*/React.createElement(Share2, {
     size: 14
-  }), " Share"), /*#__PURE__*/_react["default"].createElement("button", {
+  }), " Share"), /*#__PURE__*/React.createElement("button", {
     onClick: handleCitationCopy,
     className: "flex-1 py-2.5 bg-white/10 rounded-xl hover:bg-white/20 transition-colors text-xs font-bold flex items-center justify-center gap-2 active:scale-95"
-  }, copyFeedback ? /*#__PURE__*/_react["default"].createElement(_lucideReact.CheckCircle, {
+  }, copyFeedback ? /*#__PURE__*/React.createElement(CheckCircle, {
     size: 14,
     className: "text-green-400"
-  }) : /*#__PURE__*/_react["default"].createElement(_lucideReact.Copy, {
+  }) : /*#__PURE__*/React.createElement(Copy, {
     size: 14
-  }), copyFeedback || "Copy Link")))), error && /*#__PURE__*/_react["default"].createElement("div", {
+  }), copyFeedback || "Copy Link")))), error && /*#__PURE__*/React.createElement("div", {
     className: "bg-[#D11241]/20 border border-[#D11241] rounded-2xl p-3 text-center slide-in-down"
-  }, /*#__PURE__*/_react["default"].createElement("p", {
+  }, /*#__PURE__*/React.createElement("p", {
     className: "text-white text-sm font-semibold flex items-center justify-center gap-2"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.AlertTriangle, {
+  }, /*#__PURE__*/React.createElement(AlertTriangle, {
     size: 16
-  }), " ", error)), !isCitationMode && recent.length > 0 && /*#__PURE__*/_react["default"].createElement("div", {
+  }), " ", error)), !isCitationMode && recent.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "space-y-2 slide-in-up"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between px-2"
-  }, /*#__PURE__*/_react["default"].createElement("h3", {
+  }, /*#__PURE__*/React.createElement("h3", {
     className: "text-white/60 text-sm font-bold uppercase tracking-wider flex items-center gap-2"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.History, {
+  }, /*#__PURE__*/React.createElement(History, {
     size: 16
-  }), " Recent"), /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
+  }), " Recent"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
       clearRecent();
       vibrate(10);
     },
     className: "text-white/40 hover:text-white/60 text-xs flex items-center gap-1 transition-colors"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Trash2, {
+  }, /*#__PURE__*/React.createElement(Trash2, {
     size: 14
-  }), " Clear")), /*#__PURE__*/_react["default"].createElement("div", {
+  }), " Clear")), /*#__PURE__*/React.createElement("div", {
     className: "space-y-1 max-h-40 overflow-y-auto hide-scroll"
-  }, recent.slice(0, 5).map(function (search, idx) {
-    return /*#__PURE__*/_react["default"].createElement(RecentSearchItem, {
-      key: idx,
-      search: search,
-      onSelect: handleRecentSelect,
-      onRemove: function onRemove(s) {
-        var updated = recent.filter(function (r) {
-          return r.query !== s.query;
-        });
-        storage.set(CONFIG.STORAGE_KEYS.RECENT, updated);
-        vibrate(10);
-      }
-    });
-  }))), !isCitationMode && favorites.length > 0 && /*#__PURE__*/_react["default"].createElement("div", {
+  }, recent.slice(0, 5).map((search, idx) => /*#__PURE__*/React.createElement(RecentSearchItem, {
+    key: idx,
+    search: search,
+    onSelect: handleRecentSelect,
+    onRemove: s => {
+      var updated = recent.filter(r => r.query !== s.query);
+      storage.set(CONFIG.STORAGE_KEYS.RECENT, updated);
+      vibrate(10);
+    }
+  })))), !isCitationMode && favorites.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "space-y-2 slide-in-up",
     style: {
       animationDelay: '0.1s'
     }
-  }, /*#__PURE__*/_react["default"].createElement("h3", {
+  }, /*#__PURE__*/React.createElement("h3", {
     className: "text-white/60 text-sm font-bold uppercase tracking-wider flex items-center gap-2 px-2"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Star, {
+  }, /*#__PURE__*/React.createElement(Star, {
     size: 16,
     className: "text-yellow-500 fill-yellow-500"
-  }), " Favorites"), /*#__PURE__*/_react["default"].createElement("div", {
+  }), " Favorites"), /*#__PURE__*/React.createElement("div", {
     className: "space-y-1 max-h-40 overflow-y-auto hide-scroll"
-  }, favorites.slice(0, 5).map(function (fav) {
-    return /*#__PURE__*/_react["default"].createElement(FavoriteItem, {
-      key: fav.id,
-      favorite: fav,
-      onSelect: handleFavoriteSelect,
-      onRemove: function onRemove(id) {
-        removeFavorite(id);
-        vibrate(10);
-      }
-    });
-  }))))), /*#__PURE__*/_react["default"].createElement("div", {
+  }, favorites.slice(0, 5).map(fav => /*#__PURE__*/React.createElement(FavoriteItem, {
+    key: fav.id,
+    favorite: fav,
+    onSelect: handleFavoriteSelect,
+    onRemove: id => {
+      removeFavorite(id);
+      vibrate(10);
+    }
+  })))))), /*#__PURE__*/React.createElement("div", {
     className: "flex-grow flex flex-col items-center justify-start pt-8 relative pb-32"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "relative flex justify-center items-center"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "absolute w-48 h-48 sm:w-64 sm:h-64 border border-white/5 rounded-full pointer-events-none"
-  }), /*#__PURE__*/_react["default"].createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "absolute w-36 h-36 sm:w-48 sm:h-48 border border-white/10 rounded-full pointer-events-none"
-  }), /*#__PURE__*/_react["default"].createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "circle-transition ".concat(isExpanding ? 'expanding' : '', " ").concat(!isExpanding && view !== 'search' && !isCitationMode ? 'closing' : '')
-  }), loading && !isExpanding && /*#__PURE__*/_react["default"].createElement("div", {
+  }), loading && !isExpanding && /*#__PURE__*/React.createElement("div", {
     className: "absolute -top-24 sm:-top-20 left-0 right-0 flex justify-center z-40 px-6"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "bg-[#003B71]/80 backdrop-blur-md border border-white/10 p-3 rounded-2xl max-w-xs text-center animate-pulse slide-in-down"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex justify-center mb-1"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.CloudOff, {
+  }, /*#__PURE__*/React.createElement(CloudOff, {
     className: "text-white/60",
     size: 20
-  })), /*#__PURE__*/_react["default"].createElement("p", {
+  })), /*#__PURE__*/React.createElement("p", {
     className: "text-white/80 text-xs font-medium leading-relaxed"
-  }, "Connecting to free-tier backend...", /*#__PURE__*/_react["default"].createElement("br", null), /*#__PURE__*/_react["default"].createElement("span", {
+  }, "Connecting to free-tier backend...", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
     className: "text-white/50"
-  }, "This may take up to 50s on first use.")))), /*#__PURE__*/_react["default"].createElement("button", {
+  }, "This may take up to 50s on first use.")))), /*#__PURE__*/React.createElement("button", {
     onClick: handleSearch,
     disabled: loading,
     className: "group relative w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-white shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.3)] transition-all duration-300 active:scale-95 flex items-center justify-center z-30 disabled:opacity-50 disabled:cursor-not-allowed"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "absolute inset-1 rounded-full border-4 border-double border-[#003B71]/10 group-hover:border-[#003B71]/30 transition-colors"
-  }), /*#__PURE__*/_react["default"].createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-col items-center text-[#003B71]"
-  }, loading && !isExpanding ? /*#__PURE__*/_react["default"].createElement(_lucideReact.RotateCw, {
+  }, loading && !isExpanding ? /*#__PURE__*/React.createElement(RotateCw, {
     className: "animate-spin",
     size: 32
-  }) : /*#__PURE__*/_react["default"].createElement(_react["default"].Fragment, null, isCitationMode ? /*#__PURE__*/_react["default"].createElement(_lucideReact.Search, {
+  }) : /*#__PURE__*/React.createElement(React.Fragment, null, isCitationMode ? /*#__PURE__*/React.createElement(Search, {
     size: 32,
     strokeWidth: 2.5,
     className: "sm:hidden"
-  }) : /*#__PURE__*/_react["default"].createElement(_lucideReact.Search, {
+  }) : /*#__PURE__*/React.createElement(Search, {
     size: 32,
     strokeWidth: 2.5,
     className: "sm:hidden"
-  }), isCitationMode ? /*#__PURE__*/_react["default"].createElement(_lucideReact.Search, {
+  }), isCitationMode ? /*#__PURE__*/React.createElement(Search, {
     size: 40,
     strokeWidth: 2.5,
     className: "hidden sm:block"
-  }) : /*#__PURE__*/_react["default"].createElement(_lucideReact.Search, {
+  }) : /*#__PURE__*/React.createElement(Search, {
     size: 40,
     strokeWidth: 2.5,
     className: "hidden sm:block"
-  }), /*#__PURE__*/_react["default"].createElement("span", {
+  }), /*#__PURE__*/React.createElement("span", {
     className: "text-xs sm:text-sm font-black uppercase tracking-widest mt-1"
-  }, isCitationMode ? 'Lookup' : 'Find'))))), /*#__PURE__*/_react["default"].createElement("button", {
+  }, isCitationMode ? 'Lookup' : 'Find'))))), /*#__PURE__*/React.createElement("button", {
     onClick: toggleCitationMode,
     className: "mt-8 sm:my-auto flex items-center gap-2 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl backdrop-blur-md transition-all active:scale-95 border border-white/10 group z-30"
-  }, isCitationMode ? /*#__PURE__*/_react["default"].createElement(_lucideReact.Map, {
+  }, isCitationMode ? /*#__PURE__*/React.createElement(MapIcon, {
     size: 20,
     className: "text-white/80 group-hover:text-white"
-  }) : /*#__PURE__*/_react["default"].createElement(_lucideReact.FileText, {
+  }) : /*#__PURE__*/React.createElement(FileText, {
     size: 20,
     className: "text-white/80 group-hover:text-white"
-  }), /*#__PURE__*/_react["default"].createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
     className: "text-left"
-  }, /*#__PURE__*/_react["default"].createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", {
     className: "block text-[10px] uppercase font-bold text-white/60"
-  }, "Switch To"), /*#__PURE__*/_react["default"].createElement("span", {
+  }, "Switch To"), /*#__PURE__*/React.createElement("span", {
     className: "block font-bold text-sm text-white group-hover:text-white transition-colors"
-  }, isCitationMode ? "Space Locator" : "Citation Portal"))))), /*#__PURE__*/_react["default"].createElement("div", {
+  }, isCitationMode ? "Space Locator" : "Citation Portal"))))), /*#__PURE__*/React.createElement("div", {
     className: "fixed bottom-6 left-0 right-0 text-center z-10 transition-opacity duration-300 ".concat(view === 'results' ? 'opacity-0' : 'opacity-80')
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex flex-col items-center gap-4 text-sm",
     style: {
       borderColor: 'rgba(255,255,255,0.2)',
       color: 'rgba(255,255,255,0.7)'
     }
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3"
-  }, /*#__PURE__*/_react["default"].createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", {
     className: "font-medium"
-  }, "Built by ", /*#__PURE__*/_react["default"].createElement("span", {
+  }, "Built by ", /*#__PURE__*/React.createElement("span", {
     style: {
       color: '#fff'
     }
-  }, "William Dugann")), /*#__PURE__*/_react["default"].createElement("span", null, "|"), /*#__PURE__*/_react["default"].createElement("a", {
+  }, "William Dugann")), /*#__PURE__*/React.createElement("span", null, "|"), /*#__PURE__*/React.createElement("a", {
     href: "https://github.com/dugann",
     className: "hover:text-white transition-colors p-1",
     target: "_blank",
     rel: "noreferrer"
-  }, /*#__PURE__*/_react["default"].createElement("svg", {
+  }, /*#__PURE__*/React.createElement("svg", {
     xmlns: "http://www.w3.org/2000/svg",
     width: "20",
     height: "20",
@@ -2011,11 +1560,11 @@ function App() {
     strokeWidth: "2",
     strokeLinecap: "round",
     strokeLinejoin: "round"
-  }, /*#__PURE__*/_react["default"].createElement("path", {
+  }, /*#__PURE__*/React.createElement("path", {
     d: "M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"
-  }), /*#__PURE__*/_react["default"].createElement("path", {
+  }), /*#__PURE__*/React.createElement("path", {
     d: "M9 18c-4.51 2-5-2-7-2"
-  }))), /*#__PURE__*/_react["default"].createElement("a", {
+  }))), /*#__PURE__*/React.createElement("a", {
     href: "https://www.linkedin.com/in/dugann/",
     className: "transition-colors p-1 hover:text-white",
     style: {
@@ -2023,7 +1572,7 @@ function App() {
     },
     target: "_blank",
     rel: "noreferrer"
-  }, /*#__PURE__*/_react["default"].createElement("svg", {
+  }, /*#__PURE__*/React.createElement("svg", {
     xmlns: "http://www.w3.org/2000/svg",
     width: "20",
     height: "20",
@@ -2033,202 +1582,190 @@ function App() {
     strokeWidth: "2",
     strokeLinecap: "round",
     strokeLinejoin: "round"
-  }, /*#__PURE__*/_react["default"].createElement("path", {
+  }, /*#__PURE__*/React.createElement("path", {
     d: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"
-  }), /*#__PURE__*/_react["default"].createElement("rect", {
+  }), /*#__PURE__*/React.createElement("rect", {
     width: "4",
     height: "12",
     x: "2",
     y: "9"
-  }), /*#__PURE__*/_react["default"].createElement("circle", {
+  }), /*#__PURE__*/React.createElement("circle", {
     cx: "4",
     cy: "4",
     r: "2"
-  })))))), /*#__PURE__*/_react["default"].createElement("div", {
+  })))))), /*#__PURE__*/React.createElement("div", {
     className: "fixed inset-x-0 bottom-0 z-30 bg-slate-200 text-[#003B71] rounded-t-[2.5rem] shadow-2xl transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col safe-bottom ".concat(view === 'results' ? 'translate-y-0 h-[85vh]' : 'translate-y-full h-[85vh]')
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "px-6 py-4 flex items-center justify-between bg-[#003B71] rounded-t-[2.5rem] sticky top-0 z-40 shadow-md"
-  }, /*#__PURE__*/_react["default"].createElement("button", {
+  }, /*#__PURE__*/React.createElement("button", {
     onClick: handleNewSearch,
     className: "flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl transition-colors text-sm font-bold active:scale-95"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.RotateCw, {
+  }, /*#__PURE__*/React.createElement(RotateCw, {
     size: 18
-  }), " New Search"), /*#__PURE__*/_react["default"].createElement("div", {
+  }), " New Search"), /*#__PURE__*/React.createElement("div", {
     className: "text-right"
-  }, /*#__PURE__*/_react["default"].createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", {
     className: "block font-bold text-white text-xl leading-none"
-  }, results.length), /*#__PURE__*/_react["default"].createElement("span", {
+  }, results.length), /*#__PURE__*/React.createElement("span", {
     className: "text-[10px] text-white/60 font-bold uppercase tracking-wider"
-  }, "Results"))), /*#__PURE__*/_react["default"].createElement("div", {
+  }, "Results"))), /*#__PURE__*/React.createElement("div", {
     className: "flex-1 overflow-y-auto hide-scroll bg-slate-200"
-  }, loading ? /*#__PURE__*/_react["default"].createElement(LoadingSkeleton, null) : results.length === 0 ? /*#__PURE__*/_react["default"].createElement(EmptyState, {
+  }, loading ? /*#__PURE__*/React.createElement(LoadingSkeleton, null) : results.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, {
     message: "No results found. Try adjusting your search.",
-    icon: _lucideReact.Search,
-    action: /*#__PURE__*/_react["default"].createElement("button", {
+    icon: Search,
+    action: /*#__PURE__*/React.createElement("button", {
       onClick: handleNewSearch,
       className: "px-6 py-2.5 bg-[#003B71] text-white rounded-xl font-bold active:scale-95 transition-all"
     }, "New Search")
-  }) : /*#__PURE__*/_react["default"].createElement("div", {
+  }) : /*#__PURE__*/React.createElement("div", {
     className: "p-4"
-  }, dataDate && /*#__PURE__*/_react["default"].createElement("div", {
+  }, dataDate && /*#__PURE__*/React.createElement("div", {
     className: "mb-4 p-3 bg-blue-50/80 border border-blue-200 rounded-xl flex items-start gap-3 shadow-sm slide-in-up"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Info, {
+  }, /*#__PURE__*/React.createElement(Info, {
     className: "text-blue-600 shrink-0 mt-0.5",
     size: 18
-  }), /*#__PURE__*/_react["default"].createElement("p", {
+  }), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-blue-800 leading-relaxed font-medium"
-  }, "These results are dependent on the accuracy of City maintained records which were last updated on ", /*#__PURE__*/_react["default"].createElement("span", {
+  }, "These results are dependent on the accuracy of City maintained records which were last updated on ", /*#__PURE__*/React.createElement("span", {
     className: "font-bold"
-  }, dataDate), ".")), /*#__PURE__*/_react["default"].createElement("div", {
+  }, dataDate), ".")), /*#__PURE__*/React.createElement("div", {
     className: view === 'results' ? 'fade-enter-active' : 'fade-enter'
-  }, results.map(function (item, idx) {
-    return /*#__PURE__*/_react["default"].createElement(ResultItem, {
-      key: idx,
-      item: item,
-      onFavorite: function onFavorite(fav) {
-        if (isFavorite(fav.id)) {
-          removeFavorite(fav.id);
-          showToast('Removed from favorites', 'info');
-        } else {
-          addFavorite(fav);
-          showToast('Added to favorites', 'success');
-        }
-      },
-      isFavorite: isFavorite(item.ids.join('-'))
-    });
-  }))))), showSettingsModal && /*#__PURE__*/_react["default"].createElement("div", {
-    className: "fixed inset-0 z-50 flex items-center justify-center p-4 fade-in"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
-    className: "absolute inset-0 bg-black/80 backdrop-blur-sm",
-    onClick: function onClick() {
-      return setShowSettingsModal(false);
-    }
-  }), /*#__PURE__*/_react["default"].createElement("div", {
-    className: "bg-white rounded-3xl p-6 w-full max-w-sm relative z-10 slide-in-up text-black"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
-    className: "flex justify-between items-center mb-6"
-  }, /*#__PURE__*/_react["default"].createElement("h2", {
-    className: "text-2xl font-bold text-[#003B71] flex items-center gap-2"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Settings, {
-    size: 24
-  }), " Settings"), /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
-      return setShowSettingsModal(false);
+  }, results.map((item, idx) => /*#__PURE__*/React.createElement(ResultItem, {
+    key: idx,
+    item: item,
+    onFavorite: fav => {
+      if (isFavorite(fav.id)) {
+        removeFavorite(fav.id);
+        showToast('Removed from favorites', 'info');
+      } else {
+        addFavorite(fav);
+        showToast('Added to favorites', 'success');
+      }
     },
+    isFavorite: isFavorite(item.ids.join('-'))
+  })))))), showSettingsModal && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 z-50 flex items-center justify-center p-4 fade-in"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "absolute inset-0 bg-black/80 backdrop-blur-sm",
+    onClick: () => setShowSettingsModal(false)
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "bg-white rounded-3xl p-6 w-full max-w-sm relative z-10 slide-in-up text-black"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-between items-center mb-6"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "text-2xl font-bold text-[#003B71] flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement(Settings, {
+    size: 24
+  }), " Settings"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowSettingsModal(false),
     className: "p-1 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.X, {
+  }, /*#__PURE__*/React.createElement(X, {
     size: 20,
     className: "text-gray-500"
-  }))), /*#__PURE__*/_react["default"].createElement("div", {
+  }))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "bg-gray-50 rounded-2xl p-4"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-2"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Zap, {
+  }, /*#__PURE__*/React.createElement(Zap, {
     size: 18,
     className: "text-[#003B71]"
-  }), /*#__PURE__*/_react["default"].createElement("span", {
+  }), /*#__PURE__*/React.createElement("span", {
     className: "font-bold text-sm"
-  }, "Performance"))), /*#__PURE__*/_react["default"].createElement("p", {
+  }, "Performance"))), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-600"
-  }, isOnline ? /*#__PURE__*/_react["default"].createElement("span", {
+  }, isOnline ? /*#__PURE__*/React.createElement("span", {
     className: "flex items-center gap-2"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Wifi, {
+  }, /*#__PURE__*/React.createElement(Wifi, {
     size: 14,
     className: "text-green-500"
-  }), " Connected") : /*#__PURE__*/_react["default"].createElement("span", {
+  }), " Connected") : /*#__PURE__*/React.createElement("span", {
     className: "flex items-center gap-2"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.WifiOff, {
+  }, /*#__PURE__*/React.createElement(WifiOff, {
     size: 14,
     className: "text-red-500"
-  }), " Offline"))), /*#__PURE__*/_react["default"].createElement("div", {
+  }), " Offline"))), /*#__PURE__*/React.createElement("div", {
     className: "bg-gray-50 rounded-2xl p-4"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between mb-2"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.History, {
+  }, /*#__PURE__*/React.createElement(History, {
     size: 18,
     className: "text-[#003B71]"
-  }), /*#__PURE__*/_react["default"].createElement("span", {
+  }), /*#__PURE__*/React.createElement("span", {
     className: "font-bold text-sm"
-  }, "Data")), /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
+  }, "Data")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
       clearRecent();
       showToast('Recent searches cleared', 'success');
       vibrate(10);
     },
     className: "text-xs text-red-600 hover:text-red-700 font-bold"
-  }, "Clear Recent")), /*#__PURE__*/_react["default"].createElement("p", {
+  }, "Clear Recent")), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-gray-600"
-  }, recent.length, " recent searches \u2022 ", favorites.length, " favorites")), dataDate && /*#__PURE__*/_react["default"].createElement("div", {
+  }, recent.length, " recent searches \u2022 ", favorites.length, " favorites")), dataDate && /*#__PURE__*/React.createElement("div", {
     className: "bg-blue-50 rounded-2xl p-4 border border-blue-200"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 mb-1"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Info, {
+  }, /*#__PURE__*/React.createElement(Info, {
     size: 18,
     className: "text-blue-600"
-  }), /*#__PURE__*/_react["default"].createElement("span", {
+  }), /*#__PURE__*/React.createElement("span", {
     className: "font-bold text-sm text-blue-900"
-  }, "Data Source")), /*#__PURE__*/_react["default"].createElement("p", {
+  }, "Data Source")), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-blue-700"
-  }, "IndyGIS :: metered-parking"), /*#__PURE__*/_react["default"].createElement("p", {
+  }, "IndyGIS :: metered-parking"), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-blue-600 mt-1"
-  }, "Last updated: ", /*#__PURE__*/_react["default"].createElement("span", {
+  }, "Last updated: ", /*#__PURE__*/React.createElement("span", {
     className: "font-bold"
-  }, dataDate)))), /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
-      return setShowInfoModal(true);
-    },
+  }, dataDate)))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowInfoModal(true),
     className: "w-full mt-6 py-3 bg-[#003B71] text-white font-bold rounded-xl active:scale-95 transition-transform flex items-center justify-center gap-2"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.Info, {
+  }, /*#__PURE__*/React.createElement(Info, {
     size: 18
-  }), " About Open Curb"))), showInfoModal && /*#__PURE__*/_react["default"].createElement("div", {
+  }), " About Open Curb"))), showInfoModal && /*#__PURE__*/React.createElement("div", {
     className: "fixed inset-0 z-50 flex items-center justify-center p-4 fade-in"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "absolute inset-0 bg-black/80 backdrop-blur-sm",
-    onClick: function onClick() {
-      return setShowInfoModal(false);
-    }
-  }), /*#__PURE__*/_react["default"].createElement("div", {
+    onClick: () => setShowInfoModal(false)
+  }), /*#__PURE__*/React.createElement("div", {
     className: "bg-white rounded-3xl p-6 w-full max-w-sm relative z-10 slide-in-up text-black"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "flex justify-between items-center mb-4"
-  }, /*#__PURE__*/_react["default"].createElement("h2", {
+  }, /*#__PURE__*/React.createElement("h2", {
     className: "text-xl font-bold text-[#003B71]"
-  }, "System Intel"), /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
-      return setShowInfoModal(false);
-    },
+  }, "System Intel"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowInfoModal(false),
     className: "p-1 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.X, {
+  }, /*#__PURE__*/React.createElement(X, {
     size: 20,
     className: "text-gray-500"
-  }))), /*#__PURE__*/_react["default"].createElement("p", {
+  }))), /*#__PURE__*/React.createElement("p", {
     className: "text-gray-600 text-sm leading-relaxed mb-6"
-  }, "This utility bridges a direct connection to Indy's Open Data MapServer (Transportation Layer 14) for public access and asset verification."), /*#__PURE__*/_react["default"].createElement("div", {
+  }, "This utility bridges a direct connection to Indy's Open Data MapServer (Transportation Layer 14) for public access and asset verification."), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 bg-blue-50 p-3 rounded-xl mb-4 border border-blue-100"
-  }, /*#__PURE__*/_react["default"].createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     className: "bg-[#003B71] p-2 rounded-full text-white"
-  }, /*#__PURE__*/_react["default"].createElement(_lucideReact.User, {
+  }, /*#__PURE__*/React.createElement(User, {
     size: 16
-  })), /*#__PURE__*/_react["default"].createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
     className: "flex-1"
-  }, /*#__PURE__*/_react["default"].createElement("p", {
+  }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-gray-400 font-bold uppercase tracking-widest"
-  }, "Designed By"), /*#__PURE__*/_react["default"].createElement("p", {
+  }, "Designed By"), /*#__PURE__*/React.createElement("p", {
     className: "text-[#003B71] font-bold text-sm"
-  }, "William Dugann")), /*#__PURE__*/_react["default"].createElement("div", {
+  }, "William Dugann")), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2"
-  }, /*#__PURE__*/_react["default"].createElement("a", {
+  }, /*#__PURE__*/React.createElement("a", {
     href: "https://github.com/dugann",
     target: "_blank",
     rel: "noreferrer",
     className: "text-[#003B71]/70 hover:text-[#003B71] transition-colors"
-  }, /*#__PURE__*/_react["default"].createElement("svg", {
+  }, /*#__PURE__*/React.createElement("svg", {
     xmlns: "http://www.w3.org/2000/svg",
     width: "20",
     height: "20",
@@ -2238,16 +1775,16 @@ function App() {
     strokeWidth: "2",
     strokeLinecap: "round",
     strokeLinejoin: "round"
-  }, /*#__PURE__*/_react["default"].createElement("path", {
+  }, /*#__PURE__*/React.createElement("path", {
     d: "M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"
-  }), /*#__PURE__*/_react["default"].createElement("path", {
+  }), /*#__PURE__*/React.createElement("path", {
     d: "M9 18c-4.51 2-5-2-7-2"
-  }))), /*#__PURE__*/_react["default"].createElement("a", {
+  }))), /*#__PURE__*/React.createElement("a", {
     href: "https://www.linkedin.com/in/dugann/",
     target: "_blank",
     rel: "noreferrer",
     className: "text-[#003B71]/70 hover:text-[#003B71] transition-colors"
-  }, /*#__PURE__*/_react["default"].createElement("svg", {
+  }, /*#__PURE__*/React.createElement("svg", {
     xmlns: "http://www.w3.org/2000/svg",
     width: "20",
     height: "20",
@@ -2257,35 +1794,32 @@ function App() {
     strokeWidth: "2",
     strokeLinecap: "round",
     strokeLinejoin: "round"
-  }, /*#__PURE__*/_react["default"].createElement("path", {
+  }, /*#__PURE__*/React.createElement("path", {
     d: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"
-  }), /*#__PURE__*/_react["default"].createElement("rect", {
+  }), /*#__PURE__*/React.createElement("rect", {
     width: "4",
     height: "12",
     x: "2",
     y: "9"
-  }), /*#__PURE__*/_react["default"].createElement("circle", {
+  }), /*#__PURE__*/React.createElement("circle", {
     cx: "4",
     cy: "4",
     r: "2"
-  }))))), /*#__PURE__*/_react["default"].createElement("div", {
+  }))))), /*#__PURE__*/React.createElement("div", {
     className: "bg-gray-50 rounded-2xl p-4 mb-4"
-  }, /*#__PURE__*/_react["default"].createElement("p", {
+  }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1"
-  }, "Data Source"), /*#__PURE__*/_react["default"].createElement("p", {
+  }, "Data Source"), /*#__PURE__*/React.createElement("p", {
     className: "text-[#003B71] font-mono text-xs"
-  }, "IndyGIS :: metered-parking")), /*#__PURE__*/_react["default"].createElement("button", {
-    onClick: function onClick() {
-      return setShowInfoModal(false);
-    },
+  }, "IndyGIS :: metered-parking")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowInfoModal(false),
     className: "w-full py-3 bg-[#003B71] text-white font-bold rounded-xl active:scale-95 transition-transform"
   }, "Dismiss"))));
 }
 var container = document.getElementById('root');
-var root = (0, _client.createRoot)(container);
-root.render(/*#__PURE__*/_react["default"].createElement(App, null));
+var root = createRoot(container);
+root.render(/*#__PURE__*/React.createElement(App, null));
 </script>
 </body>
-
 
 </html>
